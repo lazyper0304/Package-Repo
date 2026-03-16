@@ -1,0 +1,21 @@
+.uploadExcel {
+  border: 2px dashed #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+  border-color: var(--primary);
+  background-color: #f0f9ff;
+
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+  }
+
+  & > span {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+}
