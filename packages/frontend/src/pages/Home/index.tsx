@@ -10,6 +10,7 @@ import AppDetail from '@/components/AppDetail'
 import type { PageEntity } from '@/entities/page'
 import UploadExcel from '@/components/UploadExcel'
 import HarmonyIcon from '@/components/HarmonyIcon'
+import { GradientBackground } from 'react-gradient-animation'
 
 type IProps = Readonly<{}>
 
@@ -94,6 +95,25 @@ const Home: React.FC<IProps> = () => {
   return (
     <>
       <div className={styles.home}>
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            opacity: 0.2,
+          }}
+        >
+          <GradientBackground
+            skew={0}
+            blending='overlay'
+            colors={{
+              background: 'blue',
+              particles: ['#00897b', '#7f00ff', '#3b82f6'],
+            }}
+            speed={{ x: { min: 0.5, max: 0.8 }, y: { min: 0.5, max: 0.8 } }}
+          />
+        </div>
+
         <div className={styles.home__content}>
           <header className={styles.home__header}>
             <h1>Package Repo</h1>

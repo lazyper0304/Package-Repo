@@ -156,6 +156,7 @@ export default class API {
     harmonyPackageName?: string
     androidPackageName?: string
     iconUrl?: string
+    type?: string
   }) {
     try {
       const response = await fetch('/api/app', {

@@ -8,6 +8,7 @@ import Pagination from '@/components/ui/Pagination'
 import styles from './index.module.less'
 import copy from 'copy-to-clipboard'
 import { notify } from '@/utils/notify'
+import empty from '@/assets/empty.svg'
 
 type IProps = Readonly<{
   apps: AppEntity.Item[]
@@ -51,40 +52,49 @@ const SearchResult: React.FC<IProps> = ({ apps, keyword, loading, pagination, on
         </Flex>
 
         <Skeleton loading={loading}>
-          <ScrollArea
-            className={styles.scrollView}
-            type='hover'
-            scrollbars='vertical'
-            style={{ height: `calc(100% - ${size?.height}px - 60px)` }}
-          >
-            <Flex gap='3' direction='column'>
-              {apps.map((app) => (
-                <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
-                  <Flex justify='between' align='center'>
-                    <Flex direction='column'>
-                      <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
-                        <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
-                      </Heading>
-                      <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
-                        <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
-                      </Text>
-                      <Text color='gray' onClick={(e) => handleCopy(e, app.harmonyPackageName)}>
-                        <Highlighter searchWords={keyword}>{app.harmonyPackageName}</Highlighter>
-                      </Text>
+          {apps.length ? (
+            <ScrollArea
+              className={styles.scrollView}
+              type='hover'
+              scrollbars='vertical'
+              style={{ height: `calc(100% - ${size?.height}px - 60px)` }}
+            >
+              <Flex gap='3' direction='column'>
+                {apps.map((app) => (
+                  <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
+                    <Flex justify='between' align='center'>
+                      <Flex direction='column'>
+                        <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
+                          <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
+                        </Heading>
+                        <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
+                          <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
+                        </Text>
+                        <Text color='gray' onClick={(e) => handleCopy(e, app.harmonyPackageName)}>
+                          <Highlighter searchWords={keyword}>{app.harmonyPackageName}</Highlighter>
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </Card>
-              ))}
-            </Flex>
-          </ScrollArea>
+                  </Card>
+                ))}
+              </Flex>
+            </ScrollArea>
+          ) : (
+            <div className={styles.empty}>
+              <img src={empty} />
+              <Text color='gray'>暂无数据</Text>
+            </div>
+          )}
         </Skeleton>
 
-        <Pagination
-          current={pagination.current}
-          pageSize={pagination.pageSize}
-          total={pagination.total}
-          onChange={onChange}
-        />
+        {apps.length > 0 && (
+          <Pagination
+            current={pagination.current}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            onChange={onChange}
+          />
+        )}
       </Card>
     </Flex>
   )

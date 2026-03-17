@@ -1,12 +1,13 @@
 import type { AppEntity } from '@/entities/app'
 import API from '@/services'
-import { Button, DataList, Dialog, Flex, TextField, Tooltip } from '@radix-ui/themes'
-import React, { useEffect, useRef, useState } from 'react'
+import { Button, DataList, Dialog, Flex, TextField } from '@radix-ui/themes'
+import React, { useEffect, useState } from 'react'
 import styles from './index.module.less'
 import { useRequest } from 'ahooks'
 import { AiOutlineLoading } from 'react-icons/ai'
 import copy from 'copy-to-clipboard'
 import { notify } from '@/utils/notify'
+import Form, { Field } from '@rc-component/form'
 
 type IProps = Readonly<{
   app?: AppEntity.Item
@@ -28,6 +29,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
       if (res.success) {
         onRefresh()
         onClose()
+      } else {
+        notify(res.message)
       }
     },
   })
@@ -38,6 +41,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
       if (res.success) {
         onRefresh()
         onClose()
+      } else {
+        notify(res.message)
       }
     },
   })
@@ -57,6 +62,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
       if (res.success) {
         onRefresh()
         onClose()
+      } else {
+        notify(res.message)
       }
     },
   })
@@ -91,16 +98,6 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
     })
   }
 
-  function handleCreate() {
-    createReq.run({
-      appName: record?.['应用名'],
-      iconUrl: record?.['图标链接'],
-      androidPackageName: record?.['安卓包名'],
-      harmonyPackageName: record?.['鸿蒙包名'],
-      type: record?.['分类'],
-    })
-  }
-
   function handleDelete() {
     deleteReq.run({ id: app!.id })
   }
@@ -111,6 +108,16 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
     copy(v)
 
     notify('复制成功')
+  }
+
+  function handleFinish(fields: Record<string, any>) {
+    createReq.run({
+      appName: fields?.['应用名'],
+      iconUrl: fields?.['图标链接'],
+      androidPackageName: fields?.['安卓包名'],
+      harmonyPackageName: fields?.['鸿蒙包名'],
+      type: fields?.['分类'],
+    })
   }
 
   function Item(label: string, v?: string) {
@@ -125,12 +132,14 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
             <Flex gap='1' align='center'>
               <div style={{ flex: 1 }}>
                 {editing ? (
-                  <TextField.Root
-                    defaultValue={v}
-                    style={{ width: 400 }}
-                    placeholder={`请输入${label}`}
-                    onChange={(e) => (record[label] = e.target.value)}
-                  ></TextField.Root>
+                  <Field name={label}>
+                    <TextField.Root
+                      defaultValue={v}
+                      style={{ width: 400 }}
+                      placeholder={`请输入${label}`}
+                      onChange={(e) => (record[label] = e.target.value)}
+                    ></TextField.Root>
+                  </Field>
                 ) : v ? (
                   v
                 ) : (
@@ -172,54 +181,56 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
             </div>
           )}
 
-          <DataList.Root>
-            {Item('应用名', app?.appName)}
+          <Form onFinish={handleFinish}>
+            <DataList.Root>
+              {Item('应用名', app?.appName)}
 
-            {Item('安卓包名', app?.androidPackageName)}
+              {Item('安卓包名', app?.androidPackageName)}
 
-            {Item('鸿蒙包名', app?.harmonyPackageName)}
+              {Item('鸿蒙包名', app?.harmonyPackageName)}
 
-            {Item('图标链接', iconUrl)}
+              {Item('图标链接', iconUrl)}
 
-            {Item('分类', app?.type)}
-          </DataList.Root>
+              {Item('分类', app?.type)}
+            </DataList.Root>
 
-          <Flex
-            gap='3'
-            style={{
-              marginTop: 24,
-            }}
-          >
-            {app && (
-              <>
-                {editing ? (
-                  <>
-                    <Button variant='soft' style={{ flex: 1 }} onClick={() => setEditing(false)}>
-                      取消
-                    </Button>
-                    <Button style={{ flex: 1 }} onClick={handleSave}>
-                      保存
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button color='red' variant='soft' style={{ flex: 1 }} onClick={handleDelete}>
-                      删除
-                    </Button>
-                    <Button style={{ flex: 1 }} onClick={() => setEditing(true)}>
-                      编辑
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
+            <Flex
+              gap='3'
+              style={{
+                marginTop: 24,
+              }}
+            >
+              {app && (
+                <>
+                  {editing ? (
+                    <>
+                      <Button variant='soft' style={{ flex: 1 }} onClick={() => setEditing(false)}>
+                        取消
+                      </Button>
+                      <Button style={{ flex: 1 }} onClick={handleSave}>
+                        保存
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button color='red' variant='soft' style={{ flex: 1 }} onClick={handleDelete}>
+                        删除
+                      </Button>
+                      <Button style={{ flex: 1 }} onClick={() => setEditing(true)}>
+                        编辑
+                      </Button>
+                    </>
+                  )}
+                </>
+              )}
 
-            {!app && (
-              <Button style={{ width: '100%' }} onClick={handleCreate}>
-                添加
-              </Button>
-            )}
-          </Flex>
+              {!app && (
+                <Button type='submit' style={{ width: '100%' }}>
+                  添加
+                </Button>
+              )}
+            </Flex>
+          </Form>
         </Dialog.Description>
       </Dialog.Content>
     </Dialog.Root>
