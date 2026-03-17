@@ -111,6 +111,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
   }
 
   function handleFinish(fields: Record<string, any>) {
+    if (!Object.values(fields).filter(Boolean).length) return
+
     createReq.run({
       appName: fields?.['应用名'],
       iconUrl: fields?.['图标链接'],
@@ -207,7 +209,7 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
                       <Button variant='soft' style={{ flex: 1 }} onClick={() => setEditing(false)}>
                         取消
                       </Button>
-                      <Button style={{ flex: 1 }} onClick={handleSave}>
+                      <Button style={{ flex: 1 }} type='submit'>
                         保存
                       </Button>
                     </>
