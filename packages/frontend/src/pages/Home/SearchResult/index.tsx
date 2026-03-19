@@ -1,6 +1,6 @@
 import Highlighter from '@/components/Highlighter'
 import type { AppEntity } from '@/entities/app'
-import { Button, Card, Flex, Heading, ScrollArea, Skeleton, Text } from '@radix-ui/themes'
+import { Badge, Button, Card, Flex, Heading, ScrollArea, Skeleton, Tabs, Text } from '@radix-ui/themes'
 import { useSize } from 'ahooks'
 import React, { useCallback, useRef } from 'react'
 import type { PageEntity } from '@/entities/page'
@@ -9,8 +9,11 @@ import styles from './index.module.less'
 import copy from 'copy-to-clipboard'
 import { notify } from '@/utils/notify'
 import empty from '@/assets/empty.svg'
+import type { AppTypeEntity } from '@/entities/appType'
 
 type IProps = Readonly<{
+  currentAppType?: string
+  appTypes: AppTypeEntity.ListItem[]
   apps: AppEntity.Item[]
   keyword: string
   loading: boolean
@@ -18,9 +21,23 @@ type IProps = Readonly<{
   onClick: (v?: AppEntity.Item) => void
   onChange: (v: number) => void
   onUpload: () => void
+  onType: () => void
+  onTypeChange: (id: string) => void
 }>
 
-const SearchResult: React.FC<IProps> = ({ apps, keyword, loading, pagination, onClick, onChange, onUpload }) => {
+const SearchResult: React.FC<IProps> = ({
+  currentAppType,
+  appTypes,
+  apps,
+  keyword,
+  loading,
+  pagination,
+  onClick,
+  onChange,
+  onUpload,
+  onType,
+  onTypeChange,
+}) => {
   const ref = useRef<HTMLHeadingElement>(null)
 
   const size = useSize(ref)
@@ -45,11 +62,29 @@ const SearchResult: React.FC<IProps> = ({ apps, keyword, loading, pagination, on
 
           <Flex gap='3'>
             <Button onClick={() => onClick()}>添加</Button>
+            <Button variant='soft' onClick={onType}>
+              分类管理
+            </Button>
             <Button variant='soft' onClick={onUpload}>
               上传
             </Button>
           </Flex>
         </Flex>
+
+        <Tabs.Root
+          value={currentAppType}
+          defaultValue={appTypes?.[0]?.id}
+          style={{ marginBottom: 16 }}
+          onValueChange={onTypeChange}
+        >
+          <Tabs.List>
+            {appTypes.map((appType) => (
+              <Tabs.Trigger key={appType.id} value={appType.type_name}>
+                {appType.type_name}
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+        </Tabs.Root>
 
         <Skeleton loading={loading}>
           {apps.length ? (
@@ -57,16 +92,19 @@ const SearchResult: React.FC<IProps> = ({ apps, keyword, loading, pagination, on
               className={styles.scrollView}
               type='hover'
               scrollbars='vertical'
-              style={{ height: `calc(100% - ${size?.height}px - 60px)` }}
+              style={{ height: `calc(100% - ${size?.height}px - 120px)` }}
             >
               <Flex gap='3' direction='column'>
                 {apps.map((app) => (
                   <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
                     <Flex justify='between' align='center'>
                       <Flex direction='column'>
-                        <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
-                          <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
-                        </Heading>
+                        <Flex gap='2' align='center'>
+                          {app.type ? <Badge>{app.type}</Badge> : null}
+                          <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
+                            <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
+                          </Heading>
+                        </Flex>
                         <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
                           <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
                         </Text>

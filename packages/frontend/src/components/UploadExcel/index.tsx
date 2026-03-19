@@ -12,7 +12,7 @@ type IProps = Readonly<{ open: boolean; onClose: () => void; onUpload: () => voi
 const UploadExcel: React.FC<IProps> = ({ open, onClose, onUpload }) => {
   const ref = useRef<HTMLInputElement>(null)
 
-  const uploadReq = useRequest(API.uploadExcel, {
+  const uploadReq = useRequest(API.excelUpload, {
     manual: true,
     onSuccess(res) {
       if (res.success) {

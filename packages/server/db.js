@@ -63,6 +63,14 @@ async function initDatabase() {
       )
     `)
 
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS app_types (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        type_name VARCHAR(255) NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
     console.log('数据库表初始化成功')
     connection.release()
   } catch (error) {

@@ -1,6 +1,6 @@
 import type { AppEntity } from '@/entities/app'
 import API from '@/services'
-import { Button, DataList, Dialog, Flex, TextField } from '@radix-ui/themes'
+import { Button, DataList, Dialog, Flex, Select, TextField } from '@radix-ui/themes'
 import React, { useEffect, useState } from 'react'
 import styles from './index.module.less'
 import { useRequest } from 'ahooks'
@@ -8,6 +8,7 @@ import { AiOutlineLoading } from 'react-icons/ai'
 import copy from 'copy-to-clipboard'
 import { notify } from '@/utils/notify'
 import Form, { Field } from '@rc-component/form'
+import type { AppTypeEntity } from '@/entities/appType'
 
 type IProps = Readonly<{
   app?: AppEntity.Item
@@ -17,11 +18,13 @@ type IProps = Readonly<{
 }>
 
 const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
+  const [form] = Form.useForm()
+
   const [iconUrl, setIconUrl] = useState('')
 
   const [editing, setEditing] = useState(!app)
 
-  const record: Record<string, string> = {}
+  const [appTypes, setAppTypes] = useState<AppTypeEntity.ListItem[]>([])
 
   const createReq = useRequest(API.addApp, {
     manual: true,
@@ -32,6 +35,12 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
       } else {
         notify(res.message)
       }
+    },
+  })
+
+  const typeReq = useRequest(API.appTypeList, {
+    onSuccess(res) {
+      setAppTypes(res?.data ?? [])
     },
   })
 
@@ -87,17 +96,6 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
     }
   }
 
-  function handleSave() {
-    updateReq.run({
-      id: app!.id,
-      appName: record?.['应用名'],
-      iconUrl: record?.['图标链接'],
-      androidPageName: record?.['安卓包名'],
-      harmonyPackageName: record?.['鸿蒙包名'],
-      type: record?.['分类'],
-    })
-  }
-
   function handleDelete() {
     deleteReq.run({ id: app!.id })
   }
@@ -112,8 +110,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
 
   function handleFinish(fields: Record<string, any>) {
     if (!Object.values(fields).filter(Boolean).length) return
-
-    createReq.run({
+    ;(app?.id ? updateReq : createReq).run({
+      id: app?.id,
       appName: fields?.['应用名'],
       iconUrl: fields?.['图标链接'],
       androidPackageName: fields?.['安卓包名'],
@@ -135,12 +133,26 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
               <div style={{ flex: 1 }}>
                 {editing ? (
                   <Field name={label}>
-                    <TextField.Root
-                      defaultValue={v}
-                      style={{ width: 400 }}
-                      placeholder={`请输入${label}`}
-                      onChange={(e) => (record[label] = e.target.value)}
-                    ></TextField.Root>
+                    {label === '分类' ? (
+                      <Select.Root defaultValue={v} onValueChange={(v) => form.setFieldValue(label, v)}>
+                        <Select.Trigger />
+                        <Select.Content>
+                          <Select.Group>
+                            {appTypes.map((appType) => (
+                              <Select.Item key={appType.id} value={appType.type_name}>
+                                {appType.type_name}
+                              </Select.Item>
+                            ))}
+                          </Select.Group>
+                        </Select.Content>
+                      </Select.Root>
+                    ) : (
+                      <TextField.Root
+                        defaultValue={v}
+                        style={{ width: 400 }}
+                        placeholder={`请输入${label}`}
+                      ></TextField.Root>
+                    )}
                   </Field>
                 ) : v ? (
                   v
@@ -183,7 +195,17 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
             </div>
           )}
 
-          <Form onFinish={handleFinish}>
+          <Form
+            initialValues={{
+              应用名: app?.appName,
+              安卓包名: app?.androidPackageName,
+              鸿蒙包名: app?.harmonyPackageName,
+              图标链接: iconUrl,
+              分类: app?.type,
+            }}
+            form={form}
+            onFinish={handleFinish}
+          >
             <DataList.Root>
               {Item('应用名', app?.appName)}
 
@@ -204,7 +226,7 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
             >
               {app && (
                 <>
-                  {editing ? (
+                  {editing && (
                     <>
                       <Button variant='soft' style={{ flex: 1 }} onClick={() => setEditing(false)}>
                         取消
@@ -213,7 +235,9 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
                         保存
                       </Button>
                     </>
-                  ) : (
+                  )}
+
+                  {!editing && (
                     <>
                       <Button color='red' variant='soft' style={{ flex: 1 }} onClick={handleDelete}>
                         删除

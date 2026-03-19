@@ -3,8 +3,9 @@ import type { PageEntity } from '@/entities/page'
 
 export default class API {
   /** 搜索应用 */
-  static async searchApps(
+  static async appSearch(
     params?: {
+      typeName?: string
       keyword: string
     } & PageEntity.PageParam,
   ): Promise<PageEntity.PageResponse<AppEntity.Item>> {
@@ -12,6 +13,10 @@ export default class API {
       const query = new URLSearchParams()
 
       query.append('keyword', params?.keyword ?? '')
+
+      if (params?.typeName && params.typeName !== '全部') {
+        query.append('typeName', params.typeName.toString())
+      }
 
       if (params?.current) {
         query.append('current', params.current.toString())
@@ -21,7 +26,7 @@ export default class API {
         query.append('pageSize', params.pageSize.toString())
       }
 
-      const response = await fetch(`/api/search-apps?${query}`)
+      const response = await fetch(`/api/app/search?${query}`)
 
       // 检查响应是否成功
       if (!response.ok) {
@@ -98,7 +103,7 @@ export default class API {
 
       query.append('appName', params.appName)
 
-      const response = await fetch(`/api/apple-store-icon?${query}`)
+      const response = await fetch(`/api/app/apple-store-icon?${query}`)
 
       // 检查响应是否成功
       if (!response.ok) {
@@ -124,30 +129,6 @@ export default class API {
       console.error('获取苹果应用商店图标失败:', error)
     }
     return null
-  }
-
-  // 加载应用列表
-  static async loadAppsFromDatabase() {
-    try {
-      const response = await fetch('/api/apps')
-      const result = await response.json()
-
-      if (result.success) {
-        return result.data.map((item) => ({
-          id: item.id,
-          name: item.app_name,
-          harmonyPackage: item.harmony_package,
-          androidPackage: item.android_package,
-          createdAt: item.created_at,
-        }))
-      } else {
-        console.error('加载应用列表失败:', result.error)
-        return []
-      }
-    } catch (error) {
-      console.error('加载应用列表失败:', error)
-      return []
-    }
   }
 
   // 添加应用
@@ -234,9 +215,9 @@ export default class API {
     }
   }
 
-  static async uploadExcel(params: FormData) {
+  static async excelUpload(params: FormData) {
     try {
-      const response = await fetch('/api/upload-excel', {
+      const response = await fetch('/api/excel/upload', {
         method: 'POST',
         body: params,
       })
@@ -260,7 +241,7 @@ export default class API {
   }
 
   static async harmonyIcon(params: FormData) {
-    const response = await fetch('/api/harmony-icon', {
+    const response = await fetch('/api/excel/harmony-icon', {
       method: 'POST',
       body: params,
     })
@@ -281,6 +262,106 @@ export default class API {
       } catch (e) {
         return { success: false, message: e }
       }
+    }
+  }
+
+  static async appTypeList() {
+    const response = await fetch('/api/app-types/list', {
+      method: 'GET',
+    })
+
+    if (response.ok) {
+      const result = await response.json()
+
+      if (result.success) {
+        return { success: true, data: result.data }
+      } else {
+        return { success: false, data: [] }
+      }
+    } else {
+      try {
+        const result = await response.json()
+
+        return { success: false, data: [], message: result.error }
+      } catch (e) {
+        return { success: false, data: [], message: e }
+      }
+    }
+  }
+
+  static async addAppType(params: { typeName: string }) {
+    try {
+      const response = await fetch(`/api/app-types`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        return { success: true, message: result.message }
+      } else {
+        return { success: false, message: result.error || '分类创建失败' }
+      }
+    } catch (error) {
+      console.error('Error Updating icon:', error)
+      return { success: false, message: '网络错误，无法连接到服务器' }
+    }
+  }
+
+  static async deleteAppType(params: { id: string }) {
+    try {
+      const response = await fetch(`/api/app-types`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        return { success: true, message: result.message }
+      } else {
+        return { success: false, message: result.error || '分类更新失败' }
+      }
+    } catch (error) {
+      console.error('Error Updating icon:', error)
+      return { success: false, message: '网络错误，无法连接到服务器' }
+    }
+  }
+
+  static async updateAppType(params: {
+    id: string
+    appName?: string
+    iconUrl?: string
+    androidPageName?: string
+    harmonyPackageName?: string
+    type?: string
+  }) {
+    try {
+      const response = await fetch(`/api/app-types`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        return { success: true, message: result.message }
+      } else {
+        return { success: false, message: result.error || '分类删除失败' }
+      }
+    } catch (error) {
+      console.error('Error Updating icon:', error)
+      return { success: false, message: '网络错误，无法连接到服务器' }
     }
   }
 }
