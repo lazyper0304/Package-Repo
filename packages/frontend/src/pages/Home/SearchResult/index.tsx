@@ -1,6 +1,6 @@
 import Highlighter from '@/components/Highlighter'
 import type { AppEntity } from '@/entities/app'
-import { Badge, Button, Card, Flex, Heading, ScrollArea, Skeleton, Tabs, Text } from '@radix-ui/themes'
+import { Badge, Button, Card, ContextMenu, Flex, Heading, ScrollArea, Skeleton, Tabs, Text } from '@radix-ui/themes'
 import { useSize } from 'ahooks'
 import React, { useCallback, useRef } from 'react'
 import type { PageEntity } from '@/entities/page'
@@ -19,6 +19,7 @@ type IProps = Readonly<{
   loading: boolean
   pagination: PageEntity.PagePagination
   onClick: (v?: AppEntity.Item) => void
+  onDelete: (id: string) => void
   onChange: (v: number) => void
   onUpload: () => void
   onType: () => void
@@ -33,6 +34,7 @@ const SearchResult: React.FC<IProps> = ({
   loading,
   pagination,
   onClick,
+  onDelete,
   onChange,
   onUpload,
   onType,
@@ -97,22 +99,43 @@ const SearchResult: React.FC<IProps> = ({
               <Flex gap='3' direction='column'>
                 {apps.map((app) => (
                   <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
-                    <Flex justify='between' align='center'>
-                      <Flex direction='column'>
-                        <Flex gap='2' align='center'>
-                          {app.type ? <Badge>{app.type}</Badge> : null}
-                          <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
-                            <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
-                          </Heading>
+                    <ContextMenu.Root>
+                      <ContextMenu.Trigger>
+                        <Flex justify='between' align='center'>
+                          <Flex direction='column'>
+                            <Flex gap='2' align='center'>
+                              {app.type ? <Badge>{app.type}</Badge> : null}
+                              <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
+                                <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
+                              </Heading>
+                            </Flex>
+                            <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
+                              <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
+                            </Text>
+                            <Text color='gray' onClick={(e) => handleCopy(e, app.harmonyPackageName)}>
+                              <Highlighter searchWords={keyword}>{app.harmonyPackageName}</Highlighter>
+                            </Text>
+                          </Flex>
                         </Flex>
-                        <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
-                          <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
-                        </Text>
-                        <Text color='gray' onClick={(e) => handleCopy(e, app.harmonyPackageName)}>
-                          <Highlighter searchWords={keyword}>{app.harmonyPackageName}</Highlighter>
-                        </Text>
-                      </Flex>
-                    </Flex>
+                      </ContextMenu.Trigger>
+
+                      <ContextMenu.Content>
+                        <ContextMenu.Item shortcut='⌘ E' onClick={() => onClick(app)}>
+                          编辑
+                        </ContextMenu.Item>
+                        <ContextMenu.Item
+                          shortcut='⌘ D'
+                          color='red'
+                          onClick={(e) => {
+                            e.stopPropagation()
+
+                            onDelete(app.id)
+                          }}
+                        >
+                          删除
+                        </ContextMenu.Item>
+                      </ContextMenu.Content>
+                    </ContextMenu.Root>
                   </Card>
                 ))}
               </Flex>

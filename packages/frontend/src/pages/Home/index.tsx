@@ -13,6 +13,7 @@ import HarmonyIcon from '@/components/HarmonyIcon'
 import { GradientBackground } from 'react-gradient-animation'
 import TypeManage from '@/components/TypeManage'
 import type { AppTypeEntity } from '@/entities/appType'
+import { notify } from '@/utils/notify'
 
 type IProps = Readonly<{}>
 
@@ -71,6 +72,17 @@ const Home: React.FC<IProps> = () => {
     },
   })
 
+  const deleteReq = useRequest(API.deleteApp, {
+    manual: true,
+    onSuccess(res) {
+      if (res.success) {
+        searchAppsReq.refresh()
+      } else {
+        notify(res.message)
+      }
+    },
+  })
+
   async function handleSearch(v: string) {
     setState({ keyword: v })
 
@@ -79,6 +91,10 @@ const Home: React.FC<IProps> = () => {
 
   function handleOpenAppDetail(app?: AppEntity.Item) {
     setState({ currentApp: app, open: true })
+  }
+
+  function handleDeleteApp(id: string) {
+    deleteReq.run({ id })
   }
 
   function handleOpenUpload() {
@@ -180,6 +196,7 @@ const Home: React.FC<IProps> = () => {
                 pagination={state.pagination}
                 apps={state.apps}
                 onClick={handleOpenAppDetail}
+                onDelete={handleDeleteApp}
                 onChange={handlePageChange}
                 onUpload={handleOpenUpload}
                 onType={handleOpenType}

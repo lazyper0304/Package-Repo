@@ -135,7 +135,7 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
                   <Field name={label}>
                     {label === '分类' ? (
                       <Select.Root defaultValue={v} onValueChange={(v) => form.setFieldValue(label, v)}>
-                        <Select.Trigger />
+                        <Select.Trigger placeholder='选择分类' />
                         <Select.Content>
                           <Select.Group>
                             {appTypes.map((appType) => (
