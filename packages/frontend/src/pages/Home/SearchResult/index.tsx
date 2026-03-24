@@ -82,7 +82,9 @@ const SearchResult: React.FC<IProps> = ({
           <Tabs.List>
             {appTypes.map((appType) => (
               <Tabs.Trigger key={appType.id} value={appType.type_name}>
-                {appType.type_name}
+                <Flex gap='2' align='center'>
+                  {appType.type_name} {appType.app_count && <Badge radius='full'>{appType.app_count}</Badge>}
+                </Flex>
               </Tabs.Trigger>
             ))}
           </Tabs.List>
@@ -101,7 +103,9 @@ const SearchResult: React.FC<IProps> = ({
                   <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
                     <ContextMenu.Root>
                       <ContextMenu.Trigger>
-                        <Flex justify='between' align='center'>
+                        <Flex gap='3' align='center'>
+                          {app.iconUrl ? <img src={app.iconUrl} /> : null}
+
                           <Flex direction='column'>
                             <Flex gap='2' align='center'>
                               {app.type ? <Badge>{app.type}</Badge> : null}

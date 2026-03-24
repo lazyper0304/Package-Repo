@@ -3,7 +3,18 @@ import { pool } from '../db.js'
 export default class AppTypeController {
   static async typeList(req, res) {
     try {
-      const [rows] = await pool.execute('SELECT id, type_name, created_at FROM app_types ORDER BY id ASC')
+      // 使用 LEFT JOIN 统计每个类型的应用数量
+      const [rows] = await pool.execute(`
+      SELECT 
+        t.id,
+        t.type_name,
+        t.created_at,
+        COUNT(a.id) as app_count
+      FROM app_types t
+      LEFT JOIN apps a ON a.type = t.type_name
+      GROUP BY t.id, t.type_name, t.created_at
+      ORDER BY t.id ASC
+    `)
 
       res.json({
         success: true,
@@ -77,7 +88,26 @@ export default class AppTypeController {
 
       const newTypeName = String(typeName).trim()
 
-      // 检查是否与其他类型重名（排除自身）
+      // 获取旧类型名称
+      const [oldTypeResult] = await pool.execute('SELECT type_name FROM app_types WHERE id = ?', [id])
+
+      if (oldTypeResult.length === 0) {
+        return res.status(404).json({ error: '应用类型不存在' })
+      }
+
+      const oldTypeName = oldTypeResult[0].type_name
+
+      // 如果类型名称没有变化，直接返回
+      if (oldTypeName === newTypeName) {
+        const [currentType] = await pool.execute('SELECT id, type_name, created_at FROM app_types WHERE id = ?', [id])
+        return res.json({
+          success: true,
+          message: '类型名称未变化',
+          data: currentType[0],
+        })
+      }
+
+      // 检查是否与其他类型重名
       const [existingTypes] = await pool.execute('SELECT id FROM app_types WHERE type_name = ? AND id != ?', [
         newTypeName,
         id,
@@ -87,12 +117,13 @@ export default class AppTypeController {
         return res.status(400).json({ error: '该类型名称已存在' })
       }
 
-      // 更新数据
-      const [result] = await pool.execute('UPDATE app_types SET type_name = ? WHERE id = ?', [newTypeName, id])
+      // 更新 app_types 表
+      await pool.execute('UPDATE app_types SET type_name = ? WHERE id = ?', [newTypeName, id])
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: '未找到对应的应用类型' })
-      }
+      // 同步更新所有使用该类型的应用（type字段直接匹配）
+      const [updateResult] = await pool.execute('UPDATE apps SET type = ? WHERE type = ?', [newTypeName, oldTypeName])
+
+      console.log(`已更新 ${updateResult.affectedRows} 个应用的类型`)
 
       // 获取更新后的记录
       const [updatedType] = await pool.execute('SELECT id, type_name, created_at FROM app_types WHERE id = ?', [id])
@@ -101,6 +132,7 @@ export default class AppTypeController {
         success: true,
         message: '应用类型更新成功',
         data: updatedType[0],
+        updatedApps: updateResult.affectedRows,
       })
     } catch (error) {
       console.error('更新应用类型失败:', error)
@@ -120,17 +152,28 @@ export default class AppTypeController {
         return res.status(400).json({ error: '必须提供id' })
       }
 
-      // 检查是否有应用使用了该类型
-      const [appsUsingType] = await pool.execute('SELECT COUNT(*) as count FROM apps WHERE type = ?', [id])
+      // 获取要删除的类型名称
+      const [typeToDelete] = await pool.execute('SELECT id, type_name FROM app_types WHERE id = ?', [id])
 
-      if (appsUsingType[0].count > 0) {
+      if (typeToDelete.length === 0) {
+        return res.status(404).json({ error: '应用类型不存在' })
+      }
+
+      const typeName = typeToDelete[0].type_name
+
+      // 检查是否有应用使用了该类型（直接匹配type字段）
+      const [appsUsingType] = await pool.execute('SELECT COUNT(*) as count FROM apps WHERE type = ?', [typeName])
+
+      const appsCount = appsUsingType[0].count
+
+      if (appsCount > 0) {
         return res.status(400).json({
-          error: `该类型下还有 ${appsUsingType[0].count} 个应用，无法删除`,
-          appsCount: appsUsingType[0].count,
+          error: `该类型下还有 ${appsCount} 个应用，无法删除`,
+          appsCount: appsCount,
         })
       }
 
-      // 删除数据
+      // 删除 app_types 表中的记录
       const [result] = await pool.execute('DELETE FROM app_types WHERE id = ?', [id])
 
       if (result.affectedRows === 0) {

@@ -117,6 +117,7 @@ const Home: React.FC<IProps> = () => {
 
   function handleRefresh() {
     searchAppsReq.refresh()
+    appTypeListReq.refresh()
   }
 
   function handleCloseUpload() {
@@ -215,7 +216,9 @@ const Home: React.FC<IProps> = () => {
         <UploadExcel open={state.uploadOpen} onClose={handleCloseUpload} onUpload={handleUploadSuccess} />
       )}
 
-      {state.typeOpen && <TypeManage open={state.typeOpen} onOk={handleTypeOk} onClose={handleCloseType} />}
+      {state.typeOpen && (
+        <TypeManage open={state.typeOpen} onOk={handleTypeOk} onRefresh={handleRefresh} onClose={handleCloseType} />
+      )}
 
       {state.harmonyIconOpen && <HarmonyIcon open={state.harmonyIconOpen} onClose={handleCloseHarmonyIcon} />}
     </>

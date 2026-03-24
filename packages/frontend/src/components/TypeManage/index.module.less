@@ -1,0 +1,19 @@
+.appType {
+  &:hover {
+    & > div:last-of-type {
+      width: auto;
+    }
+  }
+
+  & > div:last-of-type {
+    width: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+
+    & > svg {
+      cursor: pointer;
+    }
+  }
+}
