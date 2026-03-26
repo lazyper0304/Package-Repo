@@ -116,7 +116,7 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
       iconUrl: fields?.['图标链接'],
       androidPackageName: fields?.['安卓包名'],
       harmonyPackageName: fields?.['鸿蒙包名'],
-      type: fields?.['分类'],
+      type: fields?.['分类'] === '无' ? '' : fields?.['分类'],
     })
   }
 
@@ -138,6 +138,8 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
                         <Select.Trigger placeholder='选择分类' />
                         <Select.Content>
                           <Select.Group>
+                            <Select.Item value='无'>无</Select.Item>
+
                             {appTypes.map((appType) => (
                               <Select.Item key={appType.id} value={appType.type_name}>
                                 {appType.type_name}

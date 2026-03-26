@@ -50,7 +50,21 @@ const Home: React.FC<IProps> = () => {
   })
 
   const searchAppsReq = useRequest(API.appSearch, {
+    debounceWait: 600,
     onSuccess(res) {
+      let appTypes = state.appTypes
+
+      if (state.keyword.length === 0 && !state.currentAppType) {
+        const index = state.appTypes.findIndex((item) => item.type_name === '全部')
+
+        appTypes = JSON.parse(JSON.stringify(state.appTypes))
+
+        appTypes.splice(index, 1, {
+          ...appTypes[index],
+          app_count: res.total,
+        })
+      }
+
       setState({
         apps: res.data,
         pagination: {
@@ -59,6 +73,7 @@ const Home: React.FC<IProps> = () => {
           total: res.total,
           pages: res.pages,
         },
+        appTypes,
       })
     },
   })

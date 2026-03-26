@@ -83,33 +83,31 @@ export default class AppController {
       const icon_url = iconUrl !== undefined ? String(iconUrl).trim() || null : null
       const appType = type !== undefined ? String(type).trim() || null : null
 
-      // 构建唯一标识，用于检查重复（基于 app_name + type）
-      const appKey = JSON.stringify({
-        app_name: app_name,
-        type: appType,
-      })
-
-      // 检查是否已存在相同 app_name + type 的应用
-      // 注意：type 必须完全匹配，包括 NULL 值
+      // 检查是否已存在相同 app_name + harmony_package + android_package 的应用
+      // 与数据库唯一约束 idx_unique_app (app_name, harmony_package, android_package) 保持一致
       let existingApps
-      if (appType === null) {
-        // 查找 type 为 null 的记录
-        ;[existingApps] = await pool.execute(
-          `SELECT id, app_name, harmony_package, android_package, type FROM apps WHERE app_name = ? AND type IS NULL`,
-          [app_name],
-        )
-      } else {
-        // 查找 type 为具体值的记录（不包括 NULL）
-        ;[existingApps] = await pool.execute(
-          `SELECT id, app_name, harmony_package, android_package, type FROM apps WHERE app_name = ? AND type = ?`,
-          [app_name, appType],
-        )
-      }
+      ;[existingApps] = await pool.execute(
+        `SELECT id, app_name, harmony_package, android_package, type FROM apps 
+         WHERE app_name = ? 
+         AND (harmony_package = ? OR (harmony_package IS NULL AND ? IS NULL))
+         AND (android_package = ? OR (android_package IS NULL AND ? IS NULL))`,
+        [app_name, harmony_package, harmony_package, android_package, android_package],
+      )
 
       if (existingApps.length > 0) {
+        const existing = existingApps[0]
+        const duplicateFields = []
+        duplicateFields.push(`应用名称: ${existing.app_name}`)
+        if (existing.harmony_package) {
+          duplicateFields.push(`鸿蒙包名: ${existing.harmony_package}`)
+        }
+        if (existing.android_package) {
+          duplicateFields.push(`安卓包名: ${existing.android_package}`)
+        }
+        
         return res.status(400).json({
-          error: '该应用已存在',
-          existingApp: existingApps[0],
+          error: `该应用已存在（${duplicateFields.join('，')}）`,
+          existingApp: existing,
         })
       }
 
