@@ -29,6 +29,7 @@ type IState = {
   uploadOpen: boolean;
   typeOpen: boolean;
   harmonyIconOpen: boolean;
+  edit: boolean;
 };
 
 const Home: React.FC<IProps> = () => {
@@ -48,6 +49,7 @@ const Home: React.FC<IProps> = () => {
     uploadOpen: false,
     typeOpen: false,
     harmonyIconOpen: false,
+    edit: false,
   });
 
   const searchAppsReq = useRequest(API.appSearch, {
@@ -109,8 +111,8 @@ const Home: React.FC<IProps> = () => {
     searchAppsReq.run({ keyword: v, typeName: state.currentAppType });
   }
 
-  function handleOpenAppDetail(app?: AppEntity.Item) {
-    setState({ currentApp: app, open: true });
+  function handleOpenAppDetail(app?: AppEntity.Item, edit?: boolean) {
+    setState({ currentApp: app, open: true, edit: edit || false });
   }
 
   function handleDeleteApp(id: string) {
@@ -236,6 +238,7 @@ const Home: React.FC<IProps> = () => {
 
       {state.open && (
         <AppDetail
+          edit={state.edit}
           open={state.open}
           app={state.currentApp}
           onClose={handleCloseAppDetail}

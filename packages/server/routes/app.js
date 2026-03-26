@@ -322,7 +322,7 @@ export default class AppController {
       }
 
       const encodedKeyword = encodeURIComponent(appName);
-      const searchUrl = `https://www.apple.com.cn/cn/search/${encodedKeyword}?src=globalnav`;
+      const searchUrl = `https://apps.apple.com/cn/iphone/search?term=${encodedKeyword}`;
 
       const response = await axios.get(searchUrl, {
         headers: {
@@ -338,28 +338,18 @@ export default class AppController {
       if (response.status === 200) {
         const html = response.data;
 
-        // 查找应用图标链接
-        const iconPattern =
-          /http[s]?:\/\/is[0-9]-ssl\.mzstatic\.com\/image\/thumb\/[^"\s]+\/AppIcon-[^"\s]+\.png/g;
-        const iconLinks = html.match(iconPattern) || [];
+        const pattern =
+          /(https?:\/\/is\d-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s]+\/Placeholder\.mill\/)\d+x\d+bb[^"'\s]+\.webp/;
 
-        if (iconLinks.length > 0) {
-          const iconUrl = iconLinks[0].replace('http://', 'https://');
+        const match = html.match(pattern);
+
+        if (match) {
+          const base_url = match[1];
+          const final_icon_url = base_url + '256x256bb-75.webp';
+
           return res.json({
             success: true,
-            iconUrl: iconUrl,
-          });
-        }
-
-        // 尝试查找其他格式的图标链接
-        const otherIconPattern = /http[s]?:\/\/[^"\s]+\/AppIcon[^"\s]+/g;
-        const otherIcons = html.match(otherIconPattern) || [];
-
-        if (otherIcons.length > 0) {
-          const iconUrl = otherIcons[0].replace('http://', 'https://');
-          return res.json({
-            success: true,
-            iconUrl: iconUrl,
+            iconUrl: final_icon_url,
           });
         }
       }

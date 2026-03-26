@@ -8,6 +8,7 @@ import {
   Dialog,
   Flex,
   Select,
+  Skeleton,
   TextField,
 } from '@radix-ui/themes';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -20,18 +21,25 @@ import Form, { Field } from '@rc-component/form';
 import type { AppTypeEntity } from '@/entities/appType';
 
 type IProps = Readonly<{
+  edit: boolean;
   app?: AppEntity.Item;
   open: boolean;
   onClose: () => void;
   onRefresh: () => void;
 }>;
 
-const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
+const AppDetail: React.FC<IProps> = ({
+  edit,
+  app,
+  open,
+  onClose,
+  onRefresh,
+}) => {
   const [form] = Form.useForm();
 
   const [iconUrl, setIconUrl] = useState('');
 
-  const [editing, setEditing] = useState(!app);
+  const [editing, setEditing] = useState(edit || !app);
 
   const [appTypes, setAppTypes] = useState<AppTypeEntity.ListItem[]>([]);
 
@@ -179,8 +187,14 @@ const AppDetail: React.FC<IProps> = ({ app, open, onClose, onRefresh }) => {
                       <>
                         <Field name={label} />
 
+                        {typeReq.loading && <Skeleton />}
+
                         <CheckboxGroup.Root
-                          style={{ flexDirection: 'row', gap: '8px' }}
+                          style={{
+                            flexDirection: 'row',
+                            gap: '8px',
+                            flexWrap: 'wrap',
+                          }}
                           defaultValue={app?.type}
                           onValueChange={(v) => form.setFieldValue(label, v)}
                         >

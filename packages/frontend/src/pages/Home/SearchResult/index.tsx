@@ -29,7 +29,7 @@ type IProps = Readonly<{
   keyword: string;
   loading: boolean;
   pagination: PageEntity.PagePagination;
-  onClick: (v?: AppEntity.Item) => void;
+  onClick: (v?: AppEntity.Item, edit?: boolean) => void;
   onDelete: (id: string) => void;
   onChange: (v: number) => void;
   onUpload: () => void;
@@ -182,7 +182,7 @@ const SearchResult: React.FC<IProps> = ({
                       <ContextMenu.Content>
                         <ContextMenu.Item
                           shortcut="⌘ E"
-                          onClick={() => onClick(app)}
+                          onClick={() => onClick(app, true)}
                         >
                           编辑
                         </ContextMenu.Item>
