@@ -1,34 +1,35 @@
-import React, { useMemo, useState } from 'react'
-import styles from './index.module.less'
-import { Button, Flex } from '@radix-ui/themes'
-import SearchForm from './SearchForm'
-import type { AppEntity } from '@/entities/app'
-import API from '@/services'
-import SearchResult from './SearchResult'
-import { useMount, useRequest, useSetState } from 'ahooks'
-import AppDetail from '@/components/AppDetail'
-import type { PageEntity } from '@/entities/page'
-import UploadExcel from '@/components/UploadExcel'
-import HarmonyIcon from '@/components/HarmonyIcon'
-import { GradientBackground } from 'react-gradient-animation'
-import TypeManage from '@/components/TypeManage'
-import type { AppTypeEntity } from '@/entities/appType'
-import { notify } from '@/utils/notify'
+import React, { useMemo, useState } from 'react';
+import styles from './index.module.less';
+import { Button, Flex } from '@radix-ui/themes';
+import type { AppEntity } from '@/entities/app';
+import API from '@/services';
+import { useMount, useRequest, useSetState } from 'ahooks';
+import AppDetail from '@/components/AppDetail';
+import type { PageEntity } from '@/entities/page';
+import UploadExcel from '@/components/UploadExcel';
+import HarmonyIcon from '@/components/HarmonyIcon';
+import { GradientBackground } from 'react-gradient-animation';
+import TypeManage from '@/components/TypeManage';
+import type { AppTypeEntity } from '@/entities/appType';
+import { notify } from '@/utils/notify';
 
-type IProps = Readonly<{}>
+const SearchResult = React.lazy(() => import('./SearchResult'));
+const SearchForm = React.lazy(() => import('./SearchForm'));
+
+type IProps = Readonly<{}>;
 
 type IState = {
-  keyword: string
-  apps: AppEntity.Item[]
-  currentAppType?: string
-  appTypes: AppTypeEntity.ListItem[]
-  currentApp?: AppEntity.Item
-  pagination: PageEntity.PagePagination
-  open: boolean
-  uploadOpen: boolean
-  typeOpen: boolean
-  harmonyIconOpen: boolean
-}
+  keyword: string;
+  apps: AppEntity.Item[];
+  currentAppType?: string;
+  appTypes: AppTypeEntity.ListItem[];
+  currentApp?: AppEntity.Item;
+  pagination: PageEntity.PagePagination;
+  open: boolean;
+  uploadOpen: boolean;
+  typeOpen: boolean;
+  harmonyIconOpen: boolean;
+};
 
 const Home: React.FC<IProps> = () => {
   const [state, setState] = useSetState<IState>({
@@ -47,22 +48,24 @@ const Home: React.FC<IProps> = () => {
     uploadOpen: false,
     typeOpen: false,
     harmonyIconOpen: false,
-  })
+  });
 
   const searchAppsReq = useRequest(API.appSearch, {
     debounceWait: 600,
     onSuccess(res) {
-      let appTypes = state.appTypes
+      let appTypes = state.appTypes;
 
       if (state.keyword.length === 0 && !state.currentAppType) {
-        const index = state.appTypes.findIndex((item) => item.type_name === '全部')
+        const index = state.appTypes.findIndex(
+          (item) => item.type_name === '全部'
+        );
 
-        appTypes = JSON.parse(JSON.stringify(state.appTypes))
+        appTypes = JSON.parse(JSON.stringify(state.appTypes));
 
         appTypes.splice(index, 1, {
           ...appTypes[index],
           app_count: res.total,
-        })
+        });
       }
 
       setState({
@@ -74,92 +77,98 @@ const Home: React.FC<IProps> = () => {
           pages: res.pages,
         },
         appTypes,
-      })
+      });
     },
-  })
+  });
 
   const appTypeListReq = useRequest(API.appTypeList, {
     onSuccess(res) {
       setState({
-        appTypes: res?.data ? [{ type_name: '全部' }, ...res.data] : [{ type_name: '全部' }],
-        currentAppType: '全部',
-      })
+        appTypes: res?.data
+          ? [{ type_name: '全部' }, ...res.data]
+          : [{ type_name: '全部' }],
+        currentAppType: state.currentAppType || '全部',
+      });
     },
-  })
+  });
 
   const deleteReq = useRequest(API.deleteApp, {
     manual: true,
     onSuccess(res) {
       if (res.success) {
-        searchAppsReq.refresh()
+        searchAppsReq.refresh();
       } else {
-        notify(res.message)
+        notify(res.message);
       }
     },
-  })
+  });
 
   async function handleSearch(v: string) {
-    setState({ keyword: v })
+    setState({ keyword: v });
 
-    searchAppsReq.run({ keyword: v, typeName: state.currentAppType })
+    searchAppsReq.run({ keyword: v, typeName: state.currentAppType });
   }
 
   function handleOpenAppDetail(app?: AppEntity.Item) {
-    setState({ currentApp: app, open: true })
+    setState({ currentApp: app, open: true });
   }
 
   function handleDeleteApp(id: string) {
-    deleteReq.run({ id })
+    deleteReq.run({ id });
   }
 
   function handleOpenUpload() {
-    setState({ uploadOpen: true })
+    setState({ uploadOpen: true });
   }
 
   function handleOpenType() {
-    setState({ typeOpen: true })
+    setState({ typeOpen: true });
   }
 
   function handleTypeChange(v: string) {
-    setState({ currentAppType: v })
+    setState({ currentAppType: v });
 
-    searchAppsReq.run({ keyword: state.keyword, current: 1, typeName: v })
+    searchAppsReq.run({ keyword: state.keyword, current: 1, typeName: v });
   }
 
   function handleCloseAppDetail() {
-    setState({ currentApp: undefined, open: false })
+    setState({ currentApp: undefined, open: false });
   }
 
   function handleRefresh() {
-    searchAppsReq.refresh()
-    appTypeListReq.refresh()
+    searchAppsReq.refresh();
+    appTypeListReq.refresh();
   }
 
   function handleCloseUpload() {
-    setState({ uploadOpen: false })
+    setState({ uploadOpen: false });
   }
 
   function handleCloseType() {
-    setState({ typeOpen: false })
+    setState({ typeOpen: false });
   }
 
   function handleTypeOk() {
-    appTypeListReq.refresh()
+    appTypeListReq.refresh();
   }
 
   function handleCloseHarmonyIcon() {
-    setState({ harmonyIconOpen: false })
+    setState({ harmonyIconOpen: false });
   }
 
   function handleUploadSuccess() {
     searchAppsReq.run({
       keyword: state.keyword,
       typeName: state.currentAppType,
-    })
+    });
   }
 
   function handlePageChange(current: number) {
-    searchAppsReq.run({ keyword: state.keyword, current, typeName: state.currentAppType })
+    searchAppsReq.run({
+      keyword: state.keyword,
+      current,
+      typeName: state.currentAppType,
+    });
   }
 
   const background = useMemo(
@@ -174,7 +183,7 @@ const Home: React.FC<IProps> = () => {
       >
         <GradientBackground
           skew={0}
-          blending='overlay'
+          blending="overlay"
           colors={{
             background: 'blue',
             particles: ['#00897b', '#7f00ff', '#3b82f6'],
@@ -183,8 +192,8 @@ const Home: React.FC<IProps> = () => {
         />
       </div>
     ),
-    [],
-  )
+    []
+  );
 
   return (
     <>
@@ -196,12 +205,14 @@ const Home: React.FC<IProps> = () => {
             <h1>Package Repo</h1>
 
             <div className={styles.home__functions}>
-              <Button onClick={() => setState({ harmonyIconOpen: true })}>转鸿蒙双层图标</Button>
+              <Button onClick={() => setState({ harmonyIconOpen: true })}>
+                转鸿蒙双层图标
+              </Button>
             </div>
           </header>
 
           <section>
-            <Flex direction='column' gap='3' style={{ height: '100%' }}>
+            <Flex direction="column" gap="3" style={{ height: '100%' }}>
               <SearchForm onChange={handleSearch} />
 
               <SearchResult
@@ -224,20 +235,39 @@ const Home: React.FC<IProps> = () => {
       </div>
 
       {state.open && (
-        <AppDetail open={state.open} app={state.currentApp} onClose={handleCloseAppDetail} onRefresh={handleRefresh} />
+        <AppDetail
+          open={state.open}
+          app={state.currentApp}
+          onClose={handleCloseAppDetail}
+          onRefresh={handleRefresh}
+        />
       )}
 
       {state.uploadOpen && (
-        <UploadExcel open={state.uploadOpen} onClose={handleCloseUpload} onUpload={handleUploadSuccess} />
+        <UploadExcel
+          open={state.uploadOpen}
+          onClose={handleCloseUpload}
+          onUpload={handleUploadSuccess}
+        />
       )}
 
       {state.typeOpen && (
-        <TypeManage open={state.typeOpen} onOk={handleTypeOk} onRefresh={handleRefresh} onClose={handleCloseType} />
+        <TypeManage
+          open={state.typeOpen}
+          onOk={handleTypeOk}
+          onRefresh={handleRefresh}
+          onClose={handleCloseType}
+        />
       )}
 
-      {state.harmonyIconOpen && <HarmonyIcon open={state.harmonyIconOpen} onClose={handleCloseHarmonyIcon} />}
+      {state.harmonyIconOpen && (
+        <HarmonyIcon
+          open={state.harmonyIconOpen}
+          onClose={handleCloseHarmonyIcon}
+        />
+      )}
     </>
-  )
-}
+  );
+};
 
-export default React.memo(Home)
+export default React.memo(Home);

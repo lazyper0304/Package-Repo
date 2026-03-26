@@ -1,8 +1,8 @@
-import React from 'react'
-import 'rc-pagination/assets/index.css'
-import styles from './index.module.less'
+import React from 'react';
+import 'rc-pagination/assets/index.css';
+import styles from './index.module.less';
 
-import RcPagination, { type PaginationProps } from 'rc-pagination'
+import RcPagination, { type PaginationProps } from 'rc-pagination';
 
 const Pagination: React.FC<PaginationProps> = (props) => {
   return (
@@ -12,7 +12,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
       showLessItems
       showTotal={(v) => <div className={styles.pagination__total}>共{v}个</div>}
     />
-  )
-}
+  );
+};
 
-export default React.memo(Pagination)
+export default React.memo(Pagination);

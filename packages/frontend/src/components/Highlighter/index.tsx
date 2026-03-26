@@ -1,12 +1,12 @@
-import React from 'react'
-import styles from './index.module.less'
+import React from 'react';
+import styles from './index.module.less';
 
-import ReactHighlighter from 'react-highlight-words'
+import ReactHighlighter from 'react-highlight-words';
 
 type IProps = Readonly<{
-  searchWords: string | string[]
-  children: React.ReactNode
-}>
+  searchWords: string | string[];
+  children: React.ReactNode;
+}>;
 
 const Highlighter: React.FC<IProps> = ({ searchWords, children }) => {
   return (
@@ -16,7 +16,7 @@ const Highlighter: React.FC<IProps> = ({ searchWords, children }) => {
       autoEscape={true}
       textToHighlight={children}
     />
-  )
-}
+  );
+};
 
-export default React.memo(Highlighter)
+export default React.memo(Highlighter);

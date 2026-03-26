@@ -1,30 +1,41 @@
-import Highlighter from '@/components/Highlighter'
-import type { AppEntity } from '@/entities/app'
-import { Badge, Button, Card, ContextMenu, Flex, Heading, ScrollArea, Skeleton, Tabs, Text } from '@radix-ui/themes'
-import { useSize } from 'ahooks'
-import React, { useCallback, useRef } from 'react'
-import type { PageEntity } from '@/entities/page'
-import Pagination from '@/components/ui/Pagination'
-import styles from './index.module.less'
-import copy from 'copy-to-clipboard'
-import { notify } from '@/utils/notify'
-import empty from '@/assets/empty.svg'
-import type { AppTypeEntity } from '@/entities/appType'
+import Highlighter from '@/components/Highlighter';
+import type { AppEntity } from '@/entities/app';
+import {
+  Badge,
+  Button,
+  Card,
+  ContextMenu,
+  Flex,
+  Heading,
+  ScrollArea,
+  Skeleton,
+  Tabs,
+  Text,
+} from '@radix-ui/themes';
+import { useSize } from 'ahooks';
+import React, { useCallback, useRef } from 'react';
+import type { PageEntity } from '@/entities/page';
+import Pagination from '@/components/ui/Pagination';
+import styles from './index.module.less';
+import copy from 'copy-to-clipboard';
+import { notify } from '@/utils/notify';
+import empty from '@/assets/empty.svg';
+import type { AppTypeEntity } from '@/entities/appType';
 
 type IProps = Readonly<{
-  currentAppType?: string
-  appTypes: AppTypeEntity.ListItem[]
-  apps: AppEntity.Item[]
-  keyword: string
-  loading: boolean
-  pagination: PageEntity.PagePagination
-  onClick: (v?: AppEntity.Item) => void
-  onDelete: (id: string) => void
-  onChange: (v: number) => void
-  onUpload: () => void
-  onType: () => void
-  onTypeChange: (id: string) => void
-}>
+  currentAppType?: string;
+  appTypes: AppTypeEntity.ListItem[];
+  apps: AppEntity.Item[];
+  keyword: string;
+  loading: boolean;
+  pagination: PageEntity.PagePagination;
+  onClick: (v?: AppEntity.Item) => void;
+  onDelete: (id: string) => void;
+  onChange: (v: number) => void;
+  onUpload: () => void;
+  onType: () => void;
+  onTypeChange: (id: string) => void;
+}>;
 
 const SearchResult: React.FC<IProps> = ({
   currentAppType,
@@ -40,34 +51,46 @@ const SearchResult: React.FC<IProps> = ({
   onType,
   onTypeChange,
 }) => {
-  const ref = useRef<HTMLHeadingElement>(null)
+  const ref = useRef<HTMLHeadingElement>(null);
 
-  const size = useSize(ref)
+  const size = useSize(ref);
 
-  function handleCopy(e: React.MouseEvent<HTMLSpanElement, MouseEvent>, v?: string) {
-    e.stopPropagation()
+  function handleCopy(
+    e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
+    v?: string
+  ) {
+    e.stopPropagation();
 
-    if (!v) return
+    if (!v) return;
 
-    copy(v)
+    copy(v);
 
-    notify('复制成功')
+    notify('复制成功');
   }
 
   return (
-    <Flex direction='column' style={{ flex: 1, height: 0 }}>
-      <Card size='3'>
-        <Flex justify='between'>
-          <Heading ref={ref} style={{ marginBottom: 24 }}>
+    <Flex direction="column" style={{ flex: 1, height: 0 }}>
+      <Card size="3">
+        <Flex justify="between">
+          <Heading
+            ref={ref}
+            style={{
+              marginBottom: 24,
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             📱搜索结果
           </Heading>
 
-          <Flex gap='3'>
+          <Flex gap="3">
             <Button onClick={() => onClick()}>添加</Button>
-            <Button variant='soft' onClick={onType}>
+            <Button variant="soft" onClick={onType}>
               分类管理
             </Button>
-            <Button variant='soft' onClick={onUpload}>
+            <Button variant="soft" onClick={onUpload}>
               上传
             </Button>
           </Flex>
@@ -82,8 +105,11 @@ const SearchResult: React.FC<IProps> = ({
           <Tabs.List>
             {appTypes.map((appType) => (
               <Tabs.Trigger key={appType.id} value={appType.type_name}>
-                <Flex gap='2' align='center'>
-                  {appType.type_name} {appType.app_count && <Badge radius='full'>{appType.app_count}</Badge>}
+                <Flex gap="2" align="center">
+                  {appType.type_name}{' '}
+                  {appType.app_count && (
+                    <Badge radius="full">{appType.app_count}</Badge>
+                  )}
                 </Flex>
               </Tabs.Trigger>
             ))}
@@ -94,46 +120,79 @@ const SearchResult: React.FC<IProps> = ({
           {apps.length ? (
             <ScrollArea
               className={styles.scrollView}
-              type='hover'
-              scrollbars='vertical'
+              type="hover"
+              scrollbars="vertical"
               style={{ height: `calc(100% - ${size?.height}px - 120px)` }}
             >
-              <Flex gap='3' direction='column'>
+              <Flex gap="3" direction="column">
                 {apps.map((app) => (
-                  <Card key={app.id} className={styles.app} style={{ cursor: 'pointer' }} onClick={() => onClick(app)}>
+                  <Card
+                    key={app.id}
+                    className={styles.app}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => onClick(app)}
+                  >
                     <ContextMenu.Root>
                       <ContextMenu.Trigger>
-                        <Flex gap='3' align='center'>
+                        <Flex gap="3" align="center">
                           {app.iconUrl ? <img src={app.iconUrl} /> : null}
 
-                          <Flex direction='column'>
-                            <Flex gap='2' align='center'>
-                              {app.type ? <Badge>{app.type}</Badge> : null}
-                              <Heading size='3' onClick={(e) => handleCopy(e, app.appName)}>
-                                <Highlighter searchWords={keyword}>{app.appName}</Highlighter>
+                          <Flex direction="column">
+                            <Flex gap="2" align="center">
+                              {app.type?.length ? (
+                                <Flex gap="2">
+                                  {app.type.map((type) => (
+                                    <Badge key={type}>{type}</Badge>
+                                  ))}
+                                </Flex>
+                              ) : null}
+                              <Heading
+                                size="3"
+                                onClick={(e) => handleCopy(e, app.appName)}
+                              >
+                                <Highlighter searchWords={keyword}>
+                                  {app.appName}
+                                </Highlighter>
                               </Heading>
                             </Flex>
-                            <Text color='gray' onClick={(e) => handleCopy(e, app.androidPackageName)}>
-                              <Highlighter searchWords={keyword}>{app.androidPackageName}</Highlighter>
+                            <Text
+                              color="gray"
+                              onClick={(e) =>
+                                handleCopy(e, app.androidPackageName)
+                              }
+                            >
+                              <Highlighter searchWords={keyword}>
+                                {app.androidPackageName}
+                              </Highlighter>
                             </Text>
-                            <Text color='gray' onClick={(e) => handleCopy(e, app.harmonyPackageName)}>
-                              <Highlighter searchWords={keyword}>{app.harmonyPackageName}</Highlighter>
+                            <Text
+                              color="gray"
+                              onClick={(e) =>
+                                handleCopy(e, app.harmonyPackageName)
+                              }
+                            >
+                              <Highlighter searchWords={keyword}>
+                                {app.harmonyPackageName}
+                              </Highlighter>
                             </Text>
                           </Flex>
                         </Flex>
                       </ContextMenu.Trigger>
 
                       <ContextMenu.Content>
-                        <ContextMenu.Item shortcut='⌘ E' onClick={() => onClick(app)}>
+                        <ContextMenu.Item
+                          shortcut="⌘ E"
+                          onClick={() => onClick(app)}
+                        >
                           编辑
                         </ContextMenu.Item>
                         <ContextMenu.Item
-                          shortcut='⌘ D'
-                          color='red'
+                          shortcut="⌘ D"
+                          color="red"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
 
-                            onDelete(app.id)
+                            onDelete(app.id);
                           }}
                         >
                           删除
@@ -147,7 +206,7 @@ const SearchResult: React.FC<IProps> = ({
           ) : (
             <div className={styles.empty}>
               <img src={empty} />
-              <Text color='gray'>暂无数据</Text>
+              <Text color="gray">暂无数据</Text>
             </div>
           )}
         </Skeleton>
@@ -162,7 +221,7 @@ const SearchResult: React.FC<IProps> = ({
         )}
       </Card>
     </Flex>
-  )
-}
+  );
+};
 
-export default React.memo(SearchResult)
+export default React.memo(SearchResult);

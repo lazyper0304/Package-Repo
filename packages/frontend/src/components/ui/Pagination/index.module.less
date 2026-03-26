@@ -6,7 +6,21 @@
 
 @media (max-width: 640px) {
   .pagination {
-    &__total {
+    font-size: 12px;
+
+    :global(.rc-pagination-item) {
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      font-size: 12px;
+    }
+
+    :global(.rc-pagination-prev),
+    :global(.rc-pagination-next) {
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      font-size: 12px;
     }
   }
 }
