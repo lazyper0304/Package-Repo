@@ -6,7 +6,14 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   build: {
+    emptyOutDir: true,
     outDir: '../../dist',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        repo: path.resolve(__dirname, 'repo.html'),
+      },
+    },
   },
   css: {
     modules: {

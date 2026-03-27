@@ -1,33 +1,30 @@
-import { Card, Heading, TextField } from '@radix-ui/themes';
-import React, { useCallback, useRef } from 'react';
+import { Button, Card, Flex, Heading, TextField } from '@radix-ui/themes';
+import React, { useCallback, useRef, useState } from 'react';
+import { MdClose, MdSearch } from 'react-icons/md';
 
 type IProps = Readonly<{
+  loading: boolean;
   onChange: (v: string) => void;
 }>;
 
-const SearchForm: React.FC<IProps> = ({ onChange }) => {
+const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
   const compositionRef = useRef(false);
 
+  const [keyword, setKeyword] = useState('');
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (compositionRef.current) return;
+    if (!e.target.value) {
+      onChange('');
+    }
 
-    onChange(e.target.value);
+    // onChange(e.target.value);
+    setKeyword(e.target.value);
   }
 
-  function handleCompositionStart(e: React.CompositionEvent<HTMLInputElement>) {
-    compositionRef.current = true;
-  }
-
-  function handleCompositionUpdate(
-    e: React.CompositionEvent<HTMLInputElement>
-  ) {
-    compositionRef.current = true;
-  }
-
-  function handleCompositionEnd(e: React.CompositionEvent<HTMLInputElement>) {
-    compositionRef.current = false;
-
-    handleChange(e);
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      onChange(keyword);
+    }
   }
 
   return (
@@ -37,15 +34,29 @@ const SearchForm: React.FC<IProps> = ({ onChange }) => {
           🔍 搜索应用
         </Heading>
 
-        <TextField.Root
-          placeholder="输入关键字"
-          onCompositionStart={handleCompositionStart}
-          onCompositionUpdate={handleCompositionUpdate}
-          onCompositionEnd={handleCompositionEnd}
-          onChange={handleChange}
-        >
-          <TextField.Slot></TextField.Slot>
-        </TextField.Root>
+        <Flex gap="2">
+          <TextField.Root
+            value={keyword}
+            placeholder="输入关键字"
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            style={{ flex: 1 }}
+          >
+            <TextField.Slot>
+              <MdSearch />
+            </TextField.Slot>
+
+            {keyword.length > 0 && (
+              <TextField.Slot>
+                <MdClose onClick={() => setKeyword('')} />
+              </TextField.Slot>
+            )}
+          </TextField.Root>
+
+          <Button loading={loading} onClick={() => onChange(keyword)}>
+            搜索
+          </Button>
+        </Flex>
       </Card>
     </>
   );

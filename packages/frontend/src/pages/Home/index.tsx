@@ -16,7 +16,9 @@ import { notify } from '@/utils/notify';
 const SearchResult = React.lazy(() => import('./SearchResult'));
 const SearchForm = React.lazy(() => import('./SearchForm'));
 
-type IProps = Readonly<{}>;
+type IProps = Readonly<{
+  isAdmin?: boolean;
+}>;
 
 type IState = {
   keyword: string;
@@ -32,7 +34,7 @@ type IState = {
   edit: boolean;
 };
 
-const Home: React.FC<IProps> = () => {
+const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   const [state, setState] = useSetState<IState>({
     keyword: '',
     apps: [],
@@ -204,18 +206,27 @@ const Home: React.FC<IProps> = () => {
 
         <div className={styles.home__content}>
           <header className={styles.home__header}>
-            <h1>Package Repo</h1>
+            <h1>Package Repo {isAdmin ? '(管理员模式)' : ''}</h1>
 
             <div className={styles.home__functions}>
               <Button onClick={() => setState({ harmonyIconOpen: true })}>
                 转鸿蒙双层图标
               </Button>
+              {isAdmin && (
+                <>
+                  <Button onClick={handleOpenUpload}>批量上传</Button>
+                  <Button onClick={handleOpenType}>类型管理</Button>
+                </>
+              )}
             </div>
           </header>
 
           <section>
             <Flex direction="column" gap="3" style={{ height: '100%' }}>
-              <SearchForm onChange={handleSearch} />
+              <SearchForm
+                loading={searchAppsReq.loading}
+                onChange={handleSearch}
+              />
 
               <SearchResult
                 currentAppType={state.currentAppType}
@@ -230,6 +241,7 @@ const Home: React.FC<IProps> = () => {
                 onUpload={handleOpenUpload}
                 onType={handleOpenType}
                 onTypeChange={handleTypeChange}
+                isAdmin={isAdmin}
               />
             </Flex>
           </section>
@@ -238,6 +250,7 @@ const Home: React.FC<IProps> = () => {
 
       {state.open && (
         <AppDetail
+          isAdmin={isAdmin}
           edit={state.edit}
           open={state.open}
           app={state.currentApp}

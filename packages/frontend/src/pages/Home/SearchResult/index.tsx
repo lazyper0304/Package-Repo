@@ -1,26 +1,23 @@
-import Highlighter from '@/components/Highlighter';
 import type { AppEntity } from '@/entities/app';
 import {
   Badge,
   Button,
   Card,
-  ContextMenu,
   Flex,
   Heading,
   ScrollArea,
-  Skeleton,
+  Spinner,
   Tabs,
   Text,
 } from '@radix-ui/themes';
 import { useSize } from 'ahooks';
-import React, { useCallback, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { PageEntity } from '@/entities/page';
 import Pagination from '@/components/ui/Pagination';
 import styles from './index.module.less';
-import copy from 'copy-to-clipboard';
-import { notify } from '@/utils/notify';
 import empty from '@/assets/empty.svg';
 import type { AppTypeEntity } from '@/entities/appType';
+import AppItem from '@/components/AppItem';
 
 type IProps = Readonly<{
   currentAppType?: string;
@@ -35,6 +32,7 @@ type IProps = Readonly<{
   onUpload: () => void;
   onType: () => void;
   onTypeChange: (id: string) => void;
+  isAdmin?: boolean;
 }>;
 
 const SearchResult: React.FC<IProps> = ({
@@ -50,23 +48,11 @@ const SearchResult: React.FC<IProps> = ({
   onUpload,
   onType,
   onTypeChange,
+  isAdmin = false,
 }) => {
   const ref = useRef<HTMLHeadingElement>(null);
 
   const size = useSize(ref);
-
-  function handleCopy(
-    e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
-    v?: string
-  ) {
-    e.stopPropagation();
-
-    if (!v) return;
-
-    copy(v);
-
-    notify('复制成功');
-  }
 
   return (
     <Flex direction="column" style={{ flex: 1, height: 0 }}>
@@ -86,13 +72,14 @@ const SearchResult: React.FC<IProps> = ({
           </Heading>
 
           <Flex gap="3">
-            <Button onClick={() => onClick()}>添加</Button>
-            <Button variant="soft" onClick={onType}>
-              分类管理
-            </Button>
-            <Button variant="soft" onClick={onUpload}>
-              上传
-            </Button>
+            {isAdmin && (
+              <>
+                <Button onClick={() => onClick()}>添加</Button>
+                <Button variant="soft" onClick={onUpload}>
+                  上传
+                </Button>
+              </>
+            )}
           </Flex>
         </Flex>
 
@@ -116,100 +103,45 @@ const SearchResult: React.FC<IProps> = ({
           </Tabs.List>
         </Tabs.Root>
 
-        <Skeleton loading={loading}>
-          {apps.length ? (
-            <ScrollArea
-              className={styles.scrollView}
-              type="hover"
-              scrollbars="vertical"
-              style={{ height: `calc(100% - ${size?.height}px - 120px)` }}
-            >
-              <Flex gap="3" direction="column">
-                {apps.map((app) => (
-                  <Card
-                    key={app.id}
-                    className={styles.app}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => onClick(app)}
-                  >
-                    <ContextMenu.Root>
-                      <ContextMenu.Trigger>
-                        <Flex gap="3" align="center">
-                          {app.iconUrl ? <img src={app.iconUrl} /> : null}
+        {loading && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 300,
+            }}
+          >
+            <Spinner />
+          </div>
+        )}
 
-                          <Flex direction="column">
-                            <Flex gap="2" align="center">
-                              {app.type?.length ? (
-                                <Flex gap="2">
-                                  {app.type.map((type) => (
-                                    <Badge key={type}>{type}</Badge>
-                                  ))}
-                                </Flex>
-                              ) : null}
-                              <Heading
-                                size="3"
-                                onClick={(e) => handleCopy(e, app.appName)}
-                              >
-                                <Highlighter searchWords={keyword}>
-                                  {app.appName}
-                                </Highlighter>
-                              </Heading>
-                            </Flex>
-                            <Text
-                              color="gray"
-                              onClick={(e) =>
-                                handleCopy(e, app.androidPackageName)
-                              }
-                            >
-                              <Highlighter searchWords={keyword}>
-                                {app.androidPackageName}
-                              </Highlighter>
-                            </Text>
-                            <Text
-                              color="gray"
-                              onClick={(e) =>
-                                handleCopy(e, app.harmonyPackageName)
-                              }
-                            >
-                              <Highlighter searchWords={keyword}>
-                                {app.harmonyPackageName}
-                              </Highlighter>
-                            </Text>
-                          </Flex>
-                        </Flex>
-                      </ContextMenu.Trigger>
-
-                      <ContextMenu.Content>
-                        <ContextMenu.Item
-                          shortcut="⌘ E"
-                          onClick={() => onClick(app, true)}
-                        >
-                          编辑
-                        </ContextMenu.Item>
-                        <ContextMenu.Item
-                          shortcut="⌘ D"
-                          color="red"
-                          onClick={(e) => {
-                            e.stopPropagation();
-
-                            onDelete(app.id);
-                          }}
-                        >
-                          删除
-                        </ContextMenu.Item>
-                      </ContextMenu.Content>
-                    </ContextMenu.Root>
-                  </Card>
-                ))}
-              </Flex>
-            </ScrollArea>
-          ) : (
-            <div className={styles.empty}>
-              <img src={empty} />
-              <Text color="gray">暂无数据</Text>
-            </div>
-          )}
-        </Skeleton>
+        {apps.length ? (
+          <ScrollArea
+            className={styles.scrollView}
+            type="hover"
+            scrollbars="vertical"
+            style={{ height: `calc(100% - ${size?.height}px - 120px)` }}
+          >
+            <Flex gap="3" direction="column">
+              {apps.map((app) => (
+                <AppItem
+                  key={app.id}
+                  app={app}
+                  keyword={keyword}
+                  isAdmin={isAdmin}
+                  onClick={onClick}
+                  onDelete={onDelete}
+                />
+              ))}
+            </Flex>
+          </ScrollArea>
+        ) : (
+          <div className={styles.empty}>
+            <img src={empty} />
+            <Text color="gray">暂无数据</Text>
+          </div>
+        )}
 
         {apps.length > 0 && (
           <Pagination

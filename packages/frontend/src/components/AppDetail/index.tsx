@@ -7,9 +7,9 @@ import {
   DataList,
   Dialog,
   Flex,
-  Select,
-  Skeleton,
+  Text,
   TextField,
+  Spinner,
 } from '@radix-ui/themes';
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './index.module.less';
@@ -19,11 +19,13 @@ import copy from 'copy-to-clipboard';
 import { notify } from '@/utils/notify';
 import Form, { Field } from '@rc-component/form';
 import type { AppTypeEntity } from '@/entities/appType';
+import useMobile from '@/hooks/useMobile';
 
 type IProps = Readonly<{
   edit: boolean;
   app?: AppEntity.Item;
   open: boolean;
+  isAdmin: boolean;
   onClose: () => void;
   onRefresh: () => void;
 }>;
@@ -32,6 +34,7 @@ const AppDetail: React.FC<IProps> = ({
   edit,
   app,
   open,
+  isAdmin = false,
   onClose,
   onRefresh,
 }) => {
@@ -42,6 +45,8 @@ const AppDetail: React.FC<IProps> = ({
   const [editing, setEditing] = useState(edit || !app);
 
   const [appTypes, setAppTypes] = useState<AppTypeEntity.ListItem[]>([]);
+
+  const isMobile = useMobile();
 
   const createReq = useRequest(API.addApp, {
     manual: true,
@@ -159,15 +164,14 @@ const AppDetail: React.FC<IProps> = ({
         className={styles.appDetail__item}
         align={editing ? 'center' : 'baseline'}
       >
-        <DataList.Label minWidth="88px">{label}</DataList.Label>
+        <DataList.Label minWidth="68px">{label}</DataList.Label>
 
-        <Flex gap="1" align="center">
-          <DataList.Value style={{ wordBreak: 'break-all' }}>
-            <Flex gap="1" align="center">
-              <div style={{ flex: 1 }}>
-                {editing && (
-                  <>
-                    {/* {label === '分类' && (
+        <DataList.Value style={{ wordBreak: 'break-all' }}>
+          <Flex gap="2" align="center" style={{ width: '100%' }}>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              {editing && (
+                <>
+                  {/* {label === '分类' && (
                       <Select.Root defaultValue={v} onValueChange={(v) => form.setFieldValue(label, v)}>
                         <Select.Trigger placeholder='选择分类' />
                         <Select.Content>
@@ -183,12 +187,17 @@ const AppDetail: React.FC<IProps> = ({
                         </Select.Content>
                       </Select.Root>
                     )} */}
-                    {label === '分类' && (
-                      <>
-                        <Field name={label} />
+                  {label === '分类' && (
+                    <>
+                      <Field name={label} />
 
-                        {typeReq.loading && <Skeleton />}
+                      {typeReq.loading && <Spinner />}
 
+                      {!typeReq.loading && appTypes.length === 0 && (
+                        <Text>暂无分类</Text>
+                      )}
+
+                      {!typeReq.loading && appTypes.length > 0 && (
                         <CheckboxGroup.Root
                           style={{
                             flexDirection: 'row',
@@ -207,54 +216,59 @@ const AppDetail: React.FC<IProps> = ({
                             </CheckboxGroup.Item>
                           ))}
                         </CheckboxGroup.Root>
-                      </>
-                    )}
+                      )}
+                    </>
+                  )}
 
-                    {label !== '分类' && (
-                      <Field name={label}>
-                        <TextField.Root
-                          defaultValue={v}
-                          style={{ width: '56vw', maxWidth: 400 }}
-                          placeholder={`请输入${label}`}
-                        ></TextField.Root>
-                      </Field>
-                    )}
-                  </>
-                )}
-
-                {!editing && (
-                  <>
-                    {Array.isArray(v) ? (
-                      <Flex gap="2">
-                        {v.length === 0 && '-'}
-
-                        {v.map((item) => (
-                          <Badge>{item}</Badge>
-                        ))}
-                      </Flex>
-                    ) : v ? (
-                      v
-                    ) : (
-                      '-'
-                    )}
-                  </>
-                )}
-              </div>
-
-              {hasValue && !editing && (
-                <Flex
-                  gap="1"
-                  align="center"
-                  className={styles.appDetail__item__action}
-                >
-                  <Button size="1" variant="soft" onClick={() => handleCopy(v)}>
-                    复制
-                  </Button>
-                </Flex>
+                  {label !== '分类' && (
+                    <Field name={label}>
+                      <TextField.Root
+                        defaultValue={v}
+                        style={{ width: '56vw', maxWidth: 400 }}
+                        placeholder={`请输入${label}`}
+                      ></TextField.Root>
+                    </Field>
+                  )}
+                </>
               )}
-            </Flex>
-          </DataList.Value>
-        </Flex>
+
+              {!editing && (
+                <>
+                  {Array.isArray(v) ? (
+                    <Flex gap="2">
+                      {v.length === 0 && '-'}
+
+                      {v.map((item) => (
+                        <Badge size="2">{item}</Badge>
+                      ))}
+                    </Flex>
+                  ) : v ? (
+                    <div className={styles.appDetail__item__value}>{v}</div>
+                  ) : (
+                    '-'
+                  )}
+                </>
+              )}
+            </div>
+
+            {hasValue && !editing && (
+              <Flex
+                gap="1"
+                align="center"
+                className={styles.appDetail__item__action}
+              >
+                <Button
+                  size="1"
+                  color="gold"
+                  variant="soft"
+                  onClick={() => handleCopy(v)}
+                >
+                  复制
+                </Button>
+              </Flex>
+            )}
+          </Flex>
+        </DataList.Value>
       </DataList.Item>
     );
   }
@@ -267,7 +281,7 @@ const AppDetail: React.FC<IProps> = ({
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Content>
+      <Dialog.Content maxWidth={isMobile ? '88vw' : '520px'}>
         <Dialog.Title>{app?.appName ?? '新增应用'}</Dialog.Title>
 
         <Dialog.Description size="2" mb="4">
@@ -304,65 +318,67 @@ const AppDetail: React.FC<IProps> = ({
               {Item('分类', app?.type)}
             </DataList.Root>
 
-            <Flex
-              gap="3"
-              style={{
-                marginTop: 24,
-              }}
-            >
-              {app && (
-                <>
-                  {editing && (
-                    <>
-                      <Button
-                        variant="soft"
-                        style={{ flex: 1 }}
-                        onClick={() => setEditing(false)}
-                      >
-                        取消
-                      </Button>
-                      <Button
-                        loading={loading}
-                        style={{ flex: 1 }}
-                        type="submit"
-                      >
-                        保存
-                      </Button>
-                    </>
-                  )}
+            {isAdmin && (
+              <Flex
+                gap="3"
+                style={{
+                  marginTop: 24,
+                }}
+              >
+                {app && (
+                  <>
+                    {editing && (
+                      <>
+                        <Button
+                          variant="soft"
+                          style={{ flex: 1 }}
+                          onClick={() => setEditing(false)}
+                        >
+                          取消
+                        </Button>
+                        <Button
+                          loading={loading}
+                          style={{ flex: 1 }}
+                          type="submit"
+                        >
+                          保存
+                        </Button>
+                      </>
+                    )}
 
-                  {!editing && (
-                    <>
-                      <Button
-                        color="red"
-                        variant="soft"
-                        loading={loading}
-                        style={{ flex: 1 }}
-                        onClick={handleDelete}
-                      >
-                        删除
-                      </Button>
-                      <Button
-                        style={{ flex: 1 }}
-                        onClick={() => setEditing(true)}
-                      >
-                        编辑
-                      </Button>
-                    </>
-                  )}
-                </>
-              )}
+                    {!editing && (
+                      <>
+                        <Button
+                          color="red"
+                          variant="soft"
+                          loading={loading}
+                          style={{ flex: 1 }}
+                          onClick={handleDelete}
+                        >
+                          删除
+                        </Button>
+                        <Button
+                          style={{ flex: 1 }}
+                          onClick={() => setEditing(true)}
+                        >
+                          编辑
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
 
-              {!app && (
-                <Button
-                  loading={loading}
-                  type="submit"
-                  style={{ width: '100%' }}
-                >
-                  添加
-                </Button>
-              )}
-            </Flex>
+                {!app && (
+                  <Button
+                    loading={loading}
+                    type="submit"
+                    style={{ width: '100%' }}
+                  >
+                    添加
+                  </Button>
+                )}
+              </Flex>
+            )}
           </Form>
         </Dialog.Description>
       </Dialog.Content>

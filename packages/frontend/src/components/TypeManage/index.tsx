@@ -6,6 +6,7 @@ import {
   DataList,
   Dialog,
   Flex,
+  Spinner,
   TextField,
 } from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
@@ -93,8 +94,20 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
         </Dialog.Title>
 
         <Dialog.Description>
-          <Form form={form} onFinish={handleFinish}>
+          <Form form={form} style={{ minHeight: 150 }} onFinish={handleFinish}>
             <Flex wrap="wrap" gap="2" align="center" style={{ marginTop: 16 }}>
+              {request.loading && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Spinner />
+                </div>
+              )}
+
               {appTypes.map((appType) => (
                 <Badge key={appType.id} size="3">
                   {editing && editingID === appType.id ? (
