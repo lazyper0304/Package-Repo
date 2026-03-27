@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import Home from './pages/Home';
 import { Theme } from '@radix-ui/themes';
 import Notify from './components/ui/Notify';
+import { AppTypeProvider } from './contexts/AppTypeContext';
 
 // 权限检查组件
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -20,49 +21,51 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const App: React.FC = () => {
   return (
-    <Theme>
-      <BrowserRouter>
-        <Suspense
-          fallback={
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                height: '100%',
-                fontSize: '24px',
-              }}
-            >
-              Loading...
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/">
-              <Route
-                index
-                element={
-                  <AuthWrapper>
-                    <Home />
-                  </AuthWrapper>
-                }
-              ></Route>
-              <Route
-                path="repo"
-                element={
-                  <AuthWrapper>
-                    <Home />
-                  </AuthWrapper>
-                }
-              ></Route>
-            </Route>
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+    <AppTypeProvider>
+      <Theme>
+        <BrowserRouter>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                  fontSize: '24px',
+                }}
+              >
+                Loading...
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/">
+                <Route
+                  index
+                  element={
+                    <AuthWrapper>
+                      <Home />
+                    </AuthWrapper>
+                  }
+                ></Route>
+                <Route
+                  path="repo"
+                  element={
+                    <AuthWrapper>
+                      <Home />
+                    </AuthWrapper>
+                  }
+                ></Route>
+              </Route>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
 
-      <Notify />
-    </Theme>
+        <Notify />
+      </Theme>
+    </AppTypeProvider>
   );
 };
 

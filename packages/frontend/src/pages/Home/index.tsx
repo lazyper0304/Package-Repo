@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styles from './index.module.less';
 import { Button, Flex } from '@radix-ui/themes';
 import type { AppEntity } from '@/entities/app';
@@ -12,6 +12,7 @@ import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
 import type { AppTypeEntity } from '@/entities/appType';
 import { notify } from '@/utils/notify';
+import { useAppType } from '@/contexts/AppTypeContext';
 
 const SearchResult = React.lazy(() => import('./SearchResult'));
 const SearchForm = React.lazy(() => import('./SearchForm'));
@@ -24,7 +25,6 @@ type IState = {
   keyword: string;
   apps: AppEntity.Item[];
   currentAppType?: string;
-  appTypes: AppTypeEntity.ListItem[];
   currentApp?: AppEntity.Item;
   pagination: PageEntity.PagePagination;
   open: boolean;
@@ -38,8 +38,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   const [state, setState] = useSetState<IState>({
     keyword: '',
     apps: [],
-    currentAppType: undefined,
-    appTypes: [],
+    currentAppType: '全部',
     currentApp: undefined,
     pagination: {
       current: 1,
@@ -54,24 +53,18 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     edit: false,
   });
 
+  const { state: appTypeState, refreshAppTypes } = useAppType();
+
+  // 获取带"全部"选项的应用类型列表
+  const appTypesWithAll = useMemo(() => {
+    return appTypeState.appTypes.length > 0
+      ? [{ type_name: '全部' }, ...appTypeState.appTypes]
+      : [{ type_name: '全部' }];
+  }, [appTypeState.appTypes]);
+
   const searchAppsReq = useRequest(API.appSearch, {
     debounceWait: 600,
     onSuccess(res) {
-      let appTypes = state.appTypes;
-
-      if (state.keyword.length === 0 && !state.currentAppType) {
-        const index = state.appTypes.findIndex(
-          (item) => item.type_name === '全部'
-        );
-
-        appTypes = JSON.parse(JSON.stringify(state.appTypes));
-
-        appTypes.splice(index, 1, {
-          ...appTypes[index],
-          app_count: res.total,
-        });
-      }
-
       setState({
         apps: res.data,
         pagination: {
@@ -80,18 +73,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           total: res.total,
           pages: res.pages,
         },
-        appTypes,
-      });
-    },
-  });
-
-  const appTypeListReq = useRequest(API.appTypeList, {
-    onSuccess(res) {
-      setState({
-        appTypes: res?.data
-          ? [{ type_name: '全部' }, ...res.data]
-          : [{ type_name: '全部' }],
-        currentAppType: state.currentAppType || '全部',
       });
     },
   });
@@ -141,7 +122,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
   function handleRefresh() {
     searchAppsReq.refresh();
-    appTypeListReq.refresh();
+    refreshAppTypes();
   }
 
   function handleCloseUpload() {
@@ -230,7 +211,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
               <SearchResult
                 currentAppType={state.currentAppType}
-                appTypes={state.appTypes}
+                appTypes={appTypesWithAll}
                 loading={searchAppsReq.loading}
                 keyword={state.keyword}
                 pagination={state.pagination}

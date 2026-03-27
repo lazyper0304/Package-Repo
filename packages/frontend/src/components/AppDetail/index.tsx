@@ -20,6 +20,7 @@ import { notify } from '@/utils/notify';
 import Form, { Field } from '@rc-component/form';
 import type { AppTypeEntity } from '@/entities/appType';
 import useMobile from '@/hooks/useMobile';
+import { useAppType } from '@/contexts/AppTypeContext';
 
 type IProps = Readonly<{
   edit: boolean;
@@ -44,9 +45,9 @@ const AppDetail: React.FC<IProps> = ({
 
   const [editing, setEditing] = useState(edit || !app);
 
-  const [appTypes, setAppTypes] = useState<AppTypeEntity.ListItem[]>([]);
-
   const isMobile = useMobile();
+
+  const { state: appTypeState } = useAppType();
 
   const createReq = useRequest(API.addApp, {
     manual: true,
@@ -57,12 +58,6 @@ const AppDetail: React.FC<IProps> = ({
       } else {
         notify(res.message);
       }
-    },
-  });
-
-  const typeReq = useRequest(API.appTypeList, {
-    onSuccess(res) {
-      setAppTypes(res?.data ?? []);
     },
   });
 
@@ -119,6 +114,8 @@ const AppDetail: React.FC<IProps> = ({
       if (res) {
         setIconUrl(res);
 
+        form.setFieldValue('图标链接', res);
+
         updateIconReq.run({ id: app!.id, iconUrl: res });
       }
     },
@@ -168,7 +165,7 @@ const AppDetail: React.FC<IProps> = ({
 
         <DataList.Value style={{ wordBreak: 'break-all' }}>
           <Flex gap="2" align="center" style={{ width: '100%' }}>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ flex: 1 }}>
               {editing && (
                 <>
                   {/* {label === '分类' && (
@@ -191,13 +188,13 @@ const AppDetail: React.FC<IProps> = ({
                     <>
                       <Field name={label} />
 
-                      {typeReq.loading && <Spinner />}
+                      {appTypeState.loading && <Spinner />}
 
-                      {!typeReq.loading && appTypes.length === 0 && (
+                      {!appTypeState.loading && appTypeState.appTypes.length === 0 && (
                         <Text>暂无分类</Text>
                       )}
 
-                      {!typeReq.loading && appTypes.length > 0 && (
+                      {!appTypeState.loading && appTypeState.appTypes.length > 0 && (
                         <CheckboxGroup.Root
                           style={{
                             flexDirection: 'row',
@@ -207,7 +204,7 @@ const AppDetail: React.FC<IProps> = ({
                           defaultValue={app?.type}
                           onValueChange={(v) => form.setFieldValue(label, v)}
                         >
-                          {appTypes.map((appType) => (
+                          {appTypeState.appTypes.map((appType) => (
                             <CheckboxGroup.Item
                               key={appType.id}
                               value={appType.type_name}
@@ -224,7 +221,7 @@ const AppDetail: React.FC<IProps> = ({
                     <Field name={label}>
                       <TextField.Root
                         defaultValue={v}
-                        style={{ width: '56vw', maxWidth: 400 }}
+                        style={{ width: '56vw', maxWidth: '390px' }}
                         placeholder={`请输入${label}`}
                       ></TextField.Root>
                     </Field>

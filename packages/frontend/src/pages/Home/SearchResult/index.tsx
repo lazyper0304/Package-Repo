@@ -9,8 +9,9 @@ import {
   Spinner,
   Tabs,
   Text,
+  Select,
 } from '@radix-ui/themes';
-import { useSize } from 'ahooks';
+import { useSize, useLocalStorageState } from 'ahooks';
 import React, { useRef } from 'react';
 import type { PageEntity } from '@/entities/page';
 import Pagination from '@/components/ui/Pagination';
@@ -54,10 +55,17 @@ const SearchResult: React.FC<IProps> = ({
 
   const size = useSize(ref);
 
+  // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
+  const [displayMode, setDisplayMode] = useLocalStorageState<
+    'grid1' | 'grid2' | 'grid3'
+  >('app-display-mode', {
+    defaultValue: 'grid1',
+  });
+
   return (
     <Flex direction="column" style={{ flex: 1, height: 0 }}>
       <Card size="3">
-        <Flex justify="between">
+        <Flex justify="between" align="center">
           <Heading
             ref={ref}
             style={{
@@ -71,7 +79,24 @@ const SearchResult: React.FC<IProps> = ({
             📱搜索结果
           </Heading>
 
-          <Flex gap="3">
+          <Flex gap="3" align="center">
+            <Flex gap="2" align="center">
+              <Text size="2">显示模式：</Text>
+              <Select.Root
+                value={displayMode}
+                onValueChange={(v) =>
+                  setDisplayMode(v as 'grid1' | 'grid2' | 'grid3')
+                }
+              >
+                <Select.Trigger style={{ width: 120 }}></Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="grid1">一行一个</Select.Item>
+                  <Select.Item value="grid2">一行两个</Select.Item>
+                  <Select.Item value="grid3">一行三个</Select.Item>
+                </Select.Content>
+              </Select.Root>
+            </Flex>
+
             {isAdmin && (
               <>
                 <Button onClick={() => onClick()}>添加</Button>
@@ -83,25 +108,32 @@ const SearchResult: React.FC<IProps> = ({
           </Flex>
         </Flex>
 
-        <Tabs.Root
-          value={currentAppType}
-          defaultValue={appTypes?.[0]?.id}
-          style={{ marginBottom: 16 }}
-          onValueChange={onTypeChange}
+        <ScrollArea
+          radius="none"
+          type="auto"
+          scrollbars="horizontal"
+          style={{ width: '100%', height: 52 }}
         >
-          <Tabs.List>
-            {appTypes.map((appType) => (
-              <Tabs.Trigger key={appType.id} value={appType.type_name}>
-                <Flex gap="2" align="center">
-                  {appType.type_name}{' '}
-                  {appType.app_count && (
-                    <Badge radius="full">{appType.app_count}</Badge>
-                  )}
-                </Flex>
-              </Tabs.Trigger>
-            ))}
-          </Tabs.List>
-        </Tabs.Root>
+          <Tabs.Root
+            value={currentAppType}
+            defaultValue={appTypes?.[0]?.id}
+            style={{ marginBottom: 16 }}
+            onValueChange={onTypeChange}
+          >
+            <Tabs.List>
+              {appTypes.map((appType) => (
+                <Tabs.Trigger key={appType.id} value={appType.type_name}>
+                  <Flex gap="2" align="center">
+                    {appType.type_name}{' '}
+                    {appType.app_count && (
+                      <Badge radius="full">{appType.app_count}</Badge>
+                    )}
+                  </Flex>
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+          </Tabs.Root>
+        </ScrollArea>
 
         {loading && (
           <div
@@ -116,31 +148,58 @@ const SearchResult: React.FC<IProps> = ({
           </div>
         )}
 
-        {apps.length ? (
-          <ScrollArea
-            className={styles.scrollView}
-            type="hover"
-            scrollbars="vertical"
-            style={{ height: `calc(100% - ${size?.height}px - 120px)` }}
-          >
-            <Flex gap="3" direction="column">
-              {apps.map((app) => (
-                <AppItem
-                  key={app.id}
-                  app={app}
-                  keyword={keyword}
-                  isAdmin={isAdmin}
-                  onClick={onClick}
-                  onDelete={onDelete}
-                />
-              ))}
-            </Flex>
-          </ScrollArea>
-        ) : (
-          <div className={styles.empty}>
-            <img src={empty} />
-            <Text color="gray">暂无数据</Text>
-          </div>
+        {!loading && (
+          <>
+            {apps.length ? (
+              <ScrollArea
+                className={styles.scrollView}
+                type="hover"
+                scrollbars="vertical"
+                style={{
+                  marginTop: 16,
+                  height: `calc(100% - ${size?.height}px - 120px)`,
+                }}
+              >
+                <Flex
+                  gap="3"
+                  direction={displayMode === 'grid1' ? 'column' : 'row'}
+                  wrap="wrap"
+                  style={{
+                    width: '100%',
+                    gap: displayMode === 'grid1' ? '12px' : '16px',
+                  }}
+                >
+                  {apps.map((app) => (
+                    <div
+                      key={app.id}
+                      style={{
+                        width:
+                          displayMode === 'grid1'
+                            ? '100%'
+                            : displayMode === 'grid2'
+                              ? 'calc(50% - 8px)'
+                              : 'calc(33.333% - 10.666px)',
+                        minWidth: displayMode === 'grid1' ? '100%' : '280px',
+                      }}
+                    >
+                      <AppItem
+                        app={app}
+                        keyword={keyword}
+                        isAdmin={isAdmin}
+                        onClick={onClick}
+                        onDelete={onDelete}
+                      />
+                    </div>
+                  ))}
+                </Flex>
+              </ScrollArea>
+            ) : (
+              <div className={styles.empty}>
+                <img src={empty} />
+                <Text color="gray">暂无数据</Text>
+              </div>
+            )}
+          </>
         )}
 
         {apps.length > 0 && (

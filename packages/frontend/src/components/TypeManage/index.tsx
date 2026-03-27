@@ -11,10 +11,11 @@ import {
 } from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
 import { useRequest } from 'ahooks';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdAdd, MdCheck, MdClose, MdDelete, MdEdit } from 'react-icons/md';
 import styles from './index.module.less';
 import { notify } from '@/utils/notify';
+import { useAppType } from '@/contexts/AppTypeContext';
 
 type IProps = Readonly<{
   open: boolean;
@@ -26,23 +27,25 @@ type IProps = Readonly<{
 const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   const [form] = Form.useForm();
 
-  const [appTypes, setAppTypes] = useState<AppTypeEntity.ListItem[]>([]);
-
   const [editing, setEditing] = useState(false);
 
   const [editingID, setEditingID] = useState<string | undefined>(undefined);
 
-  const request = useRequest(API.appTypeList, {
-    onSuccess(res) {
-      setAppTypes(res?.data ?? []);
-    },
-  });
+  const { state: appTypeState, refreshAppTypes } = useAppType();
+
+  // 当组件打开时，刷新应用类型数据
+  // 确保类型管理界面显示最新的类型列表
+  useEffect(() => {
+    if (open) {
+      refreshAppTypes();
+    }
+  }, [open]);
 
   const addReq = useRequest(API.addAppType, {
     manual: true,
     onSuccess(res) {
       if (res.success) {
-        request.refresh();
+        refreshAppTypes();
         onOk();
       } else {
         notify(res.message);
@@ -54,7 +57,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
     manual: true,
     onSuccess(res) {
       if (res.success) {
-        request.refresh();
+        refreshAppTypes();
         onOk();
         onRefresh();
       } else {
@@ -67,7 +70,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
     manual: true,
     onSuccess(res) {
       if (res.success) {
-        request.refresh();
+        refreshAppTypes();
         onOk();
       } else {
         notify(res.message);
@@ -96,7 +99,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
         <Dialog.Description>
           <Form form={form} style={{ minHeight: 150 }} onFinish={handleFinish}>
             <Flex wrap="wrap" gap="2" align="center" style={{ marginTop: 16 }}>
-              {request.loading && (
+              {appTypeState.loading && (
                 <div
                   style={{
                     display: 'flex',
@@ -108,7 +111,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
                 </div>
               )}
 
-              {appTypes.map((appType) => (
+              {appTypeState.appTypes.map((appType) => (
                 <Badge key={appType.id} size="3">
                   {editing && editingID === appType.id ? (
                     <Flex gap="2" align="center">

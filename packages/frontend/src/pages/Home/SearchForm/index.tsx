@@ -27,6 +27,11 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
     }
   }
 
+  function handleClear() {
+    setKeyword('');
+    onChange('');
+  }
+
   return (
     <>
       <Card size="3">
@@ -47,8 +52,8 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
             </TextField.Slot>
 
             {keyword.length > 0 && (
-              <TextField.Slot>
-                <MdClose onClick={() => setKeyword('')} />
+              <TextField.Slot style={{ cursor: 'pointer' }}>
+                <MdClose onClick={handleClear} />
               </TextField.Slot>
             )}
           </TextField.Root>
