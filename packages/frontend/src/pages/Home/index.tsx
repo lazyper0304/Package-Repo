@@ -7,7 +7,8 @@ import { useRequest, useSetState } from 'ahooks';
 import AppDetail from '@/components/AppDetail';
 import type { PageEntity } from '@/entities/page';
 import UploadExcel from '@/components/UploadExcel';
-import HarmonyIcon from '@/components/HarmonyIcon';
+import HarmonyIconSingle from '@/components/HarmonyIconSingle';
+import HarmonyIconFolder from '@/components/HarmonyIconFolder';
 import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
 import { notify } from '@/utils/notify';
@@ -30,7 +31,8 @@ type IState = {
   open: boolean;
   uploadOpen: boolean;
   typeOpen: boolean;
-  harmonyIconOpen: boolean;
+  harmonyIconSingleOpen: boolean;
+  harmonyIconFolderOpen: boolean;
   edit: boolean;
 };
 
@@ -51,7 +53,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     open: false,
     uploadOpen: false,
     typeOpen: false,
-    harmonyIconOpen: false,
+    harmonyIconSingleOpen: false,
+    harmonyIconFolderOpen: false,
     edit: false,
   });
 
@@ -148,8 +151,12 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     refreshAppTypes();
   }
 
-  function handleCloseHarmonyIcon() {
-    setState({ harmonyIconOpen: false });
+  function handleCloseHarmonyIconSingle() {
+    setState({ harmonyIconSingleOpen: false });
+  }
+
+  function handleCloseHarmonyIconFolder() {
+    setState({ harmonyIconFolderOpen: false });
   }
 
   function handleUploadSuccess() {
@@ -197,9 +204,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         <h1>Package Repo {isAdmin ? '(Admin)' : ''}</h1>
 
         <div className={styles.home__functions}>
-          <Button onClick={() => setState({ harmonyIconOpen: true })}>
-            转鸿蒙双层图标
+          <Button onClick={() => setState({ harmonyIconSingleOpen: true })}>
+            单个图标转鸿蒙图标
           </Button>
+
+          <Button onClick={() => setState({ harmonyIconFolderOpen: true })}>
+            鸿蒙图标文件夹转 bgfg 图标
+          </Button>
+
           {isAdmin && (
             <>
               <Button onClick={handleOpenUpload}>批量上传</Button>
@@ -312,10 +324,17 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         />
       )}
 
-      {state.harmonyIconOpen && (
-        <HarmonyIcon
-          open={state.harmonyIconOpen}
-          onClose={handleCloseHarmonyIcon}
+      {state.harmonyIconSingleOpen && (
+        <HarmonyIconSingle
+          open={state.harmonyIconSingleOpen}
+          onClose={handleCloseHarmonyIconSingle}
+        />
+      )}
+
+      {state.harmonyIconFolderOpen && (
+        <HarmonyIconFolder
+          open={state.harmonyIconFolderOpen}
+          onClose={handleCloseHarmonyIconFolder}
         />
       )}
     </>

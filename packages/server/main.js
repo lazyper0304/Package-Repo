@@ -56,12 +56,22 @@ app.put('/api/app-types', AppTypeController.updateAppType);
 
 app.delete('/api/app-types', AppTypeController.deleteAppType);
 
-// 鸿蒙双层图标处理API - 生成两个版本的图标并返回下载链接
+// 单个图标转鸿蒙图标API
 app.post(
-  '/api/excel/harmony-icon',
-  uploadHarmony.single('file'),
-  ExcelController.harmonyIcon
+  '/api/excel/harmony-icon-single',
+  uploadHarmony.array('files'),
+  ExcelController.harmonyIconSingle
 );
+
+// 鸿蒙图标文件夹转 bgfg 图标API
+app.post(
+  '/api/excel/harmony-icon-folder',
+  uploadHarmony.array('files'),
+  ExcelController.harmonyIconFolder
+);
+
+// 一键下载所有图标API
+app.get('/api/excel/download-all-icons', ExcelController.downloadAllIcons);
 
 // 下载图标文件的API
 app.get('/api/util/download-icon', UtilController.downloadIcon);

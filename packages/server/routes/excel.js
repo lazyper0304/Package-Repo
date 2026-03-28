@@ -3,6 +3,12 @@ import multer from 'multer';
 import XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import AdmZip from 'adm-zip';
+
+// ES 模块兼容的 __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 配置Excel文件上传
 export const uploadExcel = multer({
@@ -26,12 +32,9 @@ export const uploadExcel = multer({
 export const uploadHarmony = multer({
   dest: 'uploads/',
   limits: { fileSize: 5 * 1024 * 1024 }, // 限制文件大小为5MB
+  // 移除文件类型过滤，以支持文件夹上传
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'image/png') {
-      cb(null, true);
-    } else {
-      cb(new Error('只允许上传PNG格式的文件'), false);
-    }
+    cb(null, true);
   },
 });
 
@@ -255,51 +258,261 @@ export default class ExcelController {
     }
   }
 
-  static async harmonyIcon(req, res) {
+  static async harmonyIconSingle(req, res) {
     try {
-      if (!req.file) {
+      // 检查是否有文件上传
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
         return res.status(400).json({ error: '没有上传文件' });
       }
-
-      const filePath = req.file.path;
-      const fileName = req.file.originalname;
-
-      // 检查文件扩展名
-      if (!fileName.toLowerCase().endsWith('.png')) {
-        fs.unlinkSync(filePath);
-        return res.status(400).json({ error: '只支持PNG格式的文件' });
-      }
+      
+      const files = req.files;
 
       // 创建output文件夹
-      const outputDir = path.join(process.cwd(), 'output');
+      const outputDir = path.resolve(__dirname, '..', 'output');
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
-      // 获取文件名（不含扩展名）
-      const baseName = path.parse(fileName).name;
+      // 处理所有文件
+      const processedFiles = [];
+      
+      for (const file of files) {
+        // 检查 file 对象是否有效
+        if (!file || !file.path || !file.originalname) {
+          continue; // 跳过无效文件
+        }
+        
+        const filePath = file.path;
+        const fileName = file.originalname;
 
-      // 生成_bg和_fg版本
-      const bgDestFile = path.join(outputDir, `${baseName}_bg.png`);
-      const fgDestFile = path.join(outputDir, `${baseName}_fg.png`);
+        // 检查文件扩展名
+        if (!fileName.toLowerCase().endsWith('.png')) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (e) {
+            console.error('清理临时文件失败:', e);
+          }
+          continue; // 跳过非PNG文件
+        }
 
-      // 复制文件
-      fs.copyFileSync(filePath, bgDestFile);
-      fs.copyFileSync(filePath, fgDestFile);
+        // 获取文件名（不含扩展名）
+        const baseName = path.parse(fileName).name;
 
-      // 清理临时文件
-      fs.unlinkSync(filePath);
+        // 生成_bg和_fg版本
+        const bgFileName = `${baseName}_bg.png`;
+        const fgFileName = `${baseName}_fg.png`;
+        const bgDestFile = path.join(outputDir, bgFileName);
+        const fgDestFile = path.join(outputDir, fgFileName);
 
-      // 返回两个文件的下载链接
+        // 复制文件
+        fs.copyFileSync(filePath, bgDestFile);
+        fs.copyFileSync(filePath, fgDestFile);
+
+        // 清理临时文件
+        fs.unlinkSync(filePath);
+
+        // 添加到处理结果
+        processedFiles.push({
+          name: fileName,
+          bgUrl: `/api/util/download-icon?file=${encodeURIComponent(bgFileName)}`,
+          fgUrl: `/api/util/download-icon?file=${encodeURIComponent(fgFileName)}`,
+        });
+      }
+
+      if (processedFiles.length === 0) {
+        return res.status(400).json({ error: '没有有效的PNG文件' });
+      }
+
+      // 返回处理结果
       res.json({
         success: true,
-        bgUrl: `/api/util/download-icon?file=${encodeURIComponent(`${baseName}_bg.png`)}`,
-        fgUrl: `/api/util/download-icon?file=${encodeURIComponent(`${baseName}_fg.png`)}`,
-        message: '鸿蒙双层图标生成完成，点击链接下载文件',
+        files: processedFiles,
+        message: `成功处理 ${processedFiles.length} 个图标，点击链接下载文件`,
       });
     } catch (error) {
-      console.error('处理鸿蒙双层图标失败:', error);
+      console.error('处理单个图标转鸿蒙图标失败:', error);
+      
+      // 清理临时文件
+      if (req.files && Array.isArray(req.files)) {
+        req.files.forEach((file) => {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (e) {
+            console.error('清理临时文件失败:', e);
+          }
+        });
+      } else if (req.file) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (e) {
+          console.error('清理临时文件失败:', e);
+        }
+      }
+      
       res.status(500).json({ error: '处理图标失败: ' + error.message });
+    }
+  }
+
+  static async harmonyIconFolder(req, res) {
+    try {
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        return res.status(400).json({ error: '没有上传文件' });
+      }
+
+      console.log('上传的文件数量:', req.files.length);
+      console.log('请求体:', req.body);
+
+      // 获取相对路径数组
+      const relativePaths = Array.isArray(req.body.relativePaths) ? req.body.relativePaths : [req.body.relativePaths].filter(Boolean);
+      console.log('相对路径数组:', relativePaths);
+
+      // 创建output文件夹
+      const outputDir = path.resolve(__dirname, '..', 'output');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      // 文件夹上传处理
+      const processedFiles = [];
+      const appFilesMap = new Map();
+
+      // 处理每个上传的文件
+      req.files.forEach((file, index) => {
+        console.log('文件路径:', file.path);
+        console.log('原始文件名:', file.originalname);
+        console.log('索引:', index);
+
+        // 从前端传递的相对路径中获取路径信息
+        let pathInfo = relativePaths[index] || file.originalname;
+        console.log('使用的路径信息:', pathInfo);
+
+        // 解析路径获取应用名称和文件类型
+        const parts = pathInfo.split('/');
+        console.log('路径分割结果:', parts);
+        
+        // 寻找 entry 文件夹，支持嵌套结构
+        const entryIndex = parts.indexOf('entry');
+        if (entryIndex > 0 && entryIndex < parts.length - 1) {
+          // 应用名称是 entry 文件夹的父文件夹
+          const appName = parts[entryIndex - 1];
+          const fileName = parts[entryIndex + 1];
+
+          console.log('解析结果:', { appName, entryIndex, fileName });
+
+          let type = '';
+          if (fileName === 'background.png') {
+            type = 'background';
+          } else if (fileName === 'foreground.png') {
+            type = 'foreground';
+          }
+
+          if (type) {
+            // 生成目标文件名
+            const targetFileName = `${appName}_${type === 'background' ? 'bg' : 'fg'}.png`;
+            const targetPath = path.join(outputDir, targetFileName);
+
+            console.log('目标文件:', targetFileName);
+
+            // 复制文件
+            fs.copyFileSync(file.path, targetPath);
+
+            // 添加到处理结果
+            if (!appFilesMap.has(appName)) {
+              appFilesMap.set(appName, {
+                name: appName,
+                bgUrl: '',
+                fgUrl: ''
+              });
+            }
+
+            const appFile = appFilesMap.get(appName);
+            if (type === 'background') {
+              appFile.bgUrl = `/api/util/download-icon?file=${encodeURIComponent(targetFileName)}`;
+            } else if (type === 'foreground') {
+              appFile.fgUrl = `/api/util/download-icon?file=${encodeURIComponent(targetFileName)}`;
+            }
+          }
+        }
+
+        // 清理临时文件
+        fs.unlinkSync(file.path);
+      });
+
+      // 转换 Map 为数组
+      processedFiles.push(...appFilesMap.values());
+      
+      console.log('处理结果:', processedFiles);
+      
+      // 返回处理结果
+      res.json({
+        success: true,
+        files: processedFiles,
+        message: `成功处理 ${processedFiles.length} 个应用图标`,
+      });
+    } catch (error) {
+      console.error('处理鸿蒙图标文件夹转 bgfg 图标失败:', error);
+      
+      // 清理临时文件
+      if (req.files && Array.isArray(req.files)) {
+        req.files.forEach((file) => {
+          try {
+            fs.unlinkSync(file.path);
+          } catch (e) {
+            console.error('清理临时文件失败:', e);
+          }
+        });
+      }
+      
+      res.status(500).json({ error: '处理图标失败: ' + error.message });
+    }
+  }
+
+  static async downloadAllIcons(req, res) {
+    try {
+      console.log('当前工作目录:', process.cwd());
+      // 使用绝对路径，确保在正确的位置
+      const outputDir = path.resolve(__dirname, '..', 'output');
+      console.log('Output 目录:', outputDir);
+      
+      if (!fs.existsSync(outputDir)) {
+        console.log('Output 目录不存在，创建它');
+        fs.mkdirSync(outputDir, { recursive: true });
+        return res.status(404).json({ error: '没有可下载的图标' });
+      }
+
+      // 读取 output 文件夹中的所有文件
+      const files = fs.readdirSync(outputDir);
+      console.log('Output 目录中的文件:', files);
+      
+      if (files.length === 0) {
+        console.log('Output 目录为空');
+        return res.status(404).json({ error: '没有可下载的图标' });
+      }
+
+      // 创建 zip 文件
+      const zip = new AdmZip();
+
+      // 添加所有文件到 zip
+      files.forEach((file) => {
+        const filePath = path.join(outputDir, file);
+        if (fs.statSync(filePath).isFile()) {
+          zip.addLocalFile(filePath, '', file);
+        }
+      });
+
+      // 生成 zip 文件名
+      const zipFileName = `icons_${Date.now()}.zip`;
+
+      // 发送 zip 文件
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename=${zipFileName}`);
+      
+      // 直接将 zip 内容发送到响应
+      const zipBuffer = zip.toBuffer();
+      res.send(zipBuffer);
+    } catch (error) {
+      console.error('下载所有图标失败:', error);
+      res.status(500).json({ error: '下载图标失败: ' + error.message });
     }
   }
 }

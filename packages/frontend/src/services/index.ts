@@ -242,8 +242,8 @@ export default class API {
     }
   }
 
-  static async harmonyIcon(params: FormData) {
-    const response = await fetch('/api/excel/harmony-icon', {
+  static async harmonyIconSingle(params: FormData) {
+    const response = await fetch('/api/excel/harmony-icon-single', {
       method: 'POST',
       body: params,
     });
@@ -252,7 +252,32 @@ export default class API {
       const result = await response.json();
 
       if (result.success) {
-        return { success: true, bgUrl: result.bgUrl, fgUrl: result.fgUrl };
+        return { success: true, bgUrl: result.bgUrl, fgUrl: result.fgUrl, files: result.files };
+      } else {
+        return { success: false };
+      }
+    } else {
+      try {
+        const result = await response.json();
+
+        return { success: false, message: result.error };
+      } catch (e) {
+        return { success: false, message: e };
+      }
+    }
+  }
+
+  static async harmonyIconFolder(params: FormData) {
+    const response = await fetch('/api/excel/harmony-icon-folder', {
+      method: 'POST',
+      body: params,
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+
+      if (result.success) {
+        return { success: true, files: result.files };
       } else {
         return { success: false };
       }
