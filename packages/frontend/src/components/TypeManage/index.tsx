@@ -1,5 +1,14 @@
 import API from '@/services';
-import { Badge, Dialog, Flex, Spinner, TextField } from '@radix-ui/themes';
+import {
+  Badge,
+  Button,
+  Dialog,
+  Flex,
+  Popover,
+  Spinner,
+  TextField,
+  Text,
+} from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
 import { useRequest } from 'ahooks';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -17,8 +26,6 @@ type IProps = Readonly<{
 
 const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   const [form] = Form.useForm();
-
-  const [editing, setEditing] = useState(false);
 
   const [editingID, setEditingID] = useState<string | undefined>(undefined);
 
@@ -78,10 +85,10 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   });
 
   async function handleFinish(fields: Record<string, any>) {
+    console.log('sss');
+
     if (!fields.typeName) return;
 
-    setEditing(false);
-    setEditingID(undefined);
     (editingID && editingID !== 'add' ? updateReq : addReq).run({
       id: editingID,
       typeName: fields.typeName,
@@ -113,98 +120,120 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
 
               {!appTypeState.loading &&
                 sortedAppTypes.map((appType) => (
-                  <Badge key={appType.id} size="3">
-                    {editing && editingID === appType.id ? (
-                      <Flex gap="2" align="center">
+                  <Popover.Root key={appType.id}>
+                    <Popover.Trigger>
+                      <Badge
+                        size="3"
+                        onClick={() => {
+                          form.setFieldsValue({
+                            typeName: appType.type_name,
+                            sort: appType.sort || 0,
+                          });
+                        }}
+                      >
+                        {appType.type_name}
+
+                        <MdEdit />
+                      </Badge>
+                    </Popover.Trigger>
+
+                    <Popover.Content width="360px">
+                      <Flex direction="column" gap="3">
+                        <Text color="gray" size="2">
+                          分类名称
+                        </Text>
                         <Field name="typeName">
                           <TextField.Root
-                            size="1"
+                            size="2"
                             placeholder="分类名称"
                           ></TextField.Root>
                         </Field>
+
+                        <Text color="gray" size="2">
+                          排序
+                        </Text>
                         <Field name="sort">
                           <TextField.Root
-                            size="1"
+                            size="2"
                             type="number"
                             placeholder="排序"
                             min="0"
                           ></TextField.Root>
                         </Field>
 
-                        <MdCheck onClick={form.submit} />
-
-                        <MdClose
-                          onClick={() => {
-                            setEditing(false);
-                            setEditingID(undefined);
-                          }}
-                        />
-                      </Flex>
-                    ) : (
-                      <Flex gap="2" align="center" className={styles.appType}>
-                        {appType.type_name}
-
-                        <div>
-                          <MdEdit
-                            onClick={() => {
-                              setEditing(true);
-                              setEditingID(appType.id);
-                              form.setFieldValue('typeName', appType.type_name);
-                              form.setFieldValue('sort', appType.sort || 0);
-                            }}
-                          />
-
-                          <MdDelete
+                        <Flex gap="2">
+                          <Button
                             color="red"
                             onClick={() => deleteReq.run({ id: appType.id })}
-                          />
-                        </div>
+                          >
+                            删除
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingID(appType.id);
+                              form.submit();
+                            }}
+                          >
+                            保存
+                          </Button>
+                        </Flex>
                       </Flex>
-                    )}
-                  </Badge>
+                    </Popover.Content>
+                  </Popover.Root>
                 ))}
 
-              <Badge size="3">
-                {editing && editingID === 'add' ? (
-                  <Flex gap="2" align="center">
+              <Popover.Root>
+                <Popover.Trigger>
+                  <Badge
+                    size="3"
+                    onClick={() => {
+                      form.setFieldsValue({
+                        typeName: '',
+                        sort: 0,
+                      });
+                    }}
+                  >
+                    <Flex
+                      align="center"
+                      gap="2"
+                      onClick={() => {
+                        setEditingID('add');
+                      }}
+                    >
+                      添加
+                      <MdAdd />
+                    </Flex>
+                  </Badge>
+                </Popover.Trigger>
+
+                <Popover.Content width="360px">
+                  <Flex direction="column" gap="3">
+                    <Text color="gray" size="2">
+                      分类名称
+                    </Text>
                     <Field name="typeName">
                       <TextField.Root
-                        size="1"
+                        size="2"
                         placeholder="分类名称"
                       ></TextField.Root>
                     </Field>
+
+                    <Text color="gray" size="2">
+                      排序
+                    </Text>
                     <Field name="sort">
                       <TextField.Root
-                        size="1"
+                        size="2"
                         type="number"
                         placeholder="排序"
                         min="0"
                       ></TextField.Root>
                     </Field>
 
-                    <MdCheck onClick={form.submit} />
-
-                    <MdClose
-                      onClick={() => {
-                        setEditing(false);
-                        setEditingID(undefined);
-                      }}
-                    />
+                    <Button onClick={form.submit}>保存</Button>
                   </Flex>
-                ) : (
-                  <Flex
-                    align="center"
-                    gap="2"
-                    onClick={() => {
-                      setEditing(true);
-                      setEditingID('add');
-                    }}
-                  >
-                    添加
-                    <MdAdd />
-                  </Flex>
-                )}
-              </Badge>
+                </Popover.Content>
+              </Popover.Root>
             </Flex>
           </Form>
         </Dialog.Description>
