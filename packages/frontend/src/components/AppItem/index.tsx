@@ -46,21 +46,11 @@ const AppItem: React.FC<IProps> = ({
       <Flex gap="3" align="center">
         {app.iconUrl ? <img src={app.iconUrl} /> : null}
 
-        <Flex direction="column">
-          <Flex gap="2" align="center">
-            {app.type?.length ? (
-              <Flex gap="2">
-                {app.type.map((type) => (
-                  <Badge key={type}>{type}</Badge>
-                ))}
-              </Flex>
-            ) : null}
-            <Heading size="3" onClick={(e) => handleCopy(e, app.appName)}>
-              <Highlighter searchWords={keyword || ''}>
-                {app.appName}
-              </Highlighter>
-            </Heading>
-          </Flex>
+        <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
+          <Heading size="3" onClick={(e) => handleCopy(e, app.appName)}>
+            <Highlighter searchWords={keyword || ''}>{app.appName}</Highlighter>
+          </Heading>
+
           <Text
             color="gray"
             onClick={(e) => handleCopy(e, app.androidPackageName)}
@@ -77,6 +67,22 @@ const AppItem: React.FC<IProps> = ({
               {app.harmonyPackageName}
             </Highlighter>
           </Text>
+
+          {app.type?.length ? (
+            <Flex
+              gap="2"
+              style={{
+                marginTop: 8,
+                borderTop: '1px solid #d0d0d080',
+                paddingTop: 8,
+                width: '100%',
+              }}
+            >
+              {app.type.map((type) => (
+                <Badge key={type}>{type}</Badge>
+              ))}
+            </Flex>
+          ) : null}
         </Flex>
       </Flex>
     ),

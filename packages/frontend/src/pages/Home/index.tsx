@@ -1,18 +1,18 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import styles from './index.module.less';
 import { Button, Flex } from '@radix-ui/themes';
 import type { AppEntity } from '@/entities/app';
 import API from '@/services';
-import { useMount, useRequest, useSetState } from 'ahooks';
+import { useRequest, useSetState } from 'ahooks';
 import AppDetail from '@/components/AppDetail';
 import type { PageEntity } from '@/entities/page';
 import UploadExcel from '@/components/UploadExcel';
 import HarmonyIcon from '@/components/HarmonyIcon';
 import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
-import type { AppTypeEntity } from '@/entities/appType';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
+import useMobile from '@/hooks/useMobile';
 
 const SearchResult = React.lazy(() => import('./SearchResult'));
 const SearchForm = React.lazy(() => import('./SearchForm'));
@@ -35,6 +35,8 @@ type IState = {
 };
 
 const Home: React.FC<IProps> = ({ isAdmin = false }) => {
+  const isMobile = useMobile();
+
   const [state, setState] = useSetState<IState>({
     keyword: '',
     apps: [],
@@ -58,13 +60,19 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   // 获取带"全部"选项的应用类型列表
   const appTypesWithAll = useMemo(() => {
     return appTypeState.appTypes.length > 0
-      ? [{ type_name: '全部' }, ...appTypeState.appTypes]
-      : [{ type_name: '全部' }];
+      ? [{ type_name: '全部', id: '全部' }, ...appTypeState.appTypes]
+      : [{ type_name: '全部', id: '全部' }];
   }, [appTypeState.appTypes]);
 
   const searchAppsReq = useRequest(API.appSearch, {
     debounceWait: 600,
     onSuccess(res) {
+      const index = appTypesWithAll.findIndex((item) => item.id === '全部');
+
+      if (index !== -1 && state.keyword === '') {
+        appTypesWithAll[index].app_count = res.total;
+      }
+
       setState({
         apps: res.data,
         pagination: {
@@ -134,7 +142,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   }
 
   function handleTypeOk() {
-    appTypeListReq.refresh();
+    refreshAppTypes();
   }
 
   function handleCloseHarmonyIcon() {
@@ -180,54 +188,98 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     []
   );
 
+  const header = useMemo(
+    () => (
+      <header className={styles.home__header}>
+        <h1>Package Repo {isAdmin ? '(Admin)' : ''}</h1>
+
+        <div className={styles.home__functions}>
+          <Button onClick={() => setState({ harmonyIconOpen: true })}>
+            转鸿蒙双层图标
+          </Button>
+          {isAdmin && (
+            <>
+              <Button onClick={handleOpenUpload}>批量上传</Button>
+              <Button onClick={handleOpenType}>类型管理</Button>
+            </>
+          )}
+        </div>
+      </header>
+    ),
+    [handleOpenType, handleOpenUpload, isAdmin, setState]
+  );
+
   return (
     <>
-      <div className={styles.home}>
-        {background}
+      {!isMobile && (
+        <div className={styles.home}>
+          {background}
 
-        <div className={styles.home__content}>
-          <header className={styles.home__header}>
-            <h1>Package Repo {isAdmin ? '(管理员模式)' : ''}</h1>
+          <div className={styles.home__content}>
+            {header}
 
-            <div className={styles.home__functions}>
-              <Button onClick={() => setState({ harmonyIconOpen: true })}>
-                转鸿蒙双层图标
-              </Button>
-              {isAdmin && (
-                <>
-                  <Button onClick={handleOpenUpload}>批量上传</Button>
-                  <Button onClick={handleOpenType}>类型管理</Button>
-                </>
-              )}
-            </div>
-          </header>
+            <section>
+              <Flex direction="column" gap="3" style={{ height: '100%' }}>
+                <SearchForm
+                  loading={searchAppsReq.loading}
+                  onChange={handleSearch}
+                />
 
-          <section>
-            <Flex direction="column" gap="3" style={{ height: '100%' }}>
-              <SearchForm
-                loading={searchAppsReq.loading}
-                onChange={handleSearch}
-              />
-
-              <SearchResult
-                currentAppType={state.currentAppType}
-                appTypes={appTypesWithAll}
-                loading={searchAppsReq.loading}
-                keyword={state.keyword}
-                pagination={state.pagination}
-                apps={state.apps}
-                onClick={handleOpenAppDetail}
-                onDelete={handleDeleteApp}
-                onChange={handlePageChange}
-                onUpload={handleOpenUpload}
-                onType={handleOpenType}
-                onTypeChange={handleTypeChange}
-                isAdmin={isAdmin}
-              />
-            </Flex>
-          </section>
+                <SearchResult
+                  currentAppType={state.currentAppType}
+                  appTypes={appTypesWithAll}
+                  loading={searchAppsReq.loading}
+                  keyword={state.keyword}
+                  pagination={state.pagination}
+                  apps={state.apps}
+                  onClick={handleOpenAppDetail}
+                  onDelete={handleDeleteApp}
+                  onChange={handlePageChange}
+                  onUpload={handleOpenUpload}
+                  onType={handleOpenType}
+                  onTypeChange={handleTypeChange}
+                  isAdmin={isAdmin}
+                />
+              </Flex>
+            </section>
+          </div>
         </div>
-      </div>
+      )}
+
+      {isMobile && (
+        <div className={styles['home--mobile']}>
+          {background}
+
+          <div className={styles['home__content--mobile']}>
+            {header}
+
+            <section>
+              <Flex direction="column" gap="3" style={{ height: '100%' }}>
+                <SearchForm
+                  loading={searchAppsReq.loading}
+                  onChange={handleSearch}
+                />
+
+                <SearchResult
+                  currentAppType={state.currentAppType}
+                  appTypes={appTypesWithAll}
+                  loading={searchAppsReq.loading}
+                  keyword={state.keyword}
+                  pagination={state.pagination}
+                  apps={state.apps}
+                  onClick={handleOpenAppDetail}
+                  onDelete={handleDeleteApp}
+                  onChange={handlePageChange}
+                  onUpload={handleOpenUpload}
+                  onType={handleOpenType}
+                  onTypeChange={handleTypeChange}
+                  isAdmin={isAdmin}
+                />
+              </Flex>
+            </section>
+          </div>
+        </div>
+      )}
 
       {state.open && (
         <AppDetail

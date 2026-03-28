@@ -12,13 +12,14 @@ import {
   Select,
 } from '@radix-ui/themes';
 import { useSize, useLocalStorageState } from 'ahooks';
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { PageEntity } from '@/entities/page';
 import Pagination from '@/components/ui/Pagination';
 import styles from './index.module.less';
 import empty from '@/assets/empty.svg';
 import type { AppTypeEntity } from '@/entities/appType';
 import AppItem from '@/components/AppItem';
+import useMobile from '@/hooks/useMobile';
 
 type IProps = Readonly<{
   currentAppType?: string;
@@ -53,7 +54,11 @@ const SearchResult: React.FC<IProps> = ({
 }) => {
   const ref = useRef<HTMLHeadingElement>(null);
 
+  const appTypeRef = useRef<HTMLDivElement>(null);
+
   const size = useSize(ref);
+
+  const isMobile = useMobile();
 
   // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
   const [displayMode, setDisplayMode] = useLocalStorageState<
@@ -62,14 +67,86 @@ const SearchResult: React.FC<IProps> = ({
     defaultValue: 'grid1',
   });
 
+  function handleScroll(e: React.WheelEvent<HTMLDivElement>) {
+    if (appTypeRef.current) {
+      appTypeRef.current.scrollLeft += e.deltaY;
+    }
+  }
+
+  const appList = useMemo(() => {
+    const list = (
+      <Flex
+        gap="3"
+        direction={displayMode === 'grid1' ? 'column' : 'row'}
+        wrap="wrap"
+        style={{
+          width: '100%',
+          gap: displayMode === 'grid1' ? '12px' : '16px',
+        }}
+      >
+        {apps.map((app) => (
+          <div
+            key={app.id}
+            style={{
+              width:
+                displayMode === 'grid1' || isMobile
+                  ? '100%'
+                  : displayMode === 'grid2'
+                    ? 'calc(50% - 8px)'
+                    : 'calc(33.333% - 10.666px)',
+              minWidth: displayMode === 'grid1' ? '100%' : '280px',
+            }}
+          >
+            <AppItem
+              app={app}
+              keyword={keyword}
+              isAdmin={isAdmin}
+              onClick={onClick}
+              onDelete={onDelete}
+            />
+          </div>
+        ))}
+      </Flex>
+    );
+
+    if (isMobile) {
+      return <div className={styles['scrollView--mobile']}>{list}</div>;
+    }
+
+    return (
+      <ScrollArea
+        className={styles.scrollView}
+        type="hover"
+        scrollbars="vertical"
+        style={{
+          marginTop: 16,
+          height: `calc(100% - ${size?.height}px - 120px)`,
+        }}
+      >
+        {list}
+      </ScrollArea>
+    );
+  }, [
+    displayMode,
+    apps,
+    isMobile,
+    size?.height,
+    keyword,
+    isAdmin,
+    onClick,
+    onDelete,
+  ]);
+
   return (
-    <Flex direction="column" style={{ flex: 1, height: 0 }}>
-      <Card size="3">
-        <Flex justify="between" align="center">
+    <Flex
+      direction="column"
+      style={{ flex: 1, height: isMobile ? 'max-content' : 0 }}
+    >
+      <Card size="3" style={{ display: 'flex', flexDirection: 'column' }}>
+        <Flex style={{ marginBottom: 24 }} gap="4">
           <Heading
             ref={ref}
             style={{
-              marginBottom: 24,
               flex: 1,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -80,22 +157,23 @@ const SearchResult: React.FC<IProps> = ({
           </Heading>
 
           <Flex gap="3" align="center">
-            <Flex gap="2" align="center">
-              <Text size="2">显示模式：</Text>
-              <Select.Root
-                value={displayMode}
-                onValueChange={(v) =>
-                  setDisplayMode(v as 'grid1' | 'grid2' | 'grid3')
-                }
-              >
-                <Select.Trigger style={{ width: 120 }}></Select.Trigger>
-                <Select.Content>
-                  <Select.Item value="grid1">一行一个</Select.Item>
-                  <Select.Item value="grid2">一行两个</Select.Item>
-                  <Select.Item value="grid3">一行三个</Select.Item>
-                </Select.Content>
-              </Select.Root>
-            </Flex>
+            {!isMobile && (
+              <Flex gap="2" align="center">
+                <Select.Root
+                  value={displayMode}
+                  onValueChange={(v) =>
+                    setDisplayMode(v as 'grid1' | 'grid2' | 'grid3')
+                  }
+                >
+                  <Select.Trigger style={{ width: 120 }}></Select.Trigger>
+                  <Select.Content>
+                    <Select.Item value="grid1">一行一个</Select.Item>
+                    <Select.Item value="grid2">一行两个</Select.Item>
+                    <Select.Item value="grid3">一行三个</Select.Item>
+                  </Select.Content>
+                </Select.Root>
+              </Flex>
+            )}
 
             {isAdmin && (
               <>
@@ -109,10 +187,12 @@ const SearchResult: React.FC<IProps> = ({
         </Flex>
 
         <ScrollArea
+          ref={appTypeRef}
           radius="none"
-          type="auto"
+          type="hover"
           scrollbars="horizontal"
           style={{ width: '100%', height: 52 }}
+          onWheel={handleScroll}
         >
           <Tabs.Root
             value={currentAppType}
@@ -125,7 +205,7 @@ const SearchResult: React.FC<IProps> = ({
                 <Tabs.Trigger key={appType.id} value={appType.type_name}>
                   <Flex gap="2" align="center">
                     {appType.type_name}{' '}
-                    {appType.app_count && (
+                    {keyword === '' && (appType.app_count ?? 0) > 0 && (
                       <Badge radius="full">{appType.app_count}</Badge>
                     )}
                   </Flex>
@@ -151,48 +231,7 @@ const SearchResult: React.FC<IProps> = ({
         {!loading && (
           <>
             {apps.length ? (
-              <ScrollArea
-                className={styles.scrollView}
-                type="hover"
-                scrollbars="vertical"
-                style={{
-                  marginTop: 16,
-                  height: `calc(100% - ${size?.height}px - 120px)`,
-                }}
-              >
-                <Flex
-                  gap="3"
-                  direction={displayMode === 'grid1' ? 'column' : 'row'}
-                  wrap="wrap"
-                  style={{
-                    width: '100%',
-                    gap: displayMode === 'grid1' ? '12px' : '16px',
-                  }}
-                >
-                  {apps.map((app) => (
-                    <div
-                      key={app.id}
-                      style={{
-                        width:
-                          displayMode === 'grid1'
-                            ? '100%'
-                            : displayMode === 'grid2'
-                              ? 'calc(50% - 8px)'
-                              : 'calc(33.333% - 10.666px)',
-                        minWidth: displayMode === 'grid1' ? '100%' : '280px',
-                      }}
-                    >
-                      <AppItem
-                        app={app}
-                        keyword={keyword}
-                        isAdmin={isAdmin}
-                        onClick={onClick}
-                        onDelete={onDelete}
-                      />
-                    </div>
-                  ))}
-                </Flex>
-              </ScrollArea>
+              appList
             ) : (
               <div className={styles.empty}>
                 <img src={empty} />
@@ -204,6 +243,7 @@ const SearchResult: React.FC<IProps> = ({
 
         {apps.length > 0 && (
           <Pagination
+            style={{ alignSelf: 'flex-end' }}
             current={pagination.current}
             pageSize={pagination.pageSize}
             total={pagination.total}
