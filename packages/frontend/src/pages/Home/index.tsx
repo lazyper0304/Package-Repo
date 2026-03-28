@@ -57,11 +57,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
   const { state: appTypeState, refreshAppTypes } = useAppType();
 
-  // 获取带"全部"选项的应用类型列表
+  // 获取带"全部"选项的应用类型列表，并按 sort 排序
   const appTypesWithAll = useMemo(() => {
-    return appTypeState.appTypes.length > 0
-      ? [{ type_name: '全部', id: '全部' }, ...appTypeState.appTypes]
-      : [{ type_name: '全部', id: '全部' }];
+    const sortedTypes = [...appTypeState.appTypes].sort(
+      (a, b) => (a.sort || 0) - (b.sort || 0)
+    );
+    return sortedTypes.length > 0
+      ? [{ type_name: '全部', id: '全部', sort: -1 }, ...sortedTypes]
+      : [{ type_name: '全部', id: '全部', sort: -1 }];
   }, [appTypeState.appTypes]);
 
   const searchAppsReq = useRequest(API.appSearch, {

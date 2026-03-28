@@ -3,6 +3,7 @@ export namespace AppTypeEntity {
     id: string;
     created_at?: string;
     type_name: string;
+    sort?: number;
     app_count?: number;
   }
 }

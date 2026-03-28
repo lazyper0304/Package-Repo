@@ -12,6 +12,7 @@ import Highlighter from '../Highlighter';
 import copy from 'copy-to-clipboard';
 import { notify } from '@/utils/notify';
 import styles from './index.module.less';
+import { useAppType } from '@/contexts/AppTypeContext';
 
 type IProps = Readonly<{
   app: AppEntity.Item;
@@ -28,6 +29,28 @@ const AppItem: React.FC<IProps> = ({
   onClick,
   onDelete,
 }) => {
+  const { state: appTypeState } = useAppType();
+
+  // 对类型进行排序
+  const sortedTypes = useMemo(() => {
+    if (!app.type || app.type.length === 0) return [];
+    if (!appTypeState.appTypes || appTypeState.appTypes.length === 0)
+      return app.type;
+
+    // 创建一个映射，用于快速查找类型的 sort 值
+    const typeSortMap = new Map<string, number>();
+    appTypeState.appTypes.forEach((appType) => {
+      typeSortMap.set(appType.type_name, appType.sort || 0);
+    });
+
+    // 根据 sort 值排序
+    return [...app.type].sort((a, b) => {
+      const sortA = typeSortMap.get(a) ?? 0;
+      const sortB = typeSortMap.get(b) ?? 0;
+      return sortA - sortB;
+    });
+  }, [app.type, appTypeState.appTypes]);
+
   function handleCopy(
     e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
     v?: string
@@ -43,33 +66,47 @@ const AppItem: React.FC<IProps> = ({
 
   const appItem = useMemo(
     () => (app: AppEntity.Item) => (
-      <Flex gap="3" align="center">
+      <Flex gap="3" style={{ height: '100%' }}>
         {app.iconUrl ? <img src={app.iconUrl} /> : null}
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
-          <Heading size="3" onClick={(e) => handleCopy(e, app.appName)}>
-            <Highlighter searchWords={keyword || ''}>{app.appName}</Highlighter>
-          </Heading>
+          <Flex direction="column" style={{ flex: 1 }}>
+            <Heading
+              size="3"
+              title="应用名称"
+              style={{ width: 'max-content' }}
+              onClick={(e) => handleCopy(e, app.appName)}
+            >
+              <Highlighter searchWords={keyword || ''}>
+                {app.appName}
+              </Highlighter>
+            </Heading>
 
-          <Text
-            color="gray"
-            onClick={(e) => handleCopy(e, app.androidPackageName)}
-          >
-            <Highlighter searchWords={keyword || ''}>
-              {app.androidPackageName}
-            </Highlighter>
-          </Text>
-          <Text
-            color="gray"
-            onClick={(e) => handleCopy(e, app.harmonyPackageName)}
-          >
-            <Highlighter searchWords={keyword || ''}>
-              {app.harmonyPackageName}
-            </Highlighter>
-          </Text>
+            <Text
+              color="gray"
+              title="Android包名"
+              style={{ width: 'max-content' }}
+              onClick={(e) => handleCopy(e, app.androidPackageName)}
+            >
+              <Highlighter searchWords={keyword || ''}>
+                {app.androidPackageName}
+              </Highlighter>
+            </Text>
+            <Text
+              color="gray"
+              title="Harmony包名"
+              style={{ width: 'max-content' }}
+              onClick={(e) => handleCopy(e, app.harmonyPackageName)}
+            >
+              <Highlighter searchWords={keyword || ''}>
+                {app.harmonyPackageName}
+              </Highlighter>
+            </Text>
+          </Flex>
 
-          {app.type?.length ? (
+          {sortedTypes.length ? (
             <Flex
+              wrap="wrap"
               gap="2"
               style={{
                 marginTop: 8,
@@ -78,7 +115,7 @@ const AppItem: React.FC<IProps> = ({
                 width: '100%',
               }}
             >
-              {app.type.map((type) => (
+              {sortedTypes.map((type) => (
                 <Badge key={type}>{type}</Badge>
               ))}
             </Flex>
@@ -86,7 +123,7 @@ const AppItem: React.FC<IProps> = ({
         </Flex>
       </Flex>
     ),
-    [keyword]
+    [keyword, sortedTypes]
   );
 
   return (

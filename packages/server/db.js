@@ -103,15 +103,52 @@ async function initDatabase() {
       CREATE TABLE IF NOT EXISTS app_types (
         id INT AUTO_INCREMENT PRIMARY KEY,
         type_name VARCHAR(255) NOT NULL UNIQUE,
+        sort INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // 检查并添加 sort 字段（如果不存在）
+    try {
+      const [columns] = await connection.execute(
+        "SHOW COLUMNS FROM app_types WHERE Field = 'sort'"
+      );
+
+      if (columns.length === 0) {
+        console.log('检测到 app_types 表缺少 sort 字段，开始添加...');
+        await connection.execute('ALTER TABLE app_types ADD COLUMN sort INT DEFAULT 0');
+        console.log('sort 字段添加成功');
+      }
+    } catch (addSortError) {
+      console.error('添加 sort 字段失败:', addSortError);
+      // 继续执行，不中断初始化过程
+    }
 
     console.log('数据库表初始化成功');
     connection.release();
   } catch (error) {
     console.error('数据库表初始化失败:', error);
   }
+}
+
+// 执行初始化
+async function runInit() {
+  try {
+    await createDatabase();
+    await testConnection();
+    await initDatabase();
+  } catch (error) {
+    console.error('初始化过程中出错:', error);
+  }
+}
+
+// 只有当直接运行此文件时才执行初始化
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runInit().then(() => {
+    console.log('初始化完成');
+  }).catch((error) => {
+    console.error('初始化失败:', error);
+  });
 }
 
 export { pool, testConnection, initDatabase, createDatabase };

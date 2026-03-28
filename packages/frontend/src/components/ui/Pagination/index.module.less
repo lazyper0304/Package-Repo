@@ -2,6 +2,10 @@
   margin: 16px 0;
   margin-right: -16px;
   float: right;
+
+  &__total {
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 640px) {
@@ -10,7 +14,7 @@
     margin-bottom: 0;
 
     :global(.rc-pagination-item) {
-      width: 24px;
+      min-width: 24px;
       height: 24px;
       line-height: 24px;
       font-size: 12px;
@@ -22,6 +26,12 @@
       height: 24px;
       line-height: 24px;
       font-size: 12px;
+    }
+
+    &__total {
+      position: absolute;
+      right: 0;
+      bottom: -24px;
     }
   }
 }

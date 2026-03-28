@@ -9,11 +9,12 @@ export default class AppTypeController {
         t.id,
         t.type_name,
         t.created_at,
+        t.sort,
         COUNT(a.id) as app_count
       FROM app_types t
       LEFT JOIN apps a ON JSON_CONTAINS(a.type, JSON_ARRAY(t.type_name))
-      GROUP BY t.id, t.type_name, t.created_at
-      ORDER BY t.id ASC
+      GROUP BY t.id, t.type_name, t.created_at, t.sort
+      ORDER BY t.sort ASC, t.id ASC
     `);
 
       res.json({
@@ -35,7 +36,7 @@ export default class AppTypeController {
    */
   static async addAppType(req, res) {
     try {
-      const { typeName } = req.body;
+      const { typeName, sort = 0 } = req.body;
 
       // 参数验证
       if (!typeName || typeName.trim() === '') {
@@ -56,13 +57,13 @@ export default class AppTypeController {
 
       // 插入新类型
       const [result] = await pool.execute(
-        'INSERT INTO app_types (type_name) VALUES (?)',
-        [newTypeName]
+        'INSERT INTO app_types (type_name, sort) VALUES (?, ?)',
+        [newTypeName, 0]
       );
 
       // 获取刚创建的记录
       const [newType] = await pool.execute(
-        'SELECT id, type_name, created_at FROM app_types WHERE id = ?',
+        'SELECT id, type_name, created_at, sort FROM app_types WHERE id = ?',
         [result.insertId]
       );
 
@@ -83,7 +84,7 @@ export default class AppTypeController {
    */
   static async updateAppType(req, res) {
     try {
-      const { id, typeName } = req.body;
+      const { id, typeName, sort } = req.body;
 
       // 参数验证
       if (!id) {
@@ -95,9 +96,9 @@ export default class AppTypeController {
 
       const newTypeName = String(typeName).trim();
 
-      // 获取旧类型名称
+      // 获取旧类型信息
       const [oldTypeResult] = await pool.execute(
-        'SELECT type_name FROM app_types WHERE id = ?',
+        'SELECT type_name, sort FROM app_types WHERE id = ?',
         [id]
       );
 
@@ -105,17 +106,19 @@ export default class AppTypeController {
         return res.status(404).json({ error: '应用类型不存在' });
       }
 
-      const oldTypeName = oldTypeResult[0].type_name;
+      const oldType = oldTypeResult[0];
+      const oldTypeName = oldType.type_name;
+      const oldSort = oldType.sort || 0;
 
-      // 如果类型名称没有变化，直接返回
-      if (oldTypeName === newTypeName) {
+      // 如果类型名称和 sort 值都没有变化，直接返回
+      if (oldTypeName === newTypeName && oldSort === sort) {
         const [currentType] = await pool.execute(
-          'SELECT id, type_name, created_at FROM app_types WHERE id = ?',
+          'SELECT id, type_name, created_at, sort FROM app_types WHERE id = ?',
           [id]
         );
         return res.json({
           success: true,
-          message: '类型名称未变化',
+          message: '类型名称和排序未变化',
           data: currentType[0],
         });
       }
@@ -130,11 +133,22 @@ export default class AppTypeController {
         return res.status(400).json({ error: '该类型名称已存在' });
       }
 
+      // 构建更新语句
+      const updateFields = ['type_name = ?'];
+      const updateParams = [newTypeName];
+      
+      if (sort !== undefined) {
+        updateFields.push('sort = ?');
+        updateParams.push(sort);
+      }
+      
+      updateParams.push(id);
+      
       // 更新 app_types 表
-      await pool.execute('UPDATE app_types SET type_name = ? WHERE id = ?', [
-        newTypeName,
-        id,
-      ]);
+      await pool.execute(
+        `UPDATE app_types SET ${updateFields.join(', ')} WHERE id = ?`,
+        updateParams
+      );
 
       // 同步更新所有使用该类型的应用（使用 JSON 函数处理数组）
       // 注意：由于 type 现在是数组，更新类型名称需要更复杂的逻辑
@@ -156,7 +170,7 @@ export default class AppTypeController {
 
       // 获取更新后的记录
       const [updatedType] = await pool.execute(
-        'SELECT id, type_name, created_at FROM app_types WHERE id = ?',
+        'SELECT id, type_name, created_at, sort FROM app_types WHERE id = ?',
         [id]
       );
 

@@ -153,8 +153,31 @@ const AppDetail: React.FC<IProps> = ({
     });
   }
 
+  // 对类型进行排序
+  const sortedTypes = useMemo(() => {
+    if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return [];
+    return [...appTypeState.appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+  }, [appTypeState.appTypes]);
+
   function Item(label: string, v?: string | string[]) {
     const hasValue = v && v.length > 0;
+
+    // 对展示的分类进行排序
+    const sortedDisplayTypes = useMemo(() => {
+      if (!v || !Array.isArray(v) || v.length === 0) return v;
+      if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return v;
+
+      const typeSortMap = new Map<string, number>();
+      appTypeState.appTypes.forEach((appType) => {
+        typeSortMap.set(appType.type_name, appType.sort || 0);
+      });
+
+      return [...v].sort((a, b) => {
+        const sortA = typeSortMap.get(a) ?? 0;
+        const sortB = typeSortMap.get(b) ?? 0;
+        return sortA - sortB;
+      });
+    }, [v, appTypeState.appTypes]);
 
     return (
       <DataList.Item
@@ -190,11 +213,11 @@ const AppDetail: React.FC<IProps> = ({
 
                       {appTypeState.loading && <Spinner />}
 
-                      {!appTypeState.loading && appTypeState.appTypes.length === 0 && (
+                      {!appTypeState.loading && sortedTypes.length === 0 && (
                         <Text>暂无分类</Text>
                       )}
 
-                      {!appTypeState.loading && appTypeState.appTypes.length > 0 && (
+                      {!appTypeState.loading && sortedTypes.length > 0 && (
                         <CheckboxGroup.Root
                           style={{
                             flexDirection: 'row',
@@ -204,7 +227,7 @@ const AppDetail: React.FC<IProps> = ({
                           defaultValue={app?.type}
                           onValueChange={(v) => form.setFieldValue(label, v)}
                         >
-                          {appTypeState.appTypes.map((appType) => (
+                          {sortedTypes.map((appType) => (
                             <CheckboxGroup.Item
                               key={appType.id}
                               value={appType.type_name}
@@ -231,16 +254,16 @@ const AppDetail: React.FC<IProps> = ({
 
               {!editing && (
                 <>
-                  {Array.isArray(v) ? (
+                  {Array.isArray(sortedDisplayTypes) ? (
                     <Flex gap="2">
-                      {v.length === 0 && '-'}
+                      {sortedDisplayTypes.length === 0 && '-'}
 
-                      {v.map((item) => (
+                      {sortedDisplayTypes.map((item) => (
                         <Badge size="2">{item}</Badge>
                       ))}
                     </Flex>
-                  ) : v ? (
-                    <div className={styles.appDetail__item__value}>{v}</div>
+                  ) : sortedDisplayTypes ? (
+                    <div className={styles.appDetail__item__value}>{sortedDisplayTypes}</div>
                   ) : (
                     '-'
                   )}

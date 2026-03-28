@@ -11,7 +11,7 @@ import {
 } from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
 import { useRequest } from 'ahooks';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MdAdd, MdCheck, MdClose, MdDelete, MdEdit } from 'react-icons/md';
 import styles from './index.module.less';
 import { notify } from '@/utils/notify';
@@ -32,6 +32,12 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   const [editingID, setEditingID] = useState<string | undefined>(undefined);
 
   const { state: appTypeState, refreshAppTypes } = useAppType();
+
+  // 对 appTypes 进行排序
+  const sortedAppTypes = useMemo(() => {
+    if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return [];
+    return [...appTypeState.appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+  }, [appTypeState.appTypes]);
 
   // 当组件打开时，刷新应用类型数据
   // 确保类型管理界面显示最新的类型列表
@@ -86,6 +92,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
     (editingID && editingID !== 'add' ? updateReq : addReq).run({
       id: editingID,
       typeName: fields.typeName,
+      sort: fields.sort || 0,
     });
   }
 
@@ -111,51 +118,75 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
                 </div>
               )}
 
-              {appTypeState.appTypes.map((appType) => (
-                <Badge key={appType.id} size="3">
-                  {editing && editingID === appType.id ? (
-                    <Flex gap="2" align="center">
-                      <Field name="typeName">
-                        <TextField.Root size="1"></TextField.Root>
-                      </Field>
+              {!appTypeState.loading &&
+                sortedAppTypes.map((appType) => (
+                  <Badge key={appType.id} size="3">
+                    {editing && editingID === appType.id ? (
+                      <Flex gap="2" align="center">
+                        <Field name="typeName">
+                          <TextField.Root
+                            size="1"
+                            placeholder="分类名称"
+                          ></TextField.Root>
+                        </Field>
+                        <Field name="sort">
+                          <TextField.Root
+                            size="1"
+                            type="number"
+                            placeholder="排序"
+                            min="0"
+                          ></TextField.Root>
+                        </Field>
 
-                      <MdCheck onClick={form.submit} />
+                        <MdCheck onClick={form.submit} />
 
-                      <MdClose
-                        onClick={() => {
-                          setEditing(false);
-                          setEditingID(undefined);
-                        }}
-                      />
-                    </Flex>
-                  ) : (
-                    <Flex gap="2" align="center" className={styles.appType}>
-                      {appType.type_name}
-
-                      <div>
-                        <MdEdit
+                        <MdClose
                           onClick={() => {
-                            setEditing(true);
-                            setEditingID(appType.id);
-                            form.setFieldValue('typeName', appType.type_name);
+                            setEditing(false);
+                            setEditingID(undefined);
                           }}
                         />
+                      </Flex>
+                    ) : (
+                      <Flex gap="2" align="center" className={styles.appType}>
+                        {appType.type_name}
 
-                        <MdDelete
-                          color="red"
-                          onClick={() => deleteReq.run({ id: appType.id })}
-                        />
-                      </div>
-                    </Flex>
-                  )}
-                </Badge>
-              ))}
+                        <div>
+                          <MdEdit
+                            onClick={() => {
+                              setEditing(true);
+                              setEditingID(appType.id);
+                              form.setFieldValue('typeName', appType.type_name);
+                              form.setFieldValue('sort', appType.sort || 0);
+                            }}
+                          />
+
+                          <MdDelete
+                            color="red"
+                            onClick={() => deleteReq.run({ id: appType.id })}
+                          />
+                        </div>
+                      </Flex>
+                    )}
+                  </Badge>
+                ))}
 
               <Badge size="3">
                 {editing && editingID === 'add' ? (
                   <Flex gap="2" align="center">
                     <Field name="typeName">
-                      <TextField.Root size="1"></TextField.Root>
+                      <TextField.Root
+                        size="1"
+                        placeholder="分类名称"
+                      ></TextField.Root>
+                    </Field>
+                    <Field name="sort">
+                      <TextField.Root
+                        size="1"
+                        type="number"
+                        placeholder="排序"
+                        min="0"
+                      ></TextField.Root>
                     </Field>
 
                     <MdCheck onClick={form.submit} />

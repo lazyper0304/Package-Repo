@@ -291,7 +291,7 @@ export default class API {
     }
   }
 
-  static async addAppType(params: { typeName: string }) {
+  static async addAppType(params: { typeName: string; sort?: number }) {
     try {
       const response = await fetch(`/api/app-types`, {
         method: 'POST',
@@ -339,11 +339,8 @@ export default class API {
 
   static async updateAppType(params: {
     id: string;
-    appName?: string;
-    iconUrl?: string;
-    androidPageName?: string;
-    harmonyPackageName?: string;
-    type?: string;
+    typeName: string;
+    sort?: number;
   }) {
     try {
       const response = await fetch(`/api/app-types`, {

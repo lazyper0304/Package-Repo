@@ -60,6 +60,12 @@ const SearchResult: React.FC<IProps> = ({
 
   const isMobile = useMobile();
 
+  // 对 appTypes 进行排序
+  const sortedAppTypes = useMemo(() => {
+    if (!appTypes || appTypes.length === 0) return [];
+    return [...appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+  }, [appTypes]);
+
   // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
   const [displayMode, setDisplayMode] = useLocalStorageState<
     'grid1' | 'grid2' | 'grid3'
@@ -196,12 +202,12 @@ const SearchResult: React.FC<IProps> = ({
         >
           <Tabs.Root
             value={currentAppType}
-            defaultValue={appTypes?.[0]?.id}
+            defaultValue={sortedAppTypes?.[0]?.type_name}
             style={{ marginBottom: 16 }}
             onValueChange={onTypeChange}
           >
             <Tabs.List>
-              {appTypes.map((appType) => (
+              {sortedAppTypes.map((appType) => (
                 <Tabs.Trigger key={appType.id} value={appType.type_name}>
                   <Flex gap="2" align="center">
                     {appType.type_name}{' '}
