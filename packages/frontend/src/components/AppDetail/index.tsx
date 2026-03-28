@@ -18,7 +18,8 @@ import { AiOutlineLoading } from 'react-icons/ai';
 import copy from 'copy-to-clipboard';
 import { notify } from '@/utils/notify';
 import Form, { Field } from '@rc-component/form';
-import type { AppTypeEntity } from '@/entities/appType';
+import emptyIcon from '@/assets/empty.svg';
+
 import useMobile from '@/hooks/useMobile';
 import { useAppType } from '@/contexts/AppTypeContext';
 
@@ -156,7 +157,9 @@ const AppDetail: React.FC<IProps> = ({
   // 对类型进行排序
   const sortedTypes = useMemo(() => {
     if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return [];
-    return [...appTypeState.appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    return [...appTypeState.appTypes].sort(
+      (a, b) => (a.sort || 0) - (b.sort || 0)
+    );
   }, [appTypeState.appTypes]);
 
   function Item(label: string, v?: string | string[]) {
@@ -165,7 +168,8 @@ const AppDetail: React.FC<IProps> = ({
     // 对展示的分类进行排序
     const sortedDisplayTypes = useMemo(() => {
       if (!v || !Array.isArray(v) || v.length === 0) return v;
-      if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return v;
+      if (!appTypeState.appTypes || appTypeState.appTypes.length === 0)
+        return v;
 
       const typeSortMap = new Map<string, number>();
       appTypeState.appTypes.forEach((appType) => {
@@ -177,7 +181,7 @@ const AppDetail: React.FC<IProps> = ({
         const sortB = typeSortMap.get(b) ?? 0;
         return sortA - sortB;
       });
-    }, [v, appTypeState.appTypes]);
+    }, [v]);
 
     return (
       <DataList.Item
@@ -263,7 +267,9 @@ const AppDetail: React.FC<IProps> = ({
                       ))}
                     </Flex>
                   ) : sortedDisplayTypes ? (
-                    <div className={styles.appDetail__item__value}>{sortedDisplayTypes}</div>
+                    <div className={styles.appDetail__item__value}>
+                      {sortedDisplayTypes}
+                    </div>
                   ) : (
                     '-'
                   )}
@@ -306,12 +312,17 @@ const AppDetail: React.FC<IProps> = ({
 
         <Dialog.Description size="2" mb="4">
           {app && (
-            <div className={styles.appDetail__icon}>
+            <div
+              className={styles.appDetail__icon}
+              style={{
+                background: iconUrl ? 'transparent' : '#d0d0d060',
+              }}
+            >
               {getAppleStoreIconReq.loading && (
                 <AiOutlineLoading className="loading" />
               )}
 
-              {iconUrl && <img loading="lazy" src={iconUrl} />}
+              <img loading="lazy" src={iconUrl || emptyIcon} />
             </div>
           )}
 

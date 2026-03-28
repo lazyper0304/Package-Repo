@@ -7,6 +7,7 @@ import {
   Heading,
   Text,
 } from '@radix-ui/themes';
+import emptyIcon from '@/assets/empty.svg';
 import React, { useMemo } from 'react';
 import Highlighter from '../Highlighter';
 import copy from 'copy-to-clipboard';
@@ -67,7 +68,11 @@ const AppItem: React.FC<IProps> = ({
   const appItem = useMemo(
     () => (app: AppEntity.Item) => (
       <Flex gap="3" style={{ height: '100%' }}>
-        {app.iconUrl ? <img src={app.iconUrl} /> : null}
+        <img
+          loading="lazy"
+          src={app.iconUrl || emptyIcon}
+          style={{ background: app.iconUrl ? 'transparent' : '#d0d0d060' }}
+        />
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
           <Flex direction="column" style={{ flex: 1 }}>
