@@ -1,14 +1,5 @@
-import type { AppTypeEntity } from '@/entities/appType';
 import API from '@/services';
-import {
-  Badge,
-  Button,
-  DataList,
-  Dialog,
-  Flex,
-  Spinner,
-  TextField,
-} from '@radix-ui/themes';
+import { Badge, Dialog, Flex, Spinner, TextField } from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
 import { useRequest } from 'ahooks';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -36,7 +27,9 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   // 对 appTypes 进行排序
   const sortedAppTypes = useMemo(() => {
     if (!appTypeState.appTypes || appTypeState.appTypes.length === 0) return [];
-    return [...appTypeState.appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+    return [...appTypeState.appTypes].sort(
+      (a, b) => (a.sort || 0) - (b.sort || 0)
+    );
   }, [appTypeState.appTypes]);
 
   // 当组件打开时，刷新应用类型数据

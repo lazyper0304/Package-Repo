@@ -313,7 +313,7 @@ export default class AppController {
     }
   }
 
-  static async getIconFromAppStore(req, res) {
+  static async getIconFromAppleStore(req, res) {
     try {
       const { appName } = req.query;
 
