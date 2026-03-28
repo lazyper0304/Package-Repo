@@ -313,7 +313,7 @@ export default class AppController {
     }
   }
 
-  static async getIconFromAppleStore(req, res) {
+  static async getIconFromAppStore(req, res) {
     try {
       const { appName } = req.query;
 
@@ -321,35 +321,58 @@ export default class AppController {
         return res.status(400).json({ error: '应用名称不能为空' });
       }
 
-      const encodedKeyword = encodeURIComponent(appName);
-      const searchUrl = `https://apps.apple.com/cn/iphone/search?term=${encodedKeyword}`;
+      const encodedAppName = encodeURIComponent(appName);
+      const url = `https://sj.qq.com/search?q=${encodedAppName}`;
 
-      const response = await axios.get(searchUrl, {
+      const response = await axios.get(url, {
         headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'Accept-Language':
-            'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+          'Referer': 'https://sj.qq.com/'
         },
+        timeout: 10000
       });
 
       if (response.status === 200) {
         const html = response.data;
+        let iconUrl = null;
 
-        const pattern =
-          /(https?:\/\/is\d-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s]+\/Placeholder\.mill\/)\d+x\d+bb[^"'\s]+\.webp/;
+        const myappIconRegex = /https:\/\/pp\.myapp\.com\/ma_icon\/[^"'\s]+/g;
+        let match;
+        while ((match = myappIconRegex.exec(html)) !== null) {
+          iconUrl = match[0];
+          break;
+        }
 
-        const match = html.match(pattern);
+        if (!iconUrl) {
+          const gameIconRegex = /<img[^>]*class="[^"]*GameIcon[^"]*"[^>]*src="([^"]+)"/;
+          const gameIconMatch = html.match(gameIconRegex);
+          if (gameIconMatch) {
+            iconUrl = gameIconMatch[1];
+          }
+        }
 
-        if (match) {
-          const base_url = match[1];
-          const final_icon_url = base_url + '256x256bb-75.webp';
+        if (!iconUrl) {
+          const imgRegex = /<img[^>]+src="([^"]+)"/g;
+          while ((match = imgRegex.exec(html)) !== null) {
+            const src = match[1];
+            // 检查是否是图标链接格式
+            if (src.includes('icon') || src.includes('ma_icon') || src.includes('pp.myapp.com')) {
+              iconUrl = src;
+              break;
+            }
+          }
+        }
 
+        if (iconUrl) {
+          // 确保返回的是完整的URL
+          if (!iconUrl.startsWith('http')) {
+            iconUrl = 'https:' + iconUrl;
+          }
           return res.json({
             success: true,
-            iconUrl: final_icon_url,
+            iconUrl: iconUrl,
           });
         }
       }
@@ -359,7 +382,7 @@ export default class AppController {
         error: '未找到应用图标',
       });
     } catch (error) {
-      console.error('获取苹果应用商店图标失败:', error);
+      console.error('获取应用宝图标失败:', error);
       res.status(500).json({
         success: false,
         error: '获取图标失败: ' + error.message,
