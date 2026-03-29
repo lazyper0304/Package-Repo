@@ -124,6 +124,7 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
                     <Popover.Trigger>
                       <Badge
                         size="3"
+                        style={{ cursor: 'pointer' }}
                         onClick={() => {
                           form.setFieldsValue({
                             typeName: appType.type_name,
@@ -182,58 +183,61 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
                   </Popover.Root>
                 ))}
 
-              <Popover.Root>
-                <Popover.Trigger>
-                  <Badge
-                    size="3"
-                    onClick={() => {
-                      form.setFieldsValue({
-                        typeName: '',
-                        sort: 0,
-                      });
-                    }}
-                  >
-                    <Flex
-                      align="center"
-                      gap="2"
+              {!appTypeState.loading && (
+                <Popover.Root>
+                  <Popover.Trigger>
+                    <Badge
+                      size="3"
+                      style={{ cursor: 'pointer' }}
                       onClick={() => {
-                        setEditingID('add');
+                        form.setFieldsValue({
+                          typeName: '',
+                          sort: 0,
+                        });
                       }}
                     >
-                      添加
-                      <MdAdd />
+                      <Flex
+                        align="center"
+                        gap="2"
+                        onClick={() => {
+                          setEditingID('add');
+                        }}
+                      >
+                        添加
+                        <MdAdd />
+                      </Flex>
+                    </Badge>
+                  </Popover.Trigger>
+
+                  <Popover.Content width="360px">
+                    <Flex direction="column" gap="3">
+                      <Text color="gray" size="2">
+                        分类名称
+                      </Text>
+                      <Field name="typeName">
+                        <TextField.Root
+                          size="2"
+                          placeholder="分类名称"
+                        ></TextField.Root>
+                      </Field>
+
+                      <Text color="gray" size="2">
+                        排序
+                      </Text>
+                      <Field name="sort">
+                        <TextField.Root
+                          size="2"
+                          type="number"
+                          placeholder="排序"
+                          min="0"
+                        ></TextField.Root>
+                      </Field>
+
+                      <Button onClick={form.submit}>保存</Button>
                     </Flex>
-                  </Badge>
-                </Popover.Trigger>
-
-                <Popover.Content width="360px">
-                  <Flex direction="column" gap="3">
-                    <Text color="gray" size="2">
-                      分类名称
-                    </Text>
-                    <Field name="typeName">
-                      <TextField.Root
-                        size="2"
-                        placeholder="分类名称"
-                      ></TextField.Root>
-                    </Field>
-
-                    <Text color="gray" size="2">
-                      排序
-                    </Text>
-                    <Field name="sort">
-                      <TextField.Root
-                        size="2"
-                        type="number"
-                        placeholder="排序"
-                        min="0"
-                      ></TextField.Root>
-                    </Field>
-
-                    <Button onClick={form.submit}>保存</Button>
-                  </Flex>
-                </Popover.Content>
-              </Popover.Root>
+                  </Popover.Content>
+                </Popover.Root>
+              )}
             </Flex>
           </Form>
         </Dialog.Description>

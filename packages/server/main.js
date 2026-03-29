@@ -3,7 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import AppController from './routes/app.js';
-import ExcelController, { uploadExcel, uploadHarmony } from './routes/excel.js';
+import ExcelController, { uploadExcel } from './routes/excel.js';
 import UtilController from './routes/util.js';
 import TokenUtil from './utils/token.js';
 import { initialize } from './init.js';
@@ -55,23 +55,6 @@ app.post('/api/app-types', AppTypeController.addAppType);
 app.put('/api/app-types', AppTypeController.updateAppType);
 
 app.delete('/api/app-types', AppTypeController.deleteAppType);
-
-// 单个图标转鸿蒙图标API
-app.post(
-  '/api/excel/harmony-icon-single',
-  uploadHarmony.array('files'),
-  ExcelController.harmonyIconSingle
-);
-
-// 鸿蒙图标文件夹转 bgfg 图标API
-app.post(
-  '/api/excel/harmony-icon-folder',
-  uploadHarmony.array('files'),
-  ExcelController.harmonyIconFolder
-);
-
-// 一键下载所有图标API
-app.get('/api/excel/download-all-icons', ExcelController.downloadAllIcons);
 
 // 下载图标文件的API
 app.get('/api/util/download-icon', UtilController.downloadIcon);

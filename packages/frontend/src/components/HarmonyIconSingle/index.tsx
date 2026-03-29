@@ -1,11 +1,11 @@
 import { Card, Dialog, Flex, ScrollArea, Text } from '@radix-ui/themes';
-import { useRequest, useSetState } from 'ahooks';
+import { useSetState } from 'ahooks';
 import React, { useRef } from 'react';
 import styles from './index.module.less';
 import classnames from 'classnames';
-import API from '@/services';
 import { AiOutlineLoading } from 'react-icons/ai';
 import { notify } from '@/utils/notify';
+import JSZip from 'jszip';
 
 type IProps = Readonly<{ open: boolean; onClose: () => void }>;
 
@@ -15,6 +15,13 @@ type ProcessedFile = {
   fgUrl: string;
 };
 
+type Stats = {
+  total: number;
+  success: number;
+  failed: number;
+  supported: number;
+};
+
 const HarmonyIconSingle: React.FC<IProps> = ({ open, onClose }) => {
   const ref = useRef<HTMLInputElement>(null);
 
@@ -22,117 +29,132 @@ const HarmonyIconSingle: React.FC<IProps> = ({ open, onClose }) => {
     fileName: '',
     processedFiles: [] as ProcessedFile[],
     success: false,
+    loading: false,
+    stats: { total: 0, success: 0, failed: 0, supported: 0 } as Stats,
   });
 
-  const uploadReq = useRequest(API.harmonyIconSingle, {
-    manual: true,
-    onSuccess(res) {
-      if (res.success) {
-        notify('转鸿蒙双层图标成功');
+  // 在浏览器端处理图标转换
+  async function processFiles(files: FileList) {
+    if (!files || files.length === 0) return;
 
-        if (res.files) {
-          setState({ success: true, processedFiles: res.files });
-          // 处理完成后自动发起下载请求
-          setTimeout(() => {
-            // 使用 fetch API 来发起下载请求，避免打开新标签页
-            fetch('/api/excel/download-all-icons')
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('下载失败');
-                }
-                return response.blob();
-              })
-              .then((blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `icons_${Date.now()}.zip`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              })
-              .catch((error) => {
-                console.error('下载失败:', error);
-                notify('下载失败，请重试');
-              });
-          }, 500);
-        } else {
-          // 保持对单个文件的兼容
-          setState({
-            success: true,
-            processedFiles: [
-              { name: state.fileName, bgUrl: res.bgUrl, fgUrl: res.fgUrl },
-            ],
+    const totalFiles = files.length;
+    let successCount = 0;
+    let failedCount = 0;
+    let supportedCount = 0;
+
+    setState({ 
+      loading: true, 
+      fileName: files[0].name, 
+      success: false, 
+      processedFiles: [],
+      stats: { total: totalFiles, success: 0, failed: 0, supported: 0 }
+    });
+
+    const processedFiles: ProcessedFile[] = [];
+    const zip = new JSZip();
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // 检查文件扩展名
+        if (!file.name.toLowerCase().endsWith('.png')) {
+          failedCount++;
+          continue; // 跳过非PNG文件
+        }
+
+        supportedCount++;
+
+        try {
+          // 读取文件为 ArrayBuffer
+          const arrayBuffer = await file.arrayBuffer();
+          const blob = new Blob([arrayBuffer], { type: 'image/png' });
+
+          // 生成_bg和_fg版本
+          const baseName = file.name.replace('.png', '');
+          const bgFileName = `${baseName}_bg.png`;
+          const fgFileName = `${baseName}_fg.png`;
+
+          // 创建 URL 用于预览
+          const bgUrl = URL.createObjectURL(blob);
+          const fgUrl = URL.createObjectURL(blob);
+
+          // 添加到处理结果
+          processedFiles.push({
+            name: file.name,
+            bgUrl,
+            fgUrl,
           });
-          // 处理完成后自动发起下载请求
-          setTimeout(() => {
-            // 使用 fetch API 来发起下载请求，避免打开新标签页
-            fetch('/api/excel/download-all-icons')
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('下载失败');
-                }
-                return response.blob();
-              })
-              .then((blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `icons_${Date.now()}.zip`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              })
-              .catch((error) => {
-                console.error('下载失败:', error);
-                notify('下载失败，请重试');
-              });
-          }, 500);
+
+          // 添加到 zip 文件
+          zip.file(bgFileName, blob);
+          zip.file(fgFileName, blob);
+
+          successCount++;
+        } catch (error) {
+          console.error(`处理文件 ${file.name} 失败:`, error);
+          failedCount++;
         }
       }
-    },
-  });
+
+      if (processedFiles.length === 0) {
+        notify('没有有效的PNG文件');
+        setState({ 
+          loading: false,
+          stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+        });
+        return;
+      }
+
+      // 更新状态显示处理结果
+      setState({
+        success: true,
+        processedFiles,
+        loading: false,
+        stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+      });
+
+      notify('转鸿蒙双层图标成功');
+
+      // 生成并下载 zip 文件
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = zipUrl;
+      a.download = `icons_${Date.now()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(zipUrl);
+    } catch (error) {
+      console.error('处理图标失败:', error);
+      notify('处理图标失败，请重试');
+      setState({ 
+        loading: false,
+        stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+      });
+    }
+  }
 
   function handleClick() {
-    if (uploadReq.loading) return;
+    if (state.loading) return;
 
     ref.current?.click();
   }
 
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
-
     if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-
-    // 遍历所有文件，添加到 formData 中
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
-    setState({ fileName: files[0].name, success: false, processedFiles: [] });
-
-    uploadReq.run(formData);
+    processFiles(files);
   }
 
   function handleFileDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
     const files = e.dataTransfer.files;
-
     if (!files || files.length === 0) return;
 
-    const formData = new FormData();
-
-    // 遍历所有文件，添加到 formData 中
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
-    setState({ fileName: files[0].name, success: false, processedFiles: [] });
-
-    uploadReq.run(formData);
+    processFiles(files);
   }
 
   return (
@@ -146,24 +168,24 @@ const HarmonyIconSingle: React.FC<IProps> = ({ open, onClose }) => {
           <div
             className={classnames(
               styles.harmonyIcon,
-              uploadReq.loading ? styles['harmonyIcon--disabled'] : undefined
+              state.loading ? styles['harmonyIcon--disabled'] : undefined
             )}
             onClick={handleClick}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
           >
             <input
-              key={uploadReq.loading}
+              key={state.loading}
               ref={ref}
               type="file"
               accept=".png"
               multiple
-              disabled={uploadReq.loading}
+              disabled={state.loading}
               style={{ display: 'none' }}
               onChange={handleFileUpload}
             />
             <div style={{ marginBottom: 24, fontSize: 24 }}>
-              {uploadReq.loading ? (
+              {state.loading ? (
                 <AiOutlineLoading className="loading" />
               ) : (
                 '📊'
@@ -187,6 +209,28 @@ const HarmonyIconSingle: React.FC<IProps> = ({ open, onClose }) => {
                     <Text color="gray">{state.fileName}</Text>
                   </Card>
                 </Flex>
+
+                {/* 统计信息 */}
+                <Card style={{ marginBottom: 16, padding: 12, backgroundColor: 'var(--gray-3)' }}>
+                  <Flex gap="4" justify="between">
+                    <Flex direction="column" align="center">
+                      <Text size="2" color="gray">文件总数</Text>
+                      <Text size="5" weight="bold">{state.stats.total}</Text>
+                    </Flex>
+                    <Flex direction="column" align="center">
+                      <Text size="2" color="gray">支持转换</Text>
+                      <Text size="5" weight="bold" style={{ color: 'var(--blue-9)' }}>{state.stats.supported}</Text>
+                    </Flex>
+                    <Flex direction="column" align="center">
+                      <Text size="2" color="gray">成功</Text>
+                      <Text size="5" weight="bold" style={{ color: 'var(--green-9)' }}>{state.stats.success}</Text>
+                    </Flex>
+                    <Flex direction="column" align="center">
+                      <Text size="2" color="gray">失败</Text>
+                      <Text size="5" weight="bold" style={{ color: 'var(--red-9)' }}>{state.stats.failed}</Text>
+                    </Flex>
+                  </Flex>
+                </Card>
 
                 <ScrollArea style={{ maxHeight: 500 }}>
                   {state.processedFiles.map((file, index) => (
