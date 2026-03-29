@@ -44,7 +44,24 @@ export default class AppController {
       }
 
       // 分页和排序
-      query += ` ORDER BY created_at DESC LIMIT ${pageLimit} OFFSET ${offset}`;
+      if (keyword && keyword.trim()) {
+        // 优先显示完全匹配的结果，然后是包含匹配的结果，最后按更新时间排序
+        query += ` ORDER BY 
+          CASE 
+            WHEN app_name = ? OR harmony_package = ? OR android_package = ? THEN 0
+            WHEN app_name LIKE ? OR harmony_package LIKE ? OR android_package LIKE ? THEN 1
+            ELSE 2
+          END, 
+          updated_at DESC 
+          LIMIT ${pageLimit} OFFSET ${offset}`;
+        
+        // 添加排序参数
+        params.push(keyword.trim(), keyword.trim(), keyword.trim());
+        params.push(`%${keyword.trim()}%`, `%${keyword.trim()}%`, `%${keyword.trim()}%`);
+      } else {
+        // 没有关键字时，仅按更新时间排序
+        query += ` ORDER BY updated_at DESC LIMIT ${pageLimit} OFFSET ${offset}`;
+      }
 
       // 执行查询
       const [rows] = await pool.execute(query, params);
