@@ -250,14 +250,13 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
           {isAdmin && (
             <>
-              <Button onClick={handleOpenUpload}>批量上传</Button>
               <Button onClick={handleOpenType}>类型管理</Button>
             </>
           )}
         </div>
       </header>
     ),
-    [handleOpenType, handleOpenUpload, isAdmin, setState]
+    [handleOpenType, isAdmin, setState]
   );
 
   return (
