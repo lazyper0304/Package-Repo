@@ -15,10 +15,19 @@
   :global(.rc-pagination-item),
   :global(.rc-pagination-item-link) {
     border-radius: 50%;
+
+    &:hover {
+      background: var(--primary);
+      color: #fff;
+
+      & > a {
+        color: #fff;
+      }
+    }
   }
 
   :global(.rc-pagination-item-active) {
-    background: #007bff;
+    background: var(--primary);
 
     & > a {
       color: #fff;

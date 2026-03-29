@@ -12,6 +12,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
   return (
     <RcPagination
       {...props}
+      total={200}
       className={`${styles.pagination} ${isMobile ? styles.pagination__mobile : ''}`}
       showLessItems={isMobile}
       showTotal={(v) => (
