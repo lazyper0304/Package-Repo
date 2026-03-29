@@ -1,10 +1,28 @@
 .pagination {
   margin: 16px 0;
-  margin-right: -16px;
   float: right;
 
   &__total {
     white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  :global(.rc-pagination-item-link) {
+    width: 28px;
+    height: 28px;
+  }
+
+  :global(.rc-pagination-item),
+  :global(.rc-pagination-item-link) {
+    border-radius: 50%;
+  }
+
+  :global(.rc-pagination-item-active) {
+    background: #007bff;
+
+    & > a {
+      color: #fff;
+    }
   }
 }
 
@@ -12,6 +30,11 @@
   .pagination {
     font-size: 12px;
     margin-bottom: 0;
+
+    :global(.rc-pagination-item-link) {
+      width: 24px;
+      height: 24px;
+    }
 
     :global(.rc-pagination-item) {
       min-width: 24px;
