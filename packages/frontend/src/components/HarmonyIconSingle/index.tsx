@@ -159,7 +159,7 @@ const HarmonyIconSingle: React.FC<IProps> = ({ open, onClose }) => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Content maxWidth="760px">
+      <Dialog.Content maxWidth="1060px">
         <Dialog.Title>
           <div>单个图标转鸿蒙图标</div>
         </Dialog.Title>

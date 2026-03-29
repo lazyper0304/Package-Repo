@@ -185,7 +185,7 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Content maxWidth="760px">
+      <Dialog.Content maxWidth="1060px">
         <Dialog.Title>
           <div>鸿蒙图标文件夹转 bgfg 图标</div>
         </Dialog.Title>
