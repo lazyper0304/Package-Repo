@@ -35,7 +35,9 @@ type IProps = Readonly<{
   onType: () => void;
   onTypeChange: (id: string) => void;
   isAdmin?: boolean;
-}>;
+  displayMode: 'grid1' | 'grid2' | 'grid3';
+  setDisplayMode: (v: 'grid1' | 'grid2' | 'grid3') => void;
+}>
 
 const SearchResult: React.FC<IProps> = ({
   currentAppType,
@@ -51,6 +53,8 @@ const SearchResult: React.FC<IProps> = ({
   onType,
   onTypeChange,
   isAdmin = false,
+  displayMode,
+  setDisplayMode,
 }) => {
   const ref = useRef<HTMLHeadingElement>(null);
 
@@ -65,13 +69,6 @@ const SearchResult: React.FC<IProps> = ({
     if (!appTypes || appTypes.length === 0) return [];
     return [...appTypes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
   }, [appTypes]);
-
-  // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
-  const [displayMode, setDisplayMode] = useLocalStorageState<
-    'grid1' | 'grid2' | 'grid3'
-  >('app-display-mode', {
-    defaultValue: 'grid1',
-  });
 
   function handleScroll(e: React.WheelEvent<HTMLDivElement>) {
     if (appTypeRef.current) {

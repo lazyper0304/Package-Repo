@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import styles from './index.module.less';
 import { Button, Flex } from '@radix-ui/themes';
 import type { AppEntity } from '@/entities/app';
 import API from '@/services';
-import { useRequest, useSetState } from 'ahooks';
+import { useRequest, useSetState, useLocalStorageState } from 'ahooks';
 import AppDetail from '@/components/AppDetail';
 import type { PageEntity } from '@/entities/page';
 import UploadExcel from '@/components/UploadExcel';
@@ -39,6 +39,16 @@ type IState = {
 const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   const isMobile = useMobile();
 
+  // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
+  const [displayMode, setDisplayMode] = useLocalStorageState<
+    'grid1' | 'grid2' | 'grid3'
+  >('app-display-mode', {
+    defaultValue: 'grid1',
+  });
+
+  // 根据显示模式计算 pageSize
+  const pageSize = displayMode === 'grid3' ? 21 : 20;
+
   const [state, setState] = useSetState<IState>({
     keyword: '',
     apps: [],
@@ -46,7 +56,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     currentApp: undefined,
     pagination: {
       current: 1,
-      pageSize: 20,
+      pageSize: pageSize,
       total: 0,
       pages: 0,
     },
@@ -91,6 +101,15 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     },
   });
 
+  // 当显示模式改变时，重新发起搜索请求，使用正确的 pageSize
+  useEffect(() => {
+    searchAppsReq.run({
+      keyword: state.keyword,
+      typeName: state.currentAppType,
+      pageSize: pageSize,
+    });
+  }, [displayMode, pageSize, state.keyword, state.currentAppType]);
+
   const deleteReq = useRequest(API.deleteApp, {
     manual: true,
     onSuccess(res) {
@@ -105,7 +124,11 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   async function handleSearch(v: string) {
     setState({ keyword: v });
 
-    searchAppsReq.run({ keyword: v, typeName: state.currentAppType });
+    searchAppsReq.run({
+      keyword: v,
+      typeName: state.currentAppType,
+      pageSize: pageSize,
+    });
   }
 
   function handleOpenAppDetail(app?: AppEntity.Item, edit?: boolean) {
@@ -127,14 +150,25 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   function handleTypeChange(v: string) {
     setState({ currentAppType: v });
 
-    searchAppsReq.run({ keyword: state.keyword, current: 1, typeName: v });
+    searchAppsReq.run({
+      keyword: state.keyword,
+      current: 1,
+      typeName: v,
+      pageSize: pageSize,
+    });
   }
 
   function handleCloseAppDetail() {
     setState({ currentApp: undefined, open: false });
   }
 
-  function handleRefresh() {
+  // 只刷新搜索列表（用于 AppDetail）
+  function handleRefreshSearch() {
+    searchAppsReq.refresh();
+  }
+
+  // 同时刷新搜索列表和 apptype（用于 TypeManage）
+  function handleRefreshAll() {
     searchAppsReq.refresh();
     refreshAppTypes();
   }
@@ -163,6 +197,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     searchAppsReq.run({
       keyword: state.keyword,
       typeName: state.currentAppType,
+      pageSize: pageSize,
     });
   }
 
@@ -171,6 +206,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
       keyword: state.keyword,
       current,
       typeName: state.currentAppType,
+      pageSize: pageSize,
     });
   }
 
@@ -254,6 +290,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
                   onType={handleOpenType}
                   onTypeChange={handleTypeChange}
                   isAdmin={isAdmin}
+                  displayMode={displayMode}
+                  setDisplayMode={setDisplayMode}
                 />
               </Flex>
             </section>
@@ -289,6 +327,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
                   onType={handleOpenType}
                   onTypeChange={handleTypeChange}
                   isAdmin={isAdmin}
+                  displayMode={displayMode}
+                  setDisplayMode={setDisplayMode}
                 />
               </Flex>
             </section>
@@ -303,7 +343,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           open={state.open}
           app={state.currentApp}
           onClose={handleCloseAppDetail}
-          onRefresh={handleRefresh}
+          onRefresh={handleRefreshSearch}
         />
       )}
 
@@ -319,7 +359,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         <TypeManage
           open={state.typeOpen}
           onOk={handleTypeOk}
-          onRefresh={handleRefresh}
+          onRefresh={handleRefreshAll}
           onClose={handleCloseType}
         />
       )}

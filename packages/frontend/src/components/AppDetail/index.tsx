@@ -322,7 +322,7 @@ const AppDetail: React.FC<IProps> = ({
                 <AiOutlineLoading className="loading" />
               )}
 
-              <img loading="lazy" src={iconUrl || emptyIcon} />
+              <img loading="lazy" src={(iconUrl && iconUrl !== '-') ? iconUrl : emptyIcon} />
             </div>
           )}
 
