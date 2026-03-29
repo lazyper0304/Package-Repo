@@ -12,8 +12,7 @@ import {
 import Form, { Field } from '@rc-component/form';
 import { useRequest } from 'ahooks';
 import React, { useState, useEffect, useMemo } from 'react';
-import { MdAdd, MdCheck, MdClose, MdDelete, MdEdit } from 'react-icons/md';
-import styles from './index.module.less';
+import { MdAdd, MdEdit } from 'react-icons/md';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 

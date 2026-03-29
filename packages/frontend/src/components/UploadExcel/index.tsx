@@ -1,5 +1,5 @@
 import { Dialog } from '@radix-ui/themes';
-import { useRequest, useSetState } from 'ahooks';
+import { useRequest } from 'ahooks';
 import React, { useRef } from 'react';
 import styles from './index.module.less';
 import classnames from 'classnames';

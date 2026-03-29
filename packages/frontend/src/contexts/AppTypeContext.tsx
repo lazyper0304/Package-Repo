@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import API from '@/services';
 import type { AppTypeEntity } from '@/entities/appType';
 
@@ -24,7 +24,10 @@ const initialState: AppTypeState = {
 };
 
 // Reducer 函数
-function appTypeReducer(state: AppTypeState, action: AppTypeAction): AppTypeState {
+function appTypeReducer(
+  state: AppTypeState,
+  action: AppTypeAction
+): AppTypeState {
   switch (action.type) {
     case 'FETCH_APP_TYPES_START':
       return { ...state, loading: true, error: null };
@@ -50,7 +53,7 @@ const AppTypeContext = createContext<AppTypeContextType | undefined>(undefined);
 
 // Provider 组件
 interface AppTypeProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function AppTypeProvider({ children }: AppTypeProviderProps) {
@@ -64,9 +67,12 @@ export function AppTypeProvider({ children }: AppTypeProviderProps) {
       if (response.success) {
         dispatch({ type: 'FETCH_APP_TYPES_SUCCESS', payload: response.data });
       } else {
-        dispatch({ type: 'FETCH_APP_TYPES_FAILURE', payload: '获取应用类型失败' });
+        dispatch({
+          type: 'FETCH_APP_TYPES_FAILURE',
+          payload: '获取应用类型失败',
+        });
       }
-    } catch (error) {
+    } catch {
       dispatch({ type: 'FETCH_APP_TYPES_FAILURE', payload: '网络错误' });
     }
   };
@@ -81,7 +87,9 @@ export function AppTypeProvider({ children }: AppTypeProviderProps) {
     refreshAppTypes,
   };
 
-  return <AppTypeContext.Provider value={value}>{children}</AppTypeContext.Provider>;
+  return (
+    <AppTypeContext.Provider value={value}>{children}</AppTypeContext.Provider>
+  );
 }
 
 // 自定义 Hook

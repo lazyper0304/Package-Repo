@@ -1,5 +1,5 @@
 import { Button, Card, Flex, Heading, TextField } from '@radix-ui/themes';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { MdClose, MdSearch } from 'react-icons/md';
 
 type IProps = Readonly<{
@@ -8,8 +8,6 @@ type IProps = Readonly<{
 }>;
 
 const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
-  const compositionRef = useRef(false);
-
   const [keyword, setKeyword] = useState('');
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {

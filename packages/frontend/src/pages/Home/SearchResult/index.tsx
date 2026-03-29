@@ -11,7 +11,7 @@ import {
   Text,
   Select,
 } from '@radix-ui/themes';
-import { useSize, useLocalStorageState } from 'ahooks';
+import { useSize } from 'ahooks';
 import React, { useMemo, useRef } from 'react';
 import type { PageEntity } from '@/entities/page';
 import Pagination from '@/components/ui/Pagination';
@@ -32,7 +32,6 @@ type IProps = Readonly<{
   onDelete: (id: string) => void;
   onChange: (v: number) => void;
   onUpload: () => void;
-  onType: () => void;
   onTypeChange: (id: string) => void;
   isAdmin?: boolean;
   displayMode: 'grid1' | 'grid2' | 'grid3';
@@ -50,7 +49,6 @@ const SearchResult: React.FC<IProps> = ({
   onDelete,
   onChange,
   onUpload,
-  onType,
   onTypeChange,
   isAdmin = false,
   displayMode,
