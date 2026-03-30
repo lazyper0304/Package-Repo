@@ -61,7 +61,7 @@ const LogViewer: React.FC<{
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>IP地址</Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>归属地</Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>用户代理</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>时间</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell style={{ minWidth: '180px' }}>时间</Table.ColumnHeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
