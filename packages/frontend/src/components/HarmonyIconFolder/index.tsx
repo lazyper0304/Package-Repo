@@ -42,12 +42,12 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
     let failedCount = 0;
     let supportedCount = 0;
 
-    setState({ 
-      loading: true, 
-      fileName: files[0].webkitRelativePath?.split('/')[0] || '文件夹', 
-      success: false, 
+    setState({
+      loading: true,
+      fileName: files[0].webkitRelativePath?.split('/')[0] || '文件夹',
+      success: false,
       processedFiles: [],
-      stats: { total: totalFiles, success: 0, failed: 0, supported: 0 }
+      stats: { total: totalFiles, success: 0, failed: 0, supported: 0 },
     });
 
     const processedFiles: ProcessedFile[] = [];
@@ -125,9 +125,14 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
 
       if (processedFiles.length === 0) {
         notify('没有找到有效的鸿蒙图标文件');
-        setState({ 
+        setState({
           loading: false,
-          stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+          stats: {
+            total: totalFiles,
+            success: successCount,
+            failed: failedCount,
+            supported: supportedCount,
+          },
         });
         return;
       }
@@ -137,7 +142,12 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
         success: true,
         processedFiles,
         loading: false,
-        stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+        stats: {
+          total: totalFiles,
+          success: successCount,
+          failed: failedCount,
+          supported: supportedCount,
+        },
       });
 
       notify('鸿蒙图标文件夹转 bgfg 图标成功');
@@ -155,9 +165,14 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
     } catch (error) {
       console.error('处理图标失败:', error);
       notify('处理图标失败，请重试');
-      setState({ 
+      setState({
         loading: false,
-        stats: { total: totalFiles, success: successCount, failed: failedCount, supported: supportedCount }
+        stats: {
+          total: totalFiles,
+          success: successCount,
+          failed: failedCount,
+          supported: supportedCount,
+        },
       });
     }
   }
@@ -211,11 +226,7 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
               onChange={handleFileUpload}
             />
             <div style={{ marginBottom: 24, fontSize: 24 }}>
-              {state.loading ? (
-                <AiOutlineLoading className="loading" />
-              ) : (
-                '📊'
-              )}
+              {state.loading ? <AiOutlineLoading className="loading" /> : '📊'}
             </div>
 
             <Flex direction="column">
@@ -238,23 +249,57 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
                 </Flex>
 
                 {/* 统计信息 */}
-                <Card style={{ marginBottom: 16, padding: 12, backgroundColor: 'var(--gray-3)' }}>
+                <Card
+                  style={{
+                    marginBottom: 16,
+                    padding: 12,
+                    backgroundColor: 'var(--gray-3)',
+                  }}
+                >
                   <Flex gap="4" justify="between">
                     <Flex direction="column" align="center">
-                      <Text size="2" color="gray">文件总数</Text>
-                      <Text size="5" weight="bold">{state.stats.total}</Text>
+                      <Text size="2" color="gray">
+                        文件总数
+                      </Text>
+                      <Text size="5" weight="bold">
+                        {state.stats.total}
+                      </Text>
                     </Flex>
                     <Flex direction="column" align="center">
-                      <Text size="2" color="gray">支持转换</Text>
-                      <Text size="5" weight="bold" style={{ color: 'var(--blue-9)' }}>{state.stats.supported}</Text>
+                      <Text size="2" color="gray">
+                        支持转换
+                      </Text>
+                      <Text
+                        size="5"
+                        weight="bold"
+                        style={{ color: 'var(--blue-9)' }}
+                      >
+                        {state.stats.supported}
+                      </Text>
                     </Flex>
                     <Flex direction="column" align="center">
-                      <Text size="2" color="gray">成功</Text>
-                      <Text size="5" weight="bold" style={{ color: 'var(--green-9)' }}>{state.stats.success}</Text>
+                      <Text size="2" color="gray">
+                        成功
+                      </Text>
+                      <Text
+                        size="5"
+                        weight="bold"
+                        style={{ color: 'var(--green-9)' }}
+                      >
+                        {state.stats.success}
+                      </Text>
                     </Flex>
                     <Flex direction="column" align="center">
-                      <Text size="2" color="gray">失败</Text>
-                      <Text size="5" weight="bold" style={{ color: 'var(--red-9)' }}>{state.stats.failed}</Text>
+                      <Text size="2" color="gray">
+                        失败
+                      </Text>
+                      <Text
+                        size="5"
+                        weight="bold"
+                        style={{ color: 'var(--red-9)' }}
+                      >
+                        {state.stats.failed}
+                      </Text>
                     </Flex>
                   </Flex>
                 </Card>

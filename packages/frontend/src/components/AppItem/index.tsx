@@ -70,7 +70,7 @@ const AppItem: React.FC<IProps> = ({
       <Flex gap="3" style={{ height: '100%' }}>
         <img
           loading="lazy"
-          src={(app.iconUrl && app.iconUrl !== '-') ? app.iconUrl : emptyIcon}
+          src={app.iconUrl && app.iconUrl !== '-' ? app.iconUrl : emptyIcon}
           style={{ background: app.iconUrl ? 'transparent' : '#d0d0d060' }}
         />
 

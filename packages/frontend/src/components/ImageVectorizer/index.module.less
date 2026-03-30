@@ -1,0 +1,53 @@
+.pngVectorizer {
+  border: 2px dashed var(--gray-5);
+  border-radius: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: var(--gray-1);
+
+  &:hover {
+    border-color: var(--blue-9);
+    background-color: var(--blue-1);
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    &:hover {
+      border-color: var(--gray-5);
+      background-color: var(--gray-1);
+    }
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+
+  span {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+}
+
+.pngVectorizer__preview {
+  margin-top: 24px;
+
+  .loading {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

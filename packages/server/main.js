@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import geoip from 'geoip-lite';
 import AppController from './routes/app.js';
 import ExcelController, { uploadExcel } from './routes/excel.js';
 import UtilController from './routes/util.js';
@@ -13,6 +14,86 @@ import AppTypeController from './routes/appType.js';
 const app = express();
 
 app.use(cors());
+
+// 确保日志目录存在
+if (!fs.existsSync('logs')) {
+  fs.mkdirSync('logs');
+}
+
+// 记录用户访问信息的接口
+app.get('/api/visit/log', (req, res) => {
+  // 获取用户IP
+  const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+  
+  // 获取IP归属信息
+  const geo = geoip.lookup(ip);
+  const location = geo ? `${geo.country}-${geo.region}-${geo.city}` : 'Unknown';
+  
+  // 获取用户代理
+  const userAgent = req.headers['user-agent'] || 'Unknown';
+  
+  // 构建日志记录
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    ip,
+    location,
+    userAgent
+  };
+  
+  // 记录到控制台
+  console.log(`${logEntry.timestamp} - IP: ${logEntry.ip} - Location: ${logEntry.location} - User-Agent: ${logEntry.userAgent}`);
+  
+  // 保存到日志文件
+  const logFilePath = path.join('logs', 'access.log');
+  fs.appendFile(logFilePath, JSON.stringify(logEntry) + '\n', (err) => {
+    if (err) {
+      console.error('保存日志失败:', err);
+    }
+  });
+  
+  // 返回成功响应
+  res.json({ success: true, message: '访问记录已保存' });
+});
+
+// 获取日志的接口（仅管理员可访问）
+app.get('/api/visit/logs', (req, res) => {
+  try {
+    const logFilePath = path.join('logs', 'access.log');
+    
+    // 检查日志文件是否存在
+    if (!fs.existsSync(logFilePath)) {
+      return res.json({ success: true, data: [], total: 0 });
+    }
+    
+    // 读取日志文件
+    const logContent = fs.readFileSync(logFilePath, 'utf8');
+    
+    // 解析日志内容
+    const logs = logContent
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => JSON.parse(line))
+      .reverse(); // 最新的日志在前
+    
+    // 分页处理
+    const current = parseInt(req.query.current) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    const paginatedLogs = logs.slice(start, end);
+    
+    res.json({
+      success: true,
+      data: paginatedLogs,
+      total: logs.length,
+      current,
+      pageSize
+    });
+  } catch (error) {
+    console.error('获取日志失败:', error);
+    res.json({ success: false, message: '获取日志失败' });
+  }
+});
 
 app.use(express.json());
 

@@ -1,0 +1,14 @@
+E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\deps\serde-f06cda15f848d7cd.d: C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\build\serde-9f534bba96064d9e\out/private.rs
+
+E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\deps\libserde-f06cda15f848d7cd.rlib: C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\build\serde-9f534bba96064d9e\out/private.rs
+
+E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\deps\libserde-f06cda15f848d7cd.rmeta: C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\build\serde-9f534bba96064d9e\out/private.rs
+
+C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\hexu\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+E:\code\Package-Repo\packages\rust\target\wasm32-unknown-unknown\release\build\serde-9f534bba96064d9e\out/private.rs:
+
+# env-dep:OUT_DIR=E:\\code\\Package-Repo\\packages\\rust\\target\\wasm32-unknown-unknown\\release\\build\\serde-9f534bba96064d9e\\out

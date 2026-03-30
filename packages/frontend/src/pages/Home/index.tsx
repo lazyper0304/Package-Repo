@@ -9,8 +9,10 @@ import type { PageEntity } from '@/entities/page';
 import UploadExcel from '@/components/UploadExcel';
 import HarmonyIconSingle from '@/components/HarmonyIconSingle';
 import HarmonyIconFolder from '@/components/HarmonyIconFolder';
+import ImageVectorizer from '@/components/ImageVectorizer';
 import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
+import LogViewer from '@/components/LogViewer';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 import useMobile from '@/hooks/useMobile';
@@ -33,6 +35,8 @@ type IState = {
   typeOpen: boolean;
   harmonyIconSingleOpen: boolean;
   harmonyIconFolderOpen: boolean;
+  pngVectorizerOpen: boolean;
+  logOpen: boolean;
   edit: boolean;
 };
 
@@ -65,6 +69,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     typeOpen: false,
     harmonyIconSingleOpen: false,
     harmonyIconFolderOpen: false,
+    pngVectorizerOpen: false,
+    logOpen: false,
     edit: false,
   });
 
@@ -193,6 +199,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     setState({ harmonyIconFolderOpen: false });
   }
 
+  function handleClosePngVectorizer() {
+    setState({ pngVectorizerOpen: false });
+  }
+
+  function handleCloseLog() {
+    setState({ logOpen: false });
+  }
+
   function handleUploadSuccess() {
     searchAppsReq.run({
       keyword: state.keyword,
@@ -248,9 +262,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
             鸿蒙图标文件夹转 bgfg 图标
           </Button>
 
+          <Button onClick={() => setState({ pngVectorizerOpen: true })}>
+            图片矢量化
+          </Button>
+
           {isAdmin && (
             <>
               <Button onClick={handleOpenType}>类型管理</Button>
+              <Button onClick={() => setState({ logOpen: true })}>访问日志</Button>
             </>
           )}
         </div>
@@ -374,6 +393,20 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         <HarmonyIconFolder
           open={state.harmonyIconFolderOpen}
           onClose={handleCloseHarmonyIconFolder}
+        />
+      )}
+
+      {state.pngVectorizerOpen && (
+        <ImageVectorizer
+          open={state.pngVectorizerOpen}
+          onClose={handleClosePngVectorizer}
+        />
+      )}
+
+      {state.logOpen && (
+        <LogViewer
+          open={state.logOpen}
+          onClose={handleCloseLog}
         />
       )}
     </>

@@ -19,6 +19,7 @@ import copy from 'copy-to-clipboard';
 import { notify } from '@/utils/notify';
 import Form, { Field } from '@rc-component/form';
 import emptyIcon from '@/assets/empty.svg';
+import ImageVectorizer from '@/components/ImageVectorizer';
 
 import useMobile from '@/hooks/useMobile';
 import { useAppType } from '@/contexts/AppTypeContext';
@@ -43,6 +44,7 @@ const AppDetail: React.FC<IProps> = ({
   const [form] = Form.useForm();
 
   const [iconUrl, setIconUrl] = useState('');
+  const [showImageVectorizer, setShowImageVectorizer] = useState(false);
 
   const [editing, setEditing] = useState(edit || !app);
 
@@ -307,7 +309,7 @@ const AppDetail: React.FC<IProps> = ({
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
-      <Dialog.Content maxWidth={isMobile ? '88vw' : '520px'}>
+      <Dialog.Content maxWidth={isMobile ? '88vw' : '720px'}>
         <Dialog.Title>{app?.appName ?? '新增应用'}</Dialog.Title>
 
         <Dialog.Description size="2" mb="4">
@@ -322,7 +324,10 @@ const AppDetail: React.FC<IProps> = ({
                 <AiOutlineLoading className="loading" />
               )}
 
-              <img loading="lazy" src={(iconUrl && iconUrl !== '-') ? iconUrl : emptyIcon} />
+              <img
+                loading="lazy"
+                src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon}
+              />
             </div>
           )}
 
@@ -349,68 +354,106 @@ const AppDetail: React.FC<IProps> = ({
               {Item('分类', app?.type)}
             </DataList.Root>
 
-            {isAdmin && (
-              <Flex
-                gap="3"
-                style={{
-                  marginTop: 24,
-                }}
-              >
-                {app && (
-                  <>
-                    {editing && (
-                      <>
-                        <Button
-                          variant="soft"
-                          style={{ flex: 1 }}
-                          onClick={() => setEditing(false)}
-                        >
-                          取消
-                        </Button>
-                        <Button
-                          loading={loading}
-                          style={{ flex: 1 }}
-                          type="submit"
-                        >
-                          保存
-                        </Button>
-                      </>
-                    )}
+            <Flex
+              gap="3"
+              style={{
+                marginTop: 24,
+              }}
+            >
+              {app && (
+                <>
+                  {iconUrl && (
+                    <>
+                      <Button
+                        variant="soft"
+                        style={{ flex: 1 }}
+                        onClick={() => setShowImageVectorizer(true)}
+                      >
+                        转矢量
+                      </Button>
+                      <Button
+                        variant="soft"
+                        style={{ flex: 1 }}
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(iconUrl);
+                            const blob = await response.blob();
+                            const item = new ClipboardItem({
+                              [blob.type]: blob,
+                            });
+                            await navigator.clipboard.write([item]);
+                            notify('图标已复制到剪贴板');
+                          } catch (error) {
+                            console.error('复制图标失败:', error);
+                            notify('复制图标失败，请重试');
+                          }
+                        }}
+                      >
+                        复制图标
+                      </Button>
+                    </>
+                  )}
 
-                    {!editing && (
-                      <>
-                        <Button
-                          color="red"
-                          variant="soft"
-                          loading={loading}
-                          style={{ flex: 1 }}
-                          onClick={handleDelete}
-                        >
-                          删除
-                        </Button>
-                        <Button
-                          style={{ flex: 1 }}
-                          onClick={() => setEditing(true)}
-                        >
-                          编辑
-                        </Button>
-                      </>
-                    )}
-                  </>
-                )}
+                  {isAdmin && editing && (
+                    <>
+                      <Button
+                        variant="soft"
+                        style={{ flex: 1 }}
+                        onClick={() => setEditing(false)}
+                      >
+                        取消
+                      </Button>
+                      <Button
+                        loading={loading}
+                        style={{ flex: 1 }}
+                        type="submit"
+                      >
+                        保存
+                      </Button>
+                    </>
+                  )}
 
-                {!app && (
-                  <Button
-                    loading={loading}
-                    type="submit"
-                    style={{ width: '100%' }}
-                  >
-                    添加
-                  </Button>
-                )}
-              </Flex>
-            )}
+                  {isAdmin && !editing && (
+                    <>
+                      <Button
+                        color="red"
+                        variant="soft"
+                        loading={loading}
+                        style={{ flex: 1 }}
+                        onClick={handleDelete}
+                      >
+                        删除
+                      </Button>
+                      <Button
+                        style={{ flex: 1 }}
+                        onClick={() => setEditing(true)}
+                      >
+                        编辑
+                      </Button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {isAdmin && !app && (
+                <Button
+                  loading={loading}
+                  type="submit"
+                  style={{ width: '100%' }}
+                >
+                  添加
+                </Button>
+              )}
+            </Flex>
           </Form>
+
+          {showImageVectorizer && (
+            <ImageVectorizer
+              open={showImageVectorizer}
+              onClose={() => setShowImageVectorizer(false)}
+              imageUrl={iconUrl}
+            />
+          )}
         </Dialog.Description>
       </Dialog.Content>
     </Dialog.Root>

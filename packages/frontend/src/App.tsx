@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import Home from './pages/Home';
 import { Theme } from '@radix-ui/themes';
@@ -20,6 +20,19 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App: React.FC = () => {
+  // 记录用户访问信息
+  useEffect(() => {
+    const logVisit = async () => {
+      try {
+        await fetch('/api/visit/log');
+      } catch (error) {
+        console.error('记录访问信息失败:', error);
+      }
+    };
+    
+    logVisit();
+  }, []);
+  
   return (
     <AppTypeProvider>
       <Theme>
