@@ -362,7 +362,7 @@ const AppDetail: React.FC<IProps> = ({
             >
               {app && (
                 <>
-                  {iconUrl && (
+                  {iconUrl && iconUrl !== '-' && (
                     <>
                       <Button
                         variant="soft"
