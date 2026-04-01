@@ -71,7 +71,10 @@ const AppItem: React.FC<IProps> = ({
         <img
           loading="lazy"
           src={app.iconUrl && app.iconUrl !== '-' ? app.iconUrl : emptyIcon}
-          style={{ background: app.iconUrl ? 'transparent' : '#d0d0d060' }}
+          style={{
+            background:
+              app.iconUrl && app.iconUrl !== '-' ? 'transparent' : '#d0d0d060',
+          }}
         />
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
