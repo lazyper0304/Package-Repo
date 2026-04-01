@@ -95,7 +95,6 @@ const SearchResult: React.FC<IProps> = ({
                   : displayMode === 'grid2'
                     ? 'calc(50% - 8px)'
                     : 'calc(33.333% - 10.666px)',
-              minWidth: displayMode === 'grid1' ? '100%' : '280px',
             }}
           >
             <AppItem

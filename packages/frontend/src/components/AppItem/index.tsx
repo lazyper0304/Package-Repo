@@ -82,7 +82,12 @@ const AppItem: React.FC<IProps> = ({
             <Heading
               size="3"
               title="应用名称"
-              style={{ width: 'max-content' }}
+              style={{
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
               onClick={(e) => handleCopy(e, app.appName)}
             >
               <Highlighter searchWords={keyword || ''}>
@@ -93,7 +98,12 @@ const AppItem: React.FC<IProps> = ({
             <Text
               color="gray"
               title="Android包名"
-              style={{ width: 'max-content' }}
+              style={{
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
               onClick={(e) => handleCopy(e, app.androidPackageName)}
             >
               <Highlighter searchWords={keyword || ''}>
@@ -103,7 +113,12 @@ const AppItem: React.FC<IProps> = ({
             <Text
               color="gray"
               title="Harmony包名"
-              style={{ width: 'max-content' }}
+              style={{
+                width: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
               onClick={(e) => handleCopy(e, app.harmonyPackageName)}
             >
               <Highlighter searchWords={keyword || ''}>
