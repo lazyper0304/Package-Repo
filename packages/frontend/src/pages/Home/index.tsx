@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import styles from './index.module.less';
 import { Button, Flex } from '@radix-ui/themes';
 import type { AppEntity } from '@/entities/app';
@@ -42,6 +43,8 @@ type IState = {
 
 const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   const isMobile = useMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
   const [displayMode, setDisplayMode] = useLocalStorageState<
@@ -107,7 +110,50 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     },
   });
 
-  // 当显示模式改变时，重新发起搜索请求，使用正确的 pageSize
+  // 用于跟踪上一次的搜索条件，避免循环更新
+  const prevSearchRef = React.useRef<string>(location.search);
+
+  // 从URL参数中读取搜索条件
+  useEffect(() => {
+    // 只有当URL参数真正变化时才处理，避免循环更新
+    if (location.search !== prevSearchRef.current) {
+      const params = new URLSearchParams(location.search);
+      const keyword = params.get('keyword') || '';
+      const type = params.get('type') || '全部';
+      
+      setState({
+        keyword,
+        currentAppType: type,
+      });
+      
+      // 更新引用
+      prevSearchRef.current = location.search;
+    }
+  }, [location.search]);
+
+  // 当搜索条件变化时更新URL参数
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (state.keyword) {
+      params.set('keyword', state.keyword);
+    }
+    if (state.currentAppType && state.currentAppType !== '全部') {
+      params.set('type', state.currentAppType);
+    }
+    
+    const searchString = params.toString();
+    
+    // 只在搜索条件变化时更新URL，避免无限循环
+    if (searchString !== prevSearchRef.current) {
+      // 使用replace方法避免在浏览器历史中创建太多条目
+      navigate({ search: searchString }, { replace: true });
+      
+      // 更新引用
+      prevSearchRef.current = searchString;
+    }
+  }, [state.keyword, state.currentAppType, navigate]);
+
+  // 当显示模式或搜索条件改变时，重新发起搜索请求
   useEffect(() => {
     searchAppsReq.run({
       keyword: state.keyword,

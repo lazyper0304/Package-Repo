@@ -14,6 +14,7 @@ const Pagination: React.FC<PaginationProps> = (props) => {
       {...props}
       className={`${styles.pagination} ${isMobile ? styles.pagination__mobile : ''}`}
       showLessItems={isMobile}
+      showQuickJumper={!isMobile}
       showTotal={(v) => (
         <div className={styles.pagination__total}>
           <Highlighter searchWords={v.toString()} children={`共 ${v} 个`} />
