@@ -32,6 +32,8 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
   const [result, setResult] = useState<{
     success: boolean;
     missingApps: AppInfo[];
+    missingBgApps: AppInfo[];
+    missingFgApps: AppInfo[];
     foundApps: AppInfo[];
     error?: string;
   } | null>(null);
@@ -109,6 +111,8 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
   // 从文件夹中提取图标包
   const extractPackagesFromFolder = (files: File[]): Set<string> => {
     const foundPackages = new Set<string>();
+    const bgFiles = new Set<string>();
+    const fgFiles = new Set<string>();
     
     files.forEach(file => {
       const fileName = file.name;
@@ -128,10 +132,15 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
       } 
       // 情况2：文件夹里面全是bgfg的png文件
       // 示例文件名：package_name_bg.png 或 package_name_fg.png
-      else if (fileName.endsWith('_bg.png') || fileName.endsWith('_fg.png')) {
-        const packageName = fileName.split('_')[0];
+      else if (fileName.endsWith('_bg.png')) {
+        const packageName = fileName.replace('_bg.png', '');
         if (packageName) {
-          foundPackages.add(packageName);
+          bgFiles.add(packageName);
+        }
+      } else if (fileName.endsWith('_fg.png')) {
+        const packageName = fileName.replace('_fg.png', '');
+        if (packageName) {
+          fgFiles.add(packageName);
         }
       }
       // 其他情况：直接使用文件名（不含扩展名）作为包名
@@ -140,6 +149,13 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
         if (packageName) {
           foundPackages.add(packageName);
         }
+      }
+    });
+    
+    // 对于bgfg文件，只有同时存在_bg.png和_fg.png的包名才被视为完整
+    bgFiles.forEach(packageName => {
+      if (fgFiles.has(packageName)) {
+        foundPackages.add(packageName);
       }
     });
     
@@ -163,16 +179,51 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
 
     try {
       let foundPackages: Set<string>;
+      let missingBgApps: AppInfo[] = [];
+      let missingFgApps: AppInfo[] = [];
 
       if (hwtFile) {
         // 处理HWT文件
         foundPackages = await extractPackagesFromHwt(hwtFile);
       } else {
         // 处理文件夹
-        foundPackages = extractPackagesFromFolder(folderFiles);
+        // 先分别收集bg和fg文件
+        const bgFiles = new Set<string>();
+        const fgFiles = new Set<string>();
+        
+        folderFiles.forEach(file => {
+          const fileName = file.name;
+          if (fileName.endsWith('_bg.png')) {
+            const packageName = fileName.replace('_bg.png', '');
+            if (packageName) {
+              bgFiles.add(packageName);
+            }
+          } else if (fileName.endsWith('_fg.png')) {
+            const packageName = fileName.replace('_fg.png', '');
+            if (packageName) {
+              fgFiles.add(packageName);
+            }
+          }
+        });
+        
+        // 提取完整的包（同时有bg和fg）
+        foundPackages = new Set<string>();
+        bgFiles.forEach(packageName => {
+          if (fgFiles.has(packageName)) {
+            foundPackages.add(packageName);
+          }
+        });
+        
+        // 检查缺少bg或fg的应用
+        missingBgApps = huaweiRequiredApps.filter(
+          app => !bgFiles.has(app.package_name)
+        );
+        missingFgApps = huaweiRequiredApps.filter(
+          app => !fgFiles.has(app.package_name)
+        );
       }
 
-      // 检查缺少的图标包
+      // 检查完全缺失的图标包
       const missingApps = huaweiRequiredApps.filter(
         (app) => !foundPackages.has(app.package_name)
       );
@@ -184,12 +235,16 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
       setResult({
         success: missingApps.length === 0,
         missingApps,
+        missingBgApps,
+        missingFgApps,
         foundApps,
       });
     } catch (error) {
       setResult({
         success: false,
         missingApps: huaweiRequiredApps,
+        missingBgApps: [],
+        missingFgApps: [],
         foundApps: [],
         error:
           '处理文件失败：' +
@@ -388,10 +443,38 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
                 </Text>
               )}
             </Box>
-            <ScrollArea style={{ maxHeight: '300px' }}>
+            <ScrollArea style={{ maxHeight: '400px' }}>
+              {result.missingBgApps.length > 0 && (
+                <Box mb="4">
+                  <Text size="2" weight="medium" mb="2" color="orange">
+                    缺少_bg.png文件的应用 ({result.missingBgApps.length}个):
+                  </Text>
+                  <Flex direction="column" gap="1">
+                    {result.missingBgApps.map((app, index) => (
+                      <Text key={index} size="2" color="orange">
+                        • {app.app_name} ({app.package_name})
+                      </Text>
+                    ))}
+                  </Flex>
+                </Box>
+              )}
+              {result.missingFgApps.length > 0 && (
+                <Box mb="4">
+                  <Text size="2" weight="medium" mb="2" color="orange">
+                    缺少_fg.png文件的应用 ({result.missingFgApps.length}个):
+                  </Text>
+                  <Flex direction="column" gap="1">
+                    {result.missingFgApps.map((app, index) => (
+                      <Text key={index} size="2" color="orange">
+                        • {app.app_name} ({app.package_name})
+                      </Text>
+                    ))}
+                  </Flex>
+                </Box>
+              )}
               {result.missingApps.length > 0 && (
                 <Box mb="4">
-                  <Text size="2" weight="medium" mb="2">
+                  <Text size="2" weight="medium" mb="2" color="red">
                     缺少的必做图标 ({result.missingApps.length}个):
                   </Text>
                   <Flex direction="column" gap="1">
@@ -404,12 +487,12 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
                 </Box>
               )}
               <Box>
-                <Text size="2" weight="medium" mb="2">
+                <Text size="2" weight="medium" mb="2" color="green">
                   已找到的必做图标 ({result.foundApps.length}个):
                 </Text>
                 <Flex direction="column" gap="1">
                   {result.foundApps.map((app, index) => (
-                    <Text key={index} size="2">
+                    <Text key={index} size="2" color="green">
                       • {app.app_name} ({app.package_name})
                     </Text>
                   ))}
