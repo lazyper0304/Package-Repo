@@ -414,4 +414,36 @@ export default class AppController {
       });
     }
   }
+
+  // 根据类型获取应用
+  static async getAppsByType(req, res) {
+    try {
+      const { typeName } = req.query;
+
+      if (!typeName || typeName.trim() === '') {
+        return res.status(400).json({ success: false, error: '类型名称不能为空' });
+      }
+
+      // 查询数据库中type字段包含该类型的所有应用
+      const query = `
+        SELECT app_name, harmony_package, android_package 
+        FROM apps 
+        WHERE JSON_CONTAINS(type, JSON_ARRAY(?))
+      `;
+
+      const [rows] = await pool.execute(query, [typeName.trim()]);
+
+      res.json({
+        success: true,
+        data: rows,
+        total: rows.length
+      });
+    } catch (error) {
+      console.error('根据类型获取应用失败:', error);
+      res.status(500).json({
+        success: false,
+        error: '根据类型获取应用失败: ' + error.message
+      });
+    }
+  }
 }

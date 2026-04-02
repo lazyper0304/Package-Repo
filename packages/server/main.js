@@ -129,6 +129,9 @@ app.delete('/api/app', AppController.deleteApp);
 // 苹果应用商店图标获取API
 app.get('/api/app/apple-store-icon', AppController.getIconFromAppleStore);
 
+// 根据类型获取应用
+app.get('/api/app/by-type', AppController.getAppsByType);
+
 app.get('/api/app-types/list', AppTypeController.typeList);
 
 app.post('/api/app-types', AppTypeController.addAppType);

@@ -14,6 +14,7 @@ import ImageVectorizer from '@/components/ImageVectorizer';
 import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
 import LogViewer from '@/components/LogViewer';
+import HuaweiIconChecker from '@/components/HuaweiIconChecker';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 import useMobile from '@/hooks/useMobile';
@@ -38,6 +39,7 @@ type IState = {
   harmonyIconFolderOpen: boolean;
   pngVectorizerOpen: boolean;
   logOpen: boolean;
+  huaweiIconCheckerOpen: boolean;
   edit: boolean;
 };
 
@@ -74,6 +76,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     harmonyIconFolderOpen: false,
     pngVectorizerOpen: false,
     logOpen: false,
+    huaweiIconCheckerOpen: false,
     edit: false,
   });
 
@@ -253,6 +256,10 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     setState({ logOpen: false });
   }
 
+  function handleCloseHuaweiIconChecker() {
+    setState({ huaweiIconCheckerOpen: false });
+  }
+
   function handleUploadSuccess() {
     searchAppsReq.run({
       keyword: state.keyword,
@@ -310,6 +317,10 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
           <Button onClick={() => setState({ pngVectorizerOpen: true })}>
             图片矢量化
+          </Button>
+
+          <Button onClick={() => setState({ huaweiIconCheckerOpen: true })}>
+            华为必做图标检查
           </Button>
 
           {isAdmin && (
@@ -453,6 +464,13 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         <LogViewer
           open={state.logOpen}
           onClose={handleCloseLog}
+        />
+      )}
+
+      {state.huaweiIconCheckerOpen && (
+        <HuaweiIconChecker
+          open={state.huaweiIconCheckerOpen}
+          onClose={handleCloseHuaweiIconChecker}
         />
       )}
     </>

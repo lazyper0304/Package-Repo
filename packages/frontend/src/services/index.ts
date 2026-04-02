@@ -338,4 +338,39 @@ export default class API {
       return { success: false, message: '网络错误，无法连接到服务器' };
     }
   }
+
+  // 根据类型获取应用
+  static async getAppsByType(params: {
+    typeName: string;
+  }) {
+    try {
+      const query = new URLSearchParams();
+      query.append('typeName', params.typeName);
+
+      const response = await fetch(`/api/app/by-type?${query}`);
+
+      if (!response.ok) {
+        console.error('获取应用失败:', response.status);
+        return { success: false, data: [] };
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data.map((item) => ({
+            app_name: item.app_name,
+            package_name: item.harmony_package || item.android_package || ''
+          }))
+        };
+      } else {
+        console.error('获取应用失败:', result.error);
+        return { success: false, data: [] };
+      }
+    } catch (error) {
+      console.error('获取应用错误:', error);
+      return { success: false, data: [] };
+    }
+  }
 }
