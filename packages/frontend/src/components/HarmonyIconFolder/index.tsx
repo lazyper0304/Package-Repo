@@ -65,8 +65,14 @@ const HarmonyIconFolder: React.FC<IProps> = ({ open, onClose }) => {
         const entryIndex = parts.indexOf('entry');
 
         if (entryIndex > 0 && entryIndex < parts.length - 1) {
-          const appName = parts[entryIndex - 1];
-          const fileName = parts[entryIndex + 1];
+          // 基础包名
+          const basePackageName = parts[entryIndex - 1];
+          // 检查是否存在启动类目录
+          const abilityDir = parts[entryIndex + 1];
+          // 构建应用名称，支持启动类格式
+          const appName = abilityDir && abilityDir.includes('Ability') ? abilityDir : basePackageName;
+          // 获取文件名
+          const fileName = parts[entryIndex + 2] || parts[entryIndex + 1];
 
           if (!appFilesMap.has(appName)) {
             appFilesMap.set(appName, {});

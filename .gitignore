@@ -32,3 +32,5 @@ pnpm-lock.yaml
 output
 package-lock.json
 yarn.lock
+packages/rust/pkg
+packages/rust/target
