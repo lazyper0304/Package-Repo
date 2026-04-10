@@ -341,7 +341,11 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   );
 
   const footer = useMemo(
-    () => <footer className={styles.footer}>All Rights Reserved© 2026 Package Repo</footer>,
+    () => (
+      <footer className={styles.footer}>
+        All Rights Reserved© 2026 Package Repo
+      </footer>
+    ),
     []
   );
 
@@ -354,32 +358,29 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           {background}
 
           <div className={styles.home__content}>
-            <section>
-              <Flex direction="column" gap="3" style={{ height: '100%' }}>
-                <SearchForm
-                  loading={searchAppsReq.loading}
-                  onChange={handleSearch}
-                />
+            <Flex direction="column" gap="3" style={{ maxHeight: '77vh' }}>
+              <SearchForm
+                loading={searchAppsReq.loading}
+                onChange={handleSearch}
+              />
 
-                <SearchResult
-                  currentAppType={state.currentAppType}
-                  appTypes={appTypesWithAll}
-                  loading={searchAppsReq.loading}
-                  keyword={state.keyword}
-                  pagination={state.pagination}
-                  apps={state.apps}
-                  onClick={handleOpenAppDetail}
-                  onDelete={handleDeleteApp}
-                  onChange={handlePageChange}
-                  onUpload={handleOpenUpload}
-                  onType={handleOpenType}
-                  onTypeChange={handleTypeChange}
-                  isAdmin={isAdmin}
-                  displayMode={displayMode}
-                  setDisplayMode={setDisplayMode}
-                />
-              </Flex>
-            </section>
+              <SearchResult
+                currentAppType={state.currentAppType}
+                appTypes={appTypesWithAll}
+                loading={searchAppsReq.loading}
+                keyword={state.keyword}
+                pagination={state.pagination}
+                apps={state.apps}
+                onClick={handleOpenAppDetail}
+                onDelete={handleDeleteApp}
+                onChange={handlePageChange}
+                onUpload={handleOpenUpload}
+                onTypeChange={handleTypeChange}
+                isAdmin={isAdmin}
+                displayMode={displayMode}
+                setDisplayMode={setDisplayMode}
+              />
+            </Flex>
           </div>
 
           {footer}
