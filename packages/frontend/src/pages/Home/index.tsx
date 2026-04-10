@@ -123,12 +123,12 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
       const params = new URLSearchParams(location.search);
       const keyword = params.get('keyword') || '';
       const type = params.get('type') || '全部';
-      
+
       setState({
         keyword,
         currentAppType: type,
       });
-      
+
       // 更新引用
       prevSearchRef.current = location.search;
     }
@@ -143,14 +143,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     if (state.currentAppType && state.currentAppType !== '全部') {
       params.set('type', state.currentAppType);
     }
-    
+
     const searchString = params.toString();
-    
+
     // 只在搜索条件变化时更新URL，避免无限循环
     if (searchString !== prevSearchRef.current) {
       // 使用replace方法避免在浏览器历史中创建太多条目
       navigate({ search: searchString }, { replace: true });
-      
+
       // 更新引用
       prevSearchRef.current = searchString;
     }
@@ -303,10 +303,13 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
 
   const header = useMemo(
     () => (
-      <header className={styles.home__header}>
-        <h1>Package Repo {isAdmin ? '(Admin)' : ''}</h1>
+      <header className={styles.header}>
+        <Flex align="center" gap="3">
+          <img src="/logo.png" />
+          <h1>Package Repo {isAdmin ? '(Admin)' : ''}</h1>
+        </Flex>
 
-        <div className={styles.home__functions}>
+        <div className={styles.header__functions}>
           <Button onClick={() => setState({ harmonyIconSingleOpen: true })}>
             单个图标转鸿蒙图标
           </Button>
@@ -326,7 +329,9 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           {isAdmin && (
             <>
               <Button onClick={handleOpenType}>类型管理</Button>
-              <Button onClick={() => setState({ logOpen: true })}>访问日志</Button>
+              <Button onClick={() => setState({ logOpen: true })}>
+                访问日志
+              </Button>
             </>
           )}
         </div>
@@ -335,15 +340,20 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     [handleOpenType, isAdmin, setState]
   );
 
+  const footer = useMemo(
+    () => <footer className={styles.footer}>All Rights Reserved© 2026 Package Repo</footer>,
+    []
+  );
+
   return (
     <>
       {!isMobile && (
         <div className={styles.home}>
+          {header}
+
           {background}
 
           <div className={styles.home__content}>
-            {header}
-
             <section>
               <Flex direction="column" gap="3" style={{ height: '100%' }}>
                 <SearchForm
@@ -371,6 +381,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
               </Flex>
             </section>
           </div>
+
+          {footer}
         </div>
       )}
 
@@ -405,6 +417,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
                   displayMode={displayMode}
                   setDisplayMode={setDisplayMode}
                 />
+
+                {footer}
               </Flex>
             </section>
           </div>
@@ -461,10 +475,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
       )}
 
       {state.logOpen && (
-        <LogViewer
-          open={state.logOpen}
-          onClose={handleCloseLog}
-        />
+        <LogViewer open={state.logOpen} onClose={handleCloseLog} />
       )}
 
       {state.huaweiIconCheckerOpen && (
