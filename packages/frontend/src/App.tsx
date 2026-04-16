@@ -58,6 +58,16 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // 根据主题模式设置根元素的 data-theme 属性
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    const currentTheme = themeMode === 'system' 
+      ? (systemDarkMode ? 'dark' : 'light')
+      : themeMode;
+    
+    rootElement.setAttribute('data-theme', currentTheme);
+  }, [themeMode, systemDarkMode]);
+
   // 记录用户访问信息
   useEffect(() => {
     const logVisit = async () => {

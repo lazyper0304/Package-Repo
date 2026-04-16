@@ -26,23 +26,26 @@
   --radius-xl: 24px;
   --card-bg: #f8fafc;
 
+  &[data-theme='dark'] {
+    .rt-BaseDialogContent,
+    .rt-BaseMenuContent {
+      background: #00000021;
+      backdrop-filter: blur(128px);
+    }
+
+    .rt-BaseDialogOverlay::before {
+      background: #00000080;
+    }
+  }
+
   .rt-BaseDialogContent,
   .rt-BaseMenuContent {
     background: #ffffff21;
     backdrop-filter: blur(56px);
-
-    @media (prefers-color-scheme: dark) {
-      background: #00000021;
-      backdrop-filter: blur(128px);
-    }
   }
 
   .rt-BaseDialogOverlay::before {
     background: #ffffff80;
-
-    @media (prefers-color-scheme: dark) {
-      background: #00000080;
-    }
   }
 }
 
