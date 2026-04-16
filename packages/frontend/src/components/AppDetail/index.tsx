@@ -452,6 +452,13 @@ const AppDetail: React.FC<IProps> = ({
               open={showImageVectorizer}
               onClose={() => setShowImageVectorizer(false)}
               imageUrl={iconUrl}
+              onSuccess={(svgUrl) => {
+                setIconUrl(svgUrl);
+                form.setFieldValue('图标链接', svgUrl);
+                if (app?.id) {
+                  updateIconReq.run({ id: app.id, iconUrl: svgUrl });
+                }
+              }}
             />
           )}
         </Dialog.Description>

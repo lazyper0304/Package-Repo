@@ -12,6 +12,7 @@ type IProps = Readonly<{
   open: boolean;
   onClose: () => void;
   imageUrl?: string;
+  onSuccess?: (svgUrl: string) => void;
 }>;
 
 type ProcessedFile = {
@@ -21,7 +22,8 @@ type ProcessedFile = {
   originalUrl: string;
 };
 
-const ImageVectorizer: React.FC<IProps> = ({ open, onClose, imageUrl }) => {
+const ImageVectorizer: React.FC<IProps> = (props) => {
+  const { open, onClose, imageUrl, onSuccess } = props;
   const ref = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
 
@@ -258,7 +260,7 @@ const ImageVectorizer: React.FC<IProps> = ({ open, onClose, imageUrl }) => {
     processFiles(files);
   }
 
-  // 下载SVG文件
+  // 下载 SVG 文件
   function downloadSvg(svgContent: string, fileName: string) {
     const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
     const svgUrl = URL.createObjectURL(svgBlob);
@@ -271,8 +273,16 @@ const ImageVectorizer: React.FC<IProps> = ({ open, onClose, imageUrl }) => {
     URL.revokeObjectURL(svgUrl);
   }
 
+  function handleClose() {
+    // 如果有成功的矢量化结果，回调 SVG URL 给父组件
+    if (state.success && state.processedFile && onSuccess) {
+      onSuccess(state.processedFile.svgUrl);
+    }
+    onClose();
+  }
+
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog.Root open={open} onOpenChange={(v) => !v && handleClose()}>
       <Dialog.Content maxWidth="1060px">
         <Dialog.Title>
           <div>图片矢量化</div>
