@@ -1,11 +1,12 @@
 @import url('https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css');
 
 :root {
-  --primary: #3b82f6;
-  --primary-light: #60a5fa;
-  --primary-dark: #2563eb;
   --accent: #06b6d4;
-  --bg-gradient: linear-gradient(135deg, #3b82f6 0%, #93c5fd 100%);
+  --bg-gradient: linear-gradient(
+    135deg,
+    var(--accent-3) 0%,
+    var(--accent-9) 100%
+  );
   --glass-bg: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(255, 255, 255, 0.3);
   --text-primary: #1e293b;
@@ -24,6 +25,25 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --card-bg: #f8fafc;
+
+  .rt-BaseDialogContent,
+  .rt-BaseMenuContent {
+    background: #ffffff21;
+    backdrop-filter: blur(56px);
+
+    @media (prefers-color-scheme: dark) {
+      background: #00000021;
+      backdrop-filter: blur(128px);
+    }
+  }
+
+  .rt-BaseDialogOverlay::before {
+    background: #ffffff80;
+
+    @media (prefers-color-scheme: dark) {
+      background: #00000080;
+    }
+  }
 }
 
 .loading {

@@ -133,7 +133,7 @@ const AppItem: React.FC<IProps> = ({
               gap="2"
               style={{
                 marginTop: 8,
-                borderTop: '1px solid #d0d0d080',
+                borderTop: '1px solid var(--gray-a6)',
                 paddingTop: 8,
                 width: '100%',
               }}

@@ -1,7 +1,7 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import styles from './index.module.less';
-import { Button, Flex } from '@radix-ui/themes';
+import { Button, Flex, IconButton } from '@radix-ui/themes';
 import type { AppEntity } from '@/entities/app';
 import API from '@/services';
 import { useRequest, useSetState, useLocalStorageState } from 'ahooks';
@@ -18,12 +18,37 @@ import ImportJson from '@/components/ImportJson';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 import useMobile from '@/hooks/useMobile';
+import {
+  AiOutlineSun,
+  AiOutlineMoon,
+  AiOutlineHarmonyOS,
+  AiOutlineTool,
+  AiFillTool,
+} from 'react-icons/ai';
+import {
+  MdBrightness2,
+  MdBrightnessAuto,
+  MdBrightnessHigh,
+  MdChevronLeft,
+  MdChevronRight,
+  MdFilter,
+  MdFilterList,
+  MdOutlineBrightness1,
+  MdOutlineBrightness2,
+  MdOutlineBrightness7,
+  MdOutlineBrightnessAuto,
+  MdOutlineBrightnessHigh,
+} from 'react-icons/md';
 
 const SearchResult = React.lazy(() => import('./SearchResult'));
 const SearchForm = React.lazy(() => import('./SearchForm'));
 
+type ThemeMode = 'light' | 'dark' | 'system';
+
 type IProps = Readonly<{
   isAdmin?: boolean;
+  themeMode?: ThemeMode;
+  setThemeMode?: (value: ThemeMode) => void;
 }>;
 
 type IState = {
@@ -43,7 +68,11 @@ type IState = {
   edit: boolean;
 };
 
-const Home: React.FC<IProps> = ({ isAdmin = false }) => {
+const Home: React.FC<IProps> = ({
+  isAdmin = false,
+  themeMode,
+  setThemeMode,
+}) => {
   const isMobile = useMobile();
   const location = useLocation();
   const navigate = useNavigate();
@@ -55,8 +84,11 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     defaultValue: 'grid1',
   });
 
+  // 功能展开状态
+  const [functionsExpanded, setFunctionsExpanded] = useState(false);
+
   // 根据显示模式计算 pageSize
-  const pageSize = displayMode === 'grid3' ? 21 : 20;
+  const pageSize = displayMode === 'grid3' ? 24 : 21;
 
   const [state, setState] = useSetState<IState>({
     keyword: '',
@@ -194,10 +226,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     deleteReq.run({ id });
   }
 
-  function handleOpenUpload() {
-    setState({ uploadOpen: true });
-  }
-
   function handleOpenType() {
     setState({ typeOpen: true });
   }
@@ -226,10 +254,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
   function handleRefreshAll() {
     searchAppsReq.refresh();
     refreshAppTypes();
-  }
-
-  function handleCloseUpload() {
-    setState({ uploadOpen: false });
   }
 
   function handleCloseType() {
@@ -310,34 +334,90 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         </Flex>
 
         <div className={styles.header__functions}>
-          <Button onClick={() => setState({ harmonyIconSingleOpen: true })}>
-            单个图标转鸿蒙图标
-          </Button>
+          <div
+            className={styles.header__functions__buttons}
+            style={{ display: functionsExpanded ? 'flex' : 'none' }}
+          >
+            <Button onClick={() => setState({ harmonyIconSingleOpen: true })}>
+              单个图标转鸿蒙图标
+            </Button>
 
-          <Button onClick={() => setState({ harmonyIconFolderOpen: true })}>
-            鸿蒙图标文件夹转 bgfg 图标
-          </Button>
+            <Button onClick={() => setState({ harmonyIconFolderOpen: true })}>
+              鸿蒙图标文件夹转 bgfg 图标
+            </Button>
 
-          <Button onClick={() => setState({ pngVectorizerOpen: true })}>
-            图片矢量化
-          </Button>
+            <Button onClick={() => setState({ pngVectorizerOpen: true })}>
+              图片矢量化
+            </Button>
 
-          <Button onClick={() => setState({ huaweiIconCheckerOpen: true })}>
-            华为必做图标检查
-          </Button>
+            <Button onClick={() => setState({ huaweiIconCheckerOpen: true })}>
+              华为必做图标检查
+            </Button>
 
-          {isAdmin && (
-            <>
-              <Button onClick={handleOpenType}>类型管理</Button>
-              <Button onClick={() => setState({ logOpen: true })}>
-                访问日志
-              </Button>
-            </>
-          )}
+            {isAdmin && (
+              <>
+                <Button onClick={handleOpenType}>类型管理</Button>
+                <Button onClick={() => setState({ logOpen: true })}>
+                  访问日志
+                </Button>
+              </>
+            )}
+          </div>
+
+          <div className={styles.header__functions__controls}>
+            <IconButton
+              size="3"
+              variant="soft"
+              radius="full"
+              onClick={() => setFunctionsExpanded(!functionsExpanded)}
+              aria-label={functionsExpanded ? '收起功能' : '展开功能'}
+            >
+              {functionsExpanded ? <MdChevronRight /> : <MdFilterList />}
+            </IconButton>
+
+            <IconButton
+              size="3"
+              variant="soft"
+              radius="full"
+              onClick={() => {
+                // 循环切换主题模式：light -> dark -> system
+                if (themeMode === 'light') {
+                  setThemeMode?.('dark');
+                } else if (themeMode === 'dark') {
+                  setThemeMode?.('system');
+                } else {
+                  setThemeMode?.('light');
+                }
+              }}
+              aria-label={
+                themeMode === 'light'
+                  ? '切换到深色模式'
+                  : themeMode === 'dark'
+                    ? '切换到跟随系统'
+                    : '切换到浅色模式'
+              }
+            >
+              {themeMode === 'light' ? (
+                <MdBrightnessHigh />
+              ) : themeMode === 'dark' ? (
+                <MdBrightness2 />
+              ) : (
+                <MdBrightnessAuto />
+              )}
+            </IconButton>
+          </div>
         </div>
       </header>
     ),
-    [handleOpenType, isAdmin, setState]
+    [
+      handleOpenType,
+      isAdmin,
+      setState,
+      functionsExpanded,
+      setFunctionsExpanded,
+      themeMode,
+      setThemeMode,
+    ]
   );
 
   const footer = useMemo(
@@ -358,7 +438,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           {background}
 
           <div className={styles.home__content}>
-            <Flex direction="column" gap="3" style={{ maxHeight: '77vh' }}>
+            <Flex direction="column" gap="3" style={{ maxHeight: '87vh' }}>
               <SearchForm
                 loading={searchAppsReq.loading}
                 onChange={handleSearch}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Text } from '@radix-ui/themes';
+import { Dialog } from '@radix-ui/themes';
 
 type IProps = Readonly<{
   open: boolean;
@@ -8,7 +8,7 @@ type IProps = Readonly<{
   children: React.ReactNode;
   maxWidth?: string;
   description?: string;
-}>
+}>;
 
 const CustomDialog: React.FC<IProps> = ({
   open,
