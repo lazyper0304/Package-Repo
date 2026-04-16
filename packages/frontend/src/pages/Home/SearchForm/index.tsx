@@ -129,7 +129,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               style={{
                 marginBottom: 8,
                 paddingBottom: 8,
-                borderBottom: '1px solid #eee',
+                borderBottom: '1px solid var(--gray-a6)',
               }}
             >
               <Flex align="center" gap="2">
@@ -161,7 +161,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                      '#f5f5f5';
+                      'var(--accent)';
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLDivElement).style.backgroundColor =
