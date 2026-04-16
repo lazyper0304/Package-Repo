@@ -99,19 +99,7 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
         !path.endsWith('/')
       ) {
         const parts = path.split('/');
-        if (parts.length >= 3) {
-          // 支持启动类格式：icons/package_name/entry/AbilityName/background.png
-          if (parts[2] === 'entry' && parts.length >= 4) {
-            const abilityName = parts[3];
-            if (abilityName.includes('Ability')) {
-              foundPackages.add(abilityName);
-            } else {
-              foundPackages.add(parts[1]);
-            }
-          } else {
-            foundPackages.add(parts[1]);
-          }
-        } else if (parts.length >= 2) {
+        if (parts.length >= 2) {
           foundPackages.add(parts[1]);
         }
       }
@@ -131,24 +119,11 @@ const HuaweiIconChecker: React.FC<IProps> = ({ open, onClose }) => {
       const filePath = file.webkitRelativePath || '';
       
       // 情况1：文件夹里面全是鸿蒙的图标文件夹
-      // 示例路径1：folder/package_name/icon.png
-      // 示例路径2：folder/package_name/entry/AbilityName/background.png
+      // 示例路径：folder/package_name/icon.png
       if (filePath.includes('/')) {
         const pathParts = filePath.split('/');
-        if (pathParts.length >= 4) {
-          // 支持启动类格式：folder/package_name/entry/AbilityName/background.png
-          if (pathParts[2] === 'entry') {
-            const abilityName = pathParts[3];
-            if (abilityName.includes('Ability')) {
-              foundPackages.add(abilityName);
-            } else {
-              foundPackages.add(pathParts[1]);
-            }
-          } else {
-            foundPackages.add(pathParts[1]);
-          }
-        } else if (pathParts.length >= 2) {
-          // 传统格式：folder/package_name/icon.png
+        // 假设路径结构是：上传的文件夹/包名/图标文件
+        if (pathParts.length >= 2) {
           const packageName = pathParts[1];
           if (packageName) {
             foundPackages.add(packageName);

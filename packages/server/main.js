@@ -4,8 +4,20 @@ import fs from 'fs';
 import path from 'path';
 import geoip from 'geoip-lite';
 import AppController from './routes/app.js';
-import ExcelController, { uploadExcel } from './routes/excel.js';
 import UtilController from './routes/util.js';
+import multer from 'multer';
+
+// 配置multer存储
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
 import TokenUtil from './utils/token.js';
 import { initialize } from './init.js';
 import AppTypeController from './routes/appType.js';
@@ -108,13 +120,6 @@ TokenUtil.getToken();
 // 执行初始化
 initialize();
 
-// Excel文件上传和处理路由
-app.post(
-  '/api/excel/upload',
-  uploadExcel.single('file'),
-  ExcelController.upload
-);
-
 // 搜索应用数据
 app.get('/api/app/search', AppController.appSearch);
 
@@ -131,6 +136,13 @@ app.get('/api/app/apple-store-icon', AppController.getIconFromAppleStore);
 
 // 根据类型获取应用
 app.get('/api/app/by-type', AppController.getAppsByType);
+
+// 导入JSON数据
+app.post(
+  '/api/app/import-json',
+  upload.single('file'),
+  AppController.importJson
+);
 
 app.get('/api/app-types/list', AppTypeController.typeList);
 

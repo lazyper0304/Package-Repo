@@ -217,31 +217,6 @@ export default class API {
     }
   }
 
-  static async excelUpload(params: FormData) {
-    try {
-      const response = await fetch('/api/excel/upload', {
-        method: 'POST',
-        body: params,
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        return {
-          success: true,
-          successCount: result.successCount,
-          errorCount: result.errorCount,
-          duplicateCount: result.duplicateCount,
-          message: result.message,
-        };
-      } else {
-        return { success: false, message: result.message };
-      }
-    } catch (error) {
-      return { success: false, message: error };
-    }
-  }
-
   static async appTypeList() {
     const response = await fetch('/api/app-types/list', {
       method: 'GET',
@@ -371,6 +346,30 @@ export default class API {
     } catch (error) {
       console.error('获取应用错误:', error);
       return { success: false, data: [] };
+    }
+  }
+
+  // 导入JSON数据
+  static async importJson(params: FormData) {
+    try {
+      const response = await fetch('/api/app/import-json', {
+        method: 'POST',
+        body: params,
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        return {
+          success: true,
+          message: result.message,
+        };
+      } else {
+        return { success: false, message: result.error || '上传失败' };
+      }
+    } catch (error) {
+      console.error('导入JSON错误:', error);
+      return { success: false, message: '网络错误，无法连接到服务器' };
     }
   }
 }

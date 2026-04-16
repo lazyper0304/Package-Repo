@@ -1,5 +1,6 @@
 import { pool } from '../db.js';
 import axios from 'axios';
+import fs from 'fs';
 
 export default class AppController {
   static async appSearch(req, res) {
@@ -446,4 +447,141 @@ export default class AppController {
       });
     }
   }
+
+  // 导入JSON数据
+  static async importJson(req, res) {
+    try {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ success: false, error: '请选择要上传的JSON文件' });
+      }
+
+      // 立即返回成功，异步处理导入
+      res.json({
+        success: true,
+        message: '上传完成，请耐心等待服务端导入完成'
+      });
+
+      // 异步处理导入
+      setTimeout(async () => {
+        try {
+          const jsonData = JSON.parse(fs.readFileSync(file.path, 'utf8'));
+
+          if (!Array.isArray(jsonData)) {
+            console.error('无效的JSON数据格式');
+            fs.unlinkSync(file.path);
+            return;
+          }
+
+          for (const appData of jsonData) {
+            const { app_name, appName, android_package, androidPackageName, harmony_package, harmonyPackageName, icon_url, iconUrl, type } = appData;
+            const appNameValue = app_name || appName || '';
+            const androidPackageValue = android_package || androidPackageName || '';
+            const harmonyPackageValue = harmony_package || harmonyPackageName || '';
+            const iconUrlValue = icon_url || iconUrl || '';
+            const typeValue = type || ['鸿蒙应用'];
+
+            // 按优先级查找应用：app_name -> android_package -> harmony_package
+            let existingApp = null;
+
+            // 先按app_name查找
+            if (appNameValue) {
+              const [appNameResult] = await pool.execute(
+                'SELECT id FROM apps WHERE app_name = ?',
+                [appNameValue]
+              );
+              if (appNameResult.length === 1) {
+                existingApp = appNameResult[0];
+              }
+            }
+
+            // 如果app_name不唯一，按android_package查找
+            if (!existingApp && androidPackageValue) {
+              const [androidResult] = await pool.execute(
+                'SELECT id FROM apps WHERE android_package = ?',
+                [androidPackageValue]
+              );
+              if (androidResult.length === 1) {
+                existingApp = androidResult[0];
+              }
+            }
+
+            // 如果android_package不唯一，按harmony_package查找
+            if (!existingApp && harmonyPackageValue) {
+              const [harmonyResult] = await pool.execute(
+                'SELECT id FROM apps WHERE harmony_package = ?',
+                [harmonyPackageValue]
+              );
+              if (harmonyResult.length === 1) {
+                existingApp = harmonyResult[0];
+              }
+            }
+
+            if (existingApp) {
+              // 更新现有应用
+              const updateFields = [];
+              const updateParams = [];
+
+              if (appNameValue) {
+                updateFields.push('app_name = ?');
+                updateParams.push(appNameValue);
+              }
+              if (androidPackageValue) {
+                updateFields.push('android_package = ?');
+                updateParams.push(androidPackageValue);
+              }
+              if (harmonyPackageValue) {
+                updateFields.push('harmony_package = ?');
+                updateParams.push(harmonyPackageValue);
+              }
+              if (iconUrlValue) {
+                updateFields.push('icon_url = ?');
+                updateParams.push(iconUrlValue);
+              }
+              if (typeValue) {
+                updateFields.push('type = ?');
+                updateParams.push(JSON.stringify(typeValue));
+              }
+
+              updateParams.push(existingApp.id);
+
+              if (updateFields.length > 0) {
+                await pool.execute(
+                  `UPDATE apps SET ${updateFields.join(', ')} WHERE id = ?`,
+                  updateParams
+                );
+              }
+            } else {
+              // 添加新应用
+              await pool.execute(
+                'INSERT INTO apps (app_name, android_package, harmony_package, icon_url, type) VALUES (?, ?, ?, ?, ?)',
+                [appNameValue, androidPackageValue, harmonyPackageValue, iconUrlValue, JSON.stringify(typeValue)]
+              );
+            }
+          }
+
+          // 删除临时文件
+          fs.unlinkSync(file.path);
+        } catch (error) {
+          console.error('导入JSON失败:', error);
+          // 确保删除临时文件
+          if (file) {
+            try {
+              fs.unlinkSync(file.path);
+            } catch (unlinkError) {
+              console.error('删除临时文件失败:', unlinkError);
+            }
+          }
+        }
+      }, 0);
+    } catch (error) {
+      console.error('上传JSON失败:', error);
+      res.status(500).json({
+        success: false,
+        error: '上传JSON失败: ' + error.message
+      });
+    }
+  }
 }
+

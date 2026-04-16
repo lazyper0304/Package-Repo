@@ -7,7 +7,6 @@ import API from '@/services';
 import { useRequest, useSetState, useLocalStorageState } from 'ahooks';
 import AppDetail from '@/components/AppDetail';
 import type { PageEntity } from '@/entities/page';
-import UploadExcel from '@/components/UploadExcel';
 import HarmonyIconSingle from '@/components/HarmonyIconSingle';
 import HarmonyIconFolder from '@/components/HarmonyIconFolder';
 import ImageVectorizer from '@/components/ImageVectorizer';
@@ -15,6 +14,7 @@ import { GradientBackground } from 'react-gradient-animation';
 import TypeManage from '@/components/TypeManage';
 import LogViewer from '@/components/LogViewer';
 import HuaweiIconChecker from '@/components/HuaweiIconChecker';
+import ImportJson from '@/components/ImportJson';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 import useMobile from '@/hooks/useMobile';
@@ -33,7 +33,7 @@ type IState = {
   currentApp?: AppEntity.Item;
   pagination: PageEntity.PagePagination;
   open: boolean;
-  uploadOpen: boolean;
+  importJsonOpen: boolean;
   typeOpen: boolean;
   harmonyIconSingleOpen: boolean;
   harmonyIconFolderOpen: boolean;
@@ -70,7 +70,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
       pages: 0,
     },
     open: false,
-    uploadOpen: false,
+    importJsonOpen: false,
     typeOpen: false,
     harmonyIconSingleOpen: false,
     harmonyIconFolderOpen: false,
@@ -260,12 +260,12 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
     setState({ huaweiIconCheckerOpen: false });
   }
 
-  function handleUploadSuccess() {
-    searchAppsReq.run({
-      keyword: state.keyword,
-      typeName: state.currentAppType,
-      pageSize: pageSize,
-    });
+  function handleOpenImportJson() {
+    setState({ importJsonOpen: true });
+  }
+
+  function handleCloseImportJson() {
+    setState({ importJsonOpen: false });
   }
 
   function handlePageChange(current: number) {
@@ -374,7 +374,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
                 onClick={handleOpenAppDetail}
                 onDelete={handleDeleteApp}
                 onChange={handlePageChange}
-                onUpload={handleOpenUpload}
+                onUpload={handleOpenImportJson}
                 onTypeChange={handleTypeChange}
                 isAdmin={isAdmin}
                 displayMode={displayMode}
@@ -411,8 +411,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
                   onClick={handleOpenAppDetail}
                   onDelete={handleDeleteApp}
                   onChange={handlePageChange}
-                  onUpload={handleOpenUpload}
-                  onType={handleOpenType}
+                  onUpload={handleOpenImportJson}
                   onTypeChange={handleTypeChange}
                   isAdmin={isAdmin}
                   displayMode={displayMode}
@@ -434,14 +433,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
           app={state.currentApp}
           onClose={handleCloseAppDetail}
           onRefresh={handleRefreshSearch}
-        />
-      )}
-
-      {state.uploadOpen && (
-        <UploadExcel
-          open={state.uploadOpen}
-          onClose={handleCloseUpload}
-          onUpload={handleUploadSuccess}
         />
       )}
 
@@ -483,6 +474,14 @@ const Home: React.FC<IProps> = ({ isAdmin = false }) => {
         <HuaweiIconChecker
           open={state.huaweiIconCheckerOpen}
           onClose={handleCloseHuaweiIconChecker}
+        />
+      )}
+
+      {state.importJsonOpen && (
+        <ImportJson
+          open={state.importJsonOpen}
+          onClose={handleCloseImportJson}
+          onUpload={() => {}}
         />
       )}
     </>
