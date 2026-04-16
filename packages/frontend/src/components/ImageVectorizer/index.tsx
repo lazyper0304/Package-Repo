@@ -12,7 +12,6 @@ type IProps = Readonly<{
   open: boolean;
   onClose: () => void;
   imageUrl?: string;
-  onSuccess?: (svgUrl: string) => void;
 }>;
 
 type ProcessedFile = {
@@ -23,7 +22,7 @@ type ProcessedFile = {
 };
 
 const ImageVectorizer: React.FC<IProps> = (props) => {
-  const { open, onClose, imageUrl, onSuccess } = props;
+  const { open, onClose, imageUrl } = props;
   const ref = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
 
@@ -274,10 +273,6 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
   }
 
   function handleClose() {
-    // 如果有成功的矢量化结果，回调 SVG URL 给父组件
-    if (state.success && state.processedFile && onSuccess) {
-      onSuccess(state.processedFile.svgUrl);
-    }
     onClose();
   }
 

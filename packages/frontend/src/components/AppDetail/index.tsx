@@ -44,6 +44,7 @@ const AppDetail: React.FC<IProps> = ({
   const [form] = Form.useForm();
 
   const [iconUrl, setIconUrl] = useState('');
+
   const [showImageVectorizer, setShowImageVectorizer] = useState(false);
 
   const [editing, setEditing] = useState(edit || !app);
@@ -452,13 +453,6 @@ const AppDetail: React.FC<IProps> = ({
               open={showImageVectorizer}
               onClose={() => setShowImageVectorizer(false)}
               imageUrl={iconUrl}
-              onSuccess={(svgUrl) => {
-                setIconUrl(svgUrl);
-                form.setFieldValue('图标链接', svgUrl);
-                if (app?.id) {
-                  updateIconReq.run({ id: app.id, iconUrl: svgUrl });
-                }
-              }}
             />
           )}
         </Dialog.Description>
