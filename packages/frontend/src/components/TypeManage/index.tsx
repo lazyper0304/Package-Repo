@@ -27,6 +27,11 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
   const [form] = Form.useForm();
 
   const [editingID, setEditingID] = useState<string | undefined>(undefined);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id?: string;
+    name?: string;
+  }>({ open: false });
 
   const { state: appTypeState, refreshAppTypes } = useAppType();
 
@@ -164,7 +169,13 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
                         <Flex gap="2">
                           <Button
                             color="red"
-                            onClick={() => deleteReq.run({ id: appType.id })}
+                            onClick={() =>
+                              setDeleteConfirm({
+                                open: true,
+                                id: appType.id,
+                                name: appType.type_name,
+                              })
+                            }
                           >
                             删除
                           </Button>
@@ -241,6 +252,34 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
           </Form>
         </Dialog.Description>
       </Dialog.Content>
+
+      <Dialog.Root
+        open={deleteConfirm.open}
+        onOpenChange={(v) => !v && setDeleteConfirm({ open: false })}
+      >
+        <Dialog.Content maxWidth="360px">
+          <Dialog.Title>确认删除</Dialog.Title>
+          <Dialog.Description size="2">
+            确定要删除分类 &quot;{deleteConfirm.name}&quot; 吗？此操作无法撤销。
+          </Dialog.Description>
+          <Flex gap="2" mt="4" justify="end">
+            <Button variant="soft" onClick={() => setDeleteConfirm({ open: false })}>
+              取消
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                if (deleteConfirm.id) {
+                  deleteReq.run({ id: deleteConfirm.id });
+                }
+                setDeleteConfirm({ open: false });
+              }}
+            >
+              删除
+            </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </Dialog.Root>
   );
 };

@@ -1,14 +1,16 @@
 import type { AppEntity } from '@/entities/app';
 import {
   Badge,
+  Button,
   Card,
   ContextMenu,
+  Dialog,
   Flex,
   Heading,
   Text,
 } from '@radix-ui/themes';
 import emptyIcon from '@/assets/empty.svg';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Highlighter from '../Highlighter';
 import copy from 'copy-to-clipboard';
 import { notify } from '@/utils/notify';
@@ -30,6 +32,7 @@ const AppItem: React.FC<IProps> = ({
   onClick,
   onDelete,
 }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { state: appTypeState } = useAppType();
 
   // 对类型进行排序
@@ -173,8 +176,7 @@ const AppItem: React.FC<IProps> = ({
               color="red"
               onClick={(e) => {
                 e.stopPropagation();
-
-                onDelete(app.id);
+                setShowDeleteConfirm(true);
               }}
             >
               删除
@@ -182,6 +184,29 @@ const AppItem: React.FC<IProps> = ({
           </>
         </ContextMenu.Content>
       </ContextMenu.Root>
+
+      <Dialog.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <Dialog.Content maxWidth="360px">
+          <Dialog.Title>确认删除</Dialog.Title>
+          <Dialog.Description size="2">
+            确定要删除应用 &quot;{app.appName}&quot; 吗？此操作无法撤销。
+          </Dialog.Description>
+          <Flex gap="2" mt="4" justify="end">
+            <Button variant="soft" onClick={() => setShowDeleteConfirm(false)}>
+              取消
+            </Button>
+            <Button
+              color="red"
+              onClick={() => {
+                onDelete(app.id);
+                setShowDeleteConfirm(false);
+              }}
+            >
+              删除
+            </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </Card>
   );
 };

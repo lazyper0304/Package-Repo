@@ -46,6 +46,7 @@ const AppDetail: React.FC<IProps> = ({
   const [iconUrl, setIconUrl] = useState('');
 
   const [showImageVectorizer, setShowImageVectorizer] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [editing, setEditing] = useState(edit || !app);
 
@@ -134,7 +135,7 @@ const AppDetail: React.FC<IProps> = ({
   }
 
   function handleDelete() {
-    deleteReq.run({ id: app!.id });
+    setShowDeleteConfirm(true);
   }
 
   function handleCopy(v?: string) {
@@ -455,6 +456,38 @@ const AppDetail: React.FC<IProps> = ({
               imageUrl={iconUrl}
             />
           )}
+
+          <Dialog.Root
+            open={showDeleteConfirm}
+            onOpenChange={setShowDeleteConfirm}
+          >
+            <Dialog.Content maxWidth="360px">
+              <Dialog.Title>确认删除</Dialog.Title>
+              <Dialog.Description size="2">
+                确定要删除应用 &quot;{app?.appName}&quot; 吗？此操作无法撤销。
+              </Dialog.Description>
+              <Flex gap="2" mt="4" justify="end">
+                <Button
+                  variant="soft"
+                  onClick={() => setShowDeleteConfirm(false)}
+                >
+                  取消
+                </Button>
+                <Button
+                  color="red"
+                  loading={loading}
+                  onClick={() => {
+                    if (app?.id) {
+                      deleteReq.run({ id: app.id });
+                    }
+                    setShowDeleteConfirm(false);
+                  }}
+                >
+                  删除
+                </Button>
+              </Flex>
+            </Dialog.Content>
+          </Dialog.Root>
         </Dialog.Description>
       </Dialog.Content>
     </Dialog.Root>
