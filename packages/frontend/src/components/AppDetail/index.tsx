@@ -326,10 +326,7 @@ const AppDetail: React.FC<IProps> = ({
                 <AiOutlineLoading className="loading" />
               )}
 
-              <img
-                loading="lazy"
-                src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon}
-              />
+              <img src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon} />
             </div>
           )}
 
@@ -427,6 +424,7 @@ const AppDetail: React.FC<IProps> = ({
                         删除
                       </Button>
                       <Button
+                        variant="soft"
                         style={{ flex: 1 }}
                         onClick={() => setEditing(true)}
                       >

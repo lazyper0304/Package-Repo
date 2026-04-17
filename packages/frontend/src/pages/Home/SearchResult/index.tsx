@@ -194,7 +194,7 @@ const SearchResult: React.FC<IProps> = ({
           radius="none"
           type="hover"
           scrollbars="horizontal"
-          style={{ width: '100%', height: 52 }}
+          style={{ width: '100%', minHeight: 52 }}
           onWheel={handleScroll}
         >
           <Tabs.Root

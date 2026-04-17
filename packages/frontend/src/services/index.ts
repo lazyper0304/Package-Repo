@@ -372,4 +372,36 @@ export default class API {
       return { success: false, message: '网络错误，无法连接到服务器' };
     }
   }
+
+  // 获取访问日志统计
+  static async getVisitStats() {
+    try {
+      const response = await fetch('/api/visit/logs');
+
+      if (!response.ok) {
+        console.error('获取访问日志失败:', response.status);
+        return { success: false, total: 0, today: 0 };
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        const total = result.total || 0;
+        
+        // 计算今日访问量
+        const today = new Date().toISOString().split('T')[0];
+        const todayLogs = result.data.filter((log: any) => {
+          return log.timestamp.split('T')[0] === today;
+        });
+
+        return { success: true, total, today: todayLogs.length };
+      } else {
+        console.error('获取访问日志失败:', result.message);
+        return { success: false, total: 0, today: 0 };
+      }
+    } catch (error) {
+      console.error('获取访问日志错误:', error);
+      return { success: false, total: 0, today: 0 };
+    }
+  }
 }

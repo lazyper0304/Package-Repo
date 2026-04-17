@@ -12,6 +12,23 @@
         }
       }
     </style>
+    <script>
+      // 初始化主题背景色
+      (function() {
+        const themeMode = localStorage.getItem('theme-mode') || 'system';
+        let isDarkMode = false;
+        
+        if (themeMode === 'system') {
+          if (typeof window !== 'undefined' && window.matchMedia) {
+            isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+        } else {
+          isDarkMode = themeMode === 'dark';
+        }
+        
+        document.body.style.backgroundColor = isDarkMode ? '#111827' : '#ffffff';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

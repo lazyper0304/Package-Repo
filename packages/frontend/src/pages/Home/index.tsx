@@ -15,29 +15,17 @@ import TypeManage from '@/components/TypeManage';
 import LogViewer from '@/components/LogViewer';
 import HuaweiIconChecker from '@/components/HuaweiIconChecker';
 import ImportJson from '@/components/ImportJson';
+import Footer from './Footer';
 import { notify } from '@/utils/notify';
 import { useAppType } from '@/contexts/AppTypeContext';
 import useMobile from '@/hooks/useMobile';
-import {
-  AiOutlineSun,
-  AiOutlineMoon,
-  AiOutlineHarmonyOS,
-  AiOutlineTool,
-  AiFillTool,
-} from 'react-icons/ai';
+
 import {
   MdBrightness2,
   MdBrightnessAuto,
   MdBrightnessHigh,
-  MdChevronLeft,
   MdChevronRight,
-  MdFilter,
   MdFilterList,
-  MdOutlineBrightness1,
-  MdOutlineBrightness2,
-  MdOutlineBrightness7,
-  MdOutlineBrightnessAuto,
-  MdOutlineBrightnessHigh,
 } from 'react-icons/md';
 
 const SearchResult = React.lazy(() => import('./SearchResult'));
@@ -318,7 +306,7 @@ const Home: React.FC<IProps> = ({
             background: 'blue',
             particles: ['#00897b', '#7f00ff', '#3b82f6'],
           }}
-          speed={{ x: { min: 0.5, max: 0.8 }, y: { min: 0.5, max: 0.8 } }}
+          speed={{ x: { min: 0.5, max: 2 }, y: { min: 0.5, max: 2 } }}
         />
       </div>
     ),
@@ -420,15 +408,6 @@ const Home: React.FC<IProps> = ({
     ]
   );
 
-  const footer = useMemo(
-    () => (
-      <footer className={styles.footer}>
-        All Rights Reserved© 2026 Package Repo
-      </footer>
-    ),
-    []
-  );
-
   return (
     <>
       {!isMobile && (
@@ -463,7 +442,7 @@ const Home: React.FC<IProps> = ({
             </Flex>
           </div>
 
-          {footer}
+          <Footer />
         </div>
       )}
 
@@ -498,7 +477,7 @@ const Home: React.FC<IProps> = ({
                   setDisplayMode={setDisplayMode}
                 />
 
-                {footer}
+                <Footer />
               </Flex>
             </section>
           </div>
