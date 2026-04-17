@@ -34,8 +34,8 @@ type IProps = Readonly<{
   onUpload: () => void;
   onTypeChange: (id: string) => void;
   isAdmin?: boolean;
-  displayMode: 'grid1' | 'grid2' | 'grid3';
-  setDisplayMode: (v: 'grid1' | 'grid2' | 'grid3') => void;
+  displayMode: 'grid1' | 'grid2' | 'grid3' | 'grid4';
+  setDisplayMode: (v: 'grid1' | 'grid2' | 'grid3' | 'grid4') => void;
 }>
 
 const SearchResult: React.FC<IProps> = ({
@@ -94,7 +94,9 @@ const SearchResult: React.FC<IProps> = ({
                   ? '100%'
                   : displayMode === 'grid2'
                     ? 'calc(50% - 8px)'
-                    : 'calc(33.333% - 10.666px)',
+                    : displayMode === 'grid3'
+                      ? 'calc(33.333% - 10.666px)'
+                      : 'calc(25% - 12px)',
             }}
           >
             <AppItem
@@ -162,7 +164,7 @@ const SearchResult: React.FC<IProps> = ({
                 <Select.Root
                   value={displayMode}
                   onValueChange={(v) =>
-                    setDisplayMode(v as 'grid1' | 'grid2' | 'grid3')
+                    setDisplayMode(v as 'grid1' | 'grid2' | 'grid3' | 'grid4')
                   }
                 >
                   <Select.Trigger style={{ width: 120 }}></Select.Trigger>
@@ -170,6 +172,7 @@ const SearchResult: React.FC<IProps> = ({
                     <Select.Item value="grid1">一行一个</Select.Item>
                     <Select.Item value="grid2">一行两个</Select.Item>
                     <Select.Item value="grid3">一行三个</Select.Item>
+                    <Select.Item value="grid4">一行四个</Select.Item>
                   </Select.Content>
                 </Select.Root>
               </Flex>

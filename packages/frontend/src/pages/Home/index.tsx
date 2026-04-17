@@ -77,9 +77,9 @@ const Home: React.FC<IProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）
+  // 显示模式：grid1（一行一个）、grid2（一行两个）、grid3（一行三个）、grid4（一行四个）
   const [displayMode, setDisplayMode] = useLocalStorageState<
-    'grid1' | 'grid2' | 'grid3'
+    'grid1' | 'grid2' | 'grid3' | 'grid4'
   >('app-display-mode', {
     defaultValue: 'grid1',
   });
@@ -88,7 +88,7 @@ const Home: React.FC<IProps> = ({
   const [functionsExpanded, setFunctionsExpanded] = useState(false);
 
   // 根据显示模式计算 pageSize
-  const pageSize = displayMode === 'grid3' ? 24 : 21;
+  const pageSize = displayMode === 'grid3' || displayMode === 'grid4' ? 24 : 21;
 
   const [state, setState] = useSetState<IState>({
     keyword: '',
