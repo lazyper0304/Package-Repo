@@ -190,6 +190,10 @@ const Home: React.FC<IProps> = ({
     onSuccess(res) {
       if (res.success) {
         searchAppsReq.refresh();
+        // 如果详情弹窗是打开的，关闭它
+        if (state.open) {
+          setState({ currentApp: undefined, open: false });
+        }
       } else {
         notify(res.message);
       }

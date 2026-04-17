@@ -161,7 +161,9 @@ const AppItem: React.FC<IProps> = ({
     >
       <ContextMenu.Root>
         {isAdmin ? (
-          <ContextMenu.Trigger>{appItem(app)}</ContextMenu.Trigger>
+          <ContextMenu.Trigger onClick={(e) => e.stopPropagation()}>
+            {appItem(app)}
+          </ContextMenu.Trigger>
         ) : (
           appItem(app)
         )}
@@ -192,12 +194,19 @@ const AppItem: React.FC<IProps> = ({
             确定要删除应用 &quot;{app.appName}&quot; 吗？此操作无法撤销。
           </Dialog.Description>
           <Flex gap="2" mt="4" justify="end">
-            <Button variant="soft" onClick={() => setShowDeleteConfirm(false)}>
+            <Button
+              variant="soft"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(false);
+              }}
+            >
               取消
             </Button>
             <Button
               color="red"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onDelete(app.id);
                 setShowDeleteConfirm(false);
               }}
