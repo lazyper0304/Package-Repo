@@ -11,7 +11,7 @@ export default class AppController {
       const offset = (currentPage - 1) * pageLimit;
 
       let query =
-        'SELECT id, app_name, harmony_package, android_package, icon_url, type, created_at FROM apps';
+        'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, created_at FROM apps';
       let countQuery = 'SELECT COUNT(*) as total FROM apps';
       const params = [];
       const countParams = [];
@@ -92,7 +92,7 @@ export default class AppController {
 
   static async addApp(req, res) {
     try {
-      const { appName, harmonyPackageName, androidPackageName, iconUrl, type } =
+      const { appName, harmonyPackageName, androidPackageName, iconUrl, type, desc } =
         req.body;
 
       // 参数验证
@@ -111,6 +111,8 @@ export default class AppController {
           : null;
       const icon_url =
         iconUrl !== undefined ? String(iconUrl).trim() || null : null;
+      const app_desc =
+        desc !== undefined ? String(desc).trim() || null : null;
       let appType = [];
       if (type !== undefined) {
         if (Array.isArray(type)) {
@@ -195,6 +197,11 @@ export default class AppController {
       placeholders.push('?');
       params.push(JSON.stringify(appType));
 
+      // 处理 desc 字段
+      fields.push('`desc`');
+      placeholders.push('?');
+      params.push(app_desc);
+
       // 执行插入
       const [result] = await pool.execute(
         `INSERT INTO apps (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`,
@@ -203,7 +210,7 @@ export default class AppController {
 
       // 获取刚插入的记录
       const [newApp] = await pool.execute(
-        'SELECT id, app_name, harmony_package, android_package, icon_url, type, created_at FROM apps WHERE id = ?',
+        'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, created_at FROM apps WHERE id = ?',
         [result.insertId]
       );
 
@@ -228,6 +235,7 @@ export default class AppController {
         androidPackageName,
         harmonyPackageName,
         type,
+        desc,
       } = req.body;
 
       // 参数验证
@@ -236,7 +244,8 @@ export default class AppController {
         !iconUrl &&
         !androidPackageName &&
         !harmonyPackageName &&
-        !type
+        !type &&
+        !desc
       ) {
         return res.status(400).json({ error: '至少需要提供一个更新字段' });
       }
@@ -282,6 +291,12 @@ export default class AppController {
         }
         updateFields.push('type = ?');
         params.push(JSON.stringify(appType));
+      }
+
+      if (desc !== undefined) {
+        const app_desc = String(desc).trim() || null;
+        updateFields.push('`desc` = ?');
+        params.push(app_desc);
       }
 
       // 添加WHERE条件参数
@@ -475,12 +490,13 @@ export default class AppController {
           }
 
           for (const appData of jsonData) {
-            const { app_name, appName, android_package, androidPackageName, harmony_package, harmonyPackageName, icon_url, iconUrl, type } = appData;
+            const { app_name, appName, android_package, androidPackageName, harmony_package, harmonyPackageName, icon_url, iconUrl, type, desc, description } = appData;
             const appNameValue = app_name || appName || '';
             const androidPackageValue = android_package || androidPackageName || '';
             const harmonyPackageValue = harmony_package || harmonyPackageName || '';
             const iconUrlValue = icon_url || iconUrl || '';
             const typeValue = type || ['鸿蒙应用'];
+            const descValue = desc || description || '';
 
             // 按优先级查找应用：app_name -> android_package -> harmony_package
             let existingApp = null;
@@ -543,6 +559,10 @@ export default class AppController {
                 updateFields.push('type = ?');
                 updateParams.push(JSON.stringify(typeValue));
               }
+              if (descValue) {
+                updateFields.push('`desc` = ?');
+                updateParams.push(descValue);
+              }
 
               updateParams.push(existingApp.id);
 
@@ -555,8 +575,8 @@ export default class AppController {
             } else {
               // 添加新应用
               await pool.execute(
-                'INSERT INTO apps (app_name, android_package, harmony_package, icon_url, type) VALUES (?, ?, ?, ?, ?)',
-                [appNameValue, androidPackageValue, harmonyPackageValue, iconUrlValue, JSON.stringify(typeValue)]
+                'INSERT INTO apps (app_name, android_package, harmony_package, icon_url, type, `desc`) VALUES (?, ?, ?, ?, ?, ?)',
+                [appNameValue, androidPackageValue, harmonyPackageValue, iconUrlValue, JSON.stringify(typeValue), descValue]
               );
             }
           }

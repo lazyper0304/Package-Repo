@@ -161,9 +161,7 @@ const AppItem: React.FC<IProps> = ({
     >
       <ContextMenu.Root>
         {isAdmin ? (
-          <ContextMenu.Trigger onClick={(e) => e.stopPropagation()}>
-            {appItem(app)}
-          </ContextMenu.Trigger>
+          <ContextMenu.Trigger>{appItem(app)}</ContextMenu.Trigger>
         ) : (
           appItem(app)
         )}

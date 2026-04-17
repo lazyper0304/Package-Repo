@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import API from '@/services';
+import useMobile from '@/hooks/useMobile';
 
 const Footer: React.FC = () => {
+  const isMobile = useMobile();
+
   // 访问日志统计数据
   const [visitStats, setVisitStats] = useState({ total: 0, today: 0 });
 
@@ -33,7 +36,7 @@ const Footer: React.FC = () => {
           </span>
         </div>
 
-        <span className={styles.footer__divider}>|</span>
+        {!isMobile && <span className={styles.footer__divider}>|</span>}
 
         <div className={styles.footer__copyright}>
           All Rights Reserved© 2026 Package Repo

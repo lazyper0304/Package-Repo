@@ -10,5 +10,7 @@ export namespace AppEntity {
     /** 图标地址 */
     iconUrl?: string;
     type?: string[];
+    /** 备注 */
+    desc?: string;
   }
 }

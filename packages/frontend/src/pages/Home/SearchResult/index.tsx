@@ -36,7 +36,7 @@ type IProps = Readonly<{
   isAdmin?: boolean;
   displayMode: 'grid1' | 'grid2' | 'grid3' | 'grid4';
   setDisplayMode: (v: 'grid1' | 'grid2' | 'grid3' | 'grid4') => void;
-}>
+}>;
 
 const SearchResult: React.FC<IProps> = ({
   currentAppType,

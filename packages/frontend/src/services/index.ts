@@ -65,6 +65,7 @@ export default class API {
             harmonyPackageName: item.harmony_package,
             iconUrl: item.icon_url,
             type: item.type,
+            desc: item.desc,
           })),
           pageSize: res.pageSize,
           total: res.total,
@@ -315,9 +316,7 @@ export default class API {
   }
 
   // 根据类型获取应用
-  static async getAppsByType(params: {
-    typeName: string;
-  }) {
+  static async getAppsByType(params: { typeName: string }) {
     try {
       const query = new URLSearchParams();
       query.append('typeName', params.typeName);
@@ -336,8 +335,8 @@ export default class API {
           success: true,
           data: result.data.map((item) => ({
             app_name: item.app_name,
-            package_name: item.harmony_package || item.android_package || ''
-          }))
+            package_name: item.harmony_package || item.android_package || '',
+          })),
         };
       } else {
         console.error('获取应用失败:', result.error);
@@ -387,7 +386,7 @@ export default class API {
 
       if (result.success) {
         const total = result.total || 0;
-        
+
         // 计算今日访问量
         const today = new Date().toISOString().split('T')[0];
         const todayLogs = result.data.filter((log: any) => {

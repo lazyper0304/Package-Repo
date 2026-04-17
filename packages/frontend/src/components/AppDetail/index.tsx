@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
   TextField,
+  TextArea,
   Spinner,
 } from '@radix-ui/themes';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -46,6 +47,7 @@ const AppDetail: React.FC<IProps> = ({
   const [iconUrl, setIconUrl] = useState('');
 
   const [showImageVectorizer, setShowImageVectorizer] = useState(false);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [editing, setEditing] = useState(edit || !app);
@@ -155,6 +157,7 @@ const AppDetail: React.FC<IProps> = ({
       androidPackageName: fields?.['安卓包名'],
       harmonyPackageName: fields?.['鸿蒙包名'],
       type: fields?.['分类'] === '无' ? '' : fields?.['分类'],
+      desc: fields?.['备注'],
     });
   }
 
@@ -248,13 +251,27 @@ const AppDetail: React.FC<IProps> = ({
                     </>
                   )}
 
-                  {label !== '分类' && (
+                  {label !== '分类' && label !== '备注' && (
                     <Field name={label}>
                       <TextField.Root
                         defaultValue={v}
-                        style={{ width: '56vw', maxWidth: '390px' }}
+                        style={{ minWidth: '390px' }}
                         placeholder={`请输入${label}`}
-                      ></TextField.Root>
+                      />
+                    </Field>
+                  )}
+
+                  {label === '备注' && (
+                    <Field name={label}>
+                      <TextArea
+                        defaultValue={v}
+                        style={{
+                          minWidth: '390px',
+                          minHeight: '80px',
+                        }}
+                        placeholder={`请输入${label}`}
+                        maxLength={50}
+                      />
                     </Field>
                   )}
                 </>
@@ -337,6 +354,7 @@ const AppDetail: React.FC<IProps> = ({
               鸿蒙包名: app?.harmonyPackageName,
               图标链接: iconUrl,
               分类: app?.type,
+              备注: app?.desc,
             }}
             form={form}
             onFinish={handleFinish}
@@ -351,6 +369,8 @@ const AppDetail: React.FC<IProps> = ({
               {Item('图标链接', iconUrl)}
 
               {Item('分类', app?.type)}
+
+              {Item('备注', app?.desc)}
             </DataList.Root>
 
             <Flex

@@ -116,6 +116,22 @@ async function initDatabase() {
       // 继续执行，不中断初始化过程
     }
 
+    // 检查并添加 desc 字段（如果不存在）
+    try {
+      const [columns] = await connection.execute(
+        "SHOW COLUMNS FROM apps WHERE Field = 'desc'"
+      );
+
+      if (columns.length === 0) {
+        console.log('检测到 apps 表缺少 desc 字段，开始添加...');
+        await connection.execute('ALTER TABLE apps ADD COLUMN `desc` VARCHAR(50)');
+        console.log('desc 字段添加成功');
+      }
+    } catch (addDescError) {
+      console.error('添加 desc 字段失败:', addDescError);
+      // 继续执行，不中断初始化过程
+    }
+
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS app_types (
         id INT AUTO_INCREMENT PRIMARY KEY,
