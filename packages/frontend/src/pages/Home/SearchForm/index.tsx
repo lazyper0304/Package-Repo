@@ -1,4 +1,11 @@
-import { Button, Card, Flex, Heading, TextField } from '@radix-ui/themes';
+import {
+  Button,
+  Card,
+  Flex,
+  Heading,
+  ScrollArea,
+  TextField,
+} from '@radix-ui/themes';
 import React, { useRef } from 'react';
 import { MdClose, MdSearch, MdHistory } from 'react-icons/md';
 import useMobile from '@/hooks/useMobile';
@@ -80,7 +87,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
             placeholder="输入关键字"
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            onClick={handleFocus}
+            onMouseEnter={handleFocus}
             style={{ flex: 1 }}
           >
             <TextField.Slot>
@@ -111,6 +118,8 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
           <Card
             size="2"
             style={{
+              display: 'flex',
+              flexDirection: 'column',
               position: 'absolute',
               top: 'calc(100% - 24px)',
               left: 24,
@@ -118,10 +127,10 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               marginTop: 4,
               zIndex: 9999,
               maxHeight: 300,
-              overflowY: 'auto',
               width: 'calc(100% - 106px)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             }}
+            onMouseLeave={() => setShowHistory(false)}
           >
             <Flex
               justify="between"
@@ -133,7 +142,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               }}
             >
               <Flex align="center" gap="2">
-                <MdHistory />
+                <MdHistory style={{ marginTop: -2 }} />
                 <span style={{ fontSize: 14, fontWeight: 500 }}>搜索历史</span>
               </Flex>
               <Button
@@ -145,33 +154,41 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
                 清空
               </Button>
             </Flex>
-            <Flex direction="column" gap="1">
-              {history.map((item, index) => (
-                <Flex
-                  key={index}
-                  align="center"
-                  gap="2"
-                  onClick={() => handleSelectHistory(item)}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    fontSize: 14,
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                      'var(--accent-9)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                      'transparent';
-                  }}
-                >
-                  <MdHistory style={{ opacity: 0.5 }} />
-                  <span>{item}</span>
-                </Flex>
-              ))}
+            <Flex
+              direction="column"
+              gap="1"
+              style={{ flex: 1, overflowY: 'auto' }}
+            >
+              <ScrollArea>
+                {history.map((item, index) => (
+                  <Flex
+                    key={index}
+                    align="center"
+                    gap="2"
+                    onClick={() => handleSelectHistory(item)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: 14,
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      (
+                        e.currentTarget as HTMLDivElement
+                      ).style.backgroundColor = 'var(--accent-9)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (
+                        e.currentTarget as HTMLDivElement
+                      ).style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <MdHistory style={{ opacity: 0.5 }} />
+                    <span>{item}</span>
+                  </Flex>
+                ))}
+              </ScrollArea>
             </Flex>
           </Card>
         </div>
