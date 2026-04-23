@@ -1,5 +1,6 @@
 import type { AppEntity } from '@/entities/app';
 import type { PageEntity } from '@/entities/page';
+import { HttpClient } from './httpClient';
 
 export default class API {
   /** 搜索应用 */
@@ -10,50 +11,23 @@ export default class API {
     } & PageEntity.PageParam
   ): Promise<PageEntity.PageResponse<AppEntity.Item>> {
     try {
-      const query = new URLSearchParams();
+      // 过滤参数
+      const filteredParams = {
+        keyword: params?.keyword ?? '',
+        current: params?.current,
+        pageSize: params?.pageSize,
+        typeName: params?.typeName && params.typeName !== '全部' ? params.typeName : undefined,
+      };
 
-      query.append('keyword', params?.keyword ?? '');
-
-      if (params?.typeName && params.typeName !== '全部') {
-        query.append('typeName', params.typeName.toString());
-      }
-
-      if (params?.current) {
-        query.append('current', params.current.toString());
-      }
-
-      if (params?.pageSize) {
-        query.append('pageSize', params.pageSize.toString());
-      }
-
-      const response = await fetch(`/api/app/search?${query}`);
-
-      // 检查响应是否成功
-      if (!response.ok) {
-        console.error('搜索失败:', response.status);
-        return {
-          current: 1,
-          data: [],
-          pageSize: 0,
-          total: 0,
-          pages: 0,
-        };
-      }
-
-      // 尝试解析JSON
-      let res;
-      try {
-        res = await response.json();
-      } catch (jsonError) {
-        console.error('JSON解析错误:', jsonError);
-        return {
-          current: res.current,
-          data: [],
-          pageSize: res.pageSize,
-          total: res.total,
-          pages: res.pages,
-        };
-      }
+      const res = await HttpClient.get<{
+        success: boolean;
+        data: any[];
+        current: number;
+        pageSize: number;
+        total: number;
+        pages: number;
+        error?: string;
+      }>('/api/app/search', filteredParams);
 
       if (res.success) {
         return {
@@ -74,11 +48,11 @@ export default class API {
       } else {
         console.error('搜索失败:', res.error);
         return {
-          current: res.current,
+          current: res.current || 1,
           data: [],
-          pageSize: res.pageSize,
-          total: res.total,
-          pages: res.pages,
+          pageSize: res.pageSize || 0,
+          total: res.total || 0,
+          pages: res.pages || 0,
         };
       }
     } catch (error) {
@@ -102,26 +76,11 @@ export default class API {
         return null;
       }
 
-      const query = new URLSearchParams();
-
-      query.append('appName', params.appName);
-
-      const response = await fetch(`/api/app/apple-store-icon?${query}`);
-
-      // 检查响应是否成功
-      if (!response.ok) {
-        console.error('获取苹果应用商店图标失败:', response.status);
-        return null;
-      }
-
-      // 尝试解析JSON
-      let result;
-      try {
-        result = await response.json();
-      } catch (jsonError) {
-        console.error('JSON解析错误:', jsonError);
-        return null;
-      }
+      const result = await HttpClient.get<{
+        success: boolean;
+        iconUrl: string;
+        error?: string;
+      }>('/api/app/apple-store-icon', params);
 
       if (result.success) {
         return result.iconUrl;
@@ -143,17 +102,13 @@ export default class API {
     type?: string;
   }) {
     try {
-      const response = await fetch('/api/app', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.post<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || '添加失败' };
@@ -167,17 +122,13 @@ export default class API {
   // 删除应用
   static async deleteApp(params: { id: string }) {
     try {
-      const response = await fetch(`/api/app`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.delete<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || '删除失败' };
@@ -197,17 +148,13 @@ export default class API {
     type?: string;
   }) {
     try {
-      const response = await fetch(`/api/app`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.put<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || 'app更新失败' };
@@ -219,42 +166,33 @@ export default class API {
   }
 
   static async appTypeList() {
-    const response = await fetch('/api/app-types/list', {
-      method: 'GET',
-    });
-
-    if (response.ok) {
-      const result = await response.json();
+    try {
+      const result = await HttpClient.get<{
+        success: boolean;
+        data: any[];
+        error?: string;
+      }>('/api/app-types/list');
 
       if (result.success) {
         return { success: true, data: result.data };
       } else {
         return { success: false, data: [] };
       }
-    } else {
-      try {
-        const result = await response.json();
-
-        return { success: false, data: [], message: result.error };
-      } catch (e) {
-        return { success: false, data: [], message: e };
-      }
+    } catch (error) {
+      console.error('获取应用类型失败:', error);
+      return { success: false, data: [], message: error };
     }
   }
 
   static async addAppType(params: { typeName: string; sort?: number }) {
     try {
-      const response = await fetch(`/api/app-types`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.post<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app-types', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || '分类创建失败' };
@@ -267,17 +205,13 @@ export default class API {
 
   static async deleteAppType(params: { id: string }) {
     try {
-      const response = await fetch(`/api/app-types`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.delete<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app-types', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || '分类更新失败' };
@@ -294,17 +228,13 @@ export default class API {
     sort?: number;
   }) {
     try {
-      const response = await fetch(`/api/app-types`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
+      const result = await HttpClient.put<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app-types', params);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         return { success: true, message: result.message };
       } else {
         return { success: false, message: result.error || '分类删除失败' };
@@ -318,17 +248,11 @@ export default class API {
   // 根据类型获取应用
   static async getAppsByType(params: { typeName: string }) {
     try {
-      const query = new URLSearchParams();
-      query.append('typeName', params.typeName);
-
-      const response = await fetch(`/api/app/by-type?${query}`);
-
-      if (!response.ok) {
-        console.error('获取应用失败:', response.status);
-        return { success: false, data: [] };
-      }
-
-      const result = await response.json();
+      const result = await HttpClient.get<{
+        success: boolean;
+        data: any[];
+        error?: string;
+      }>('/api/app/by-type', params);
 
       if (result.success) {
         return {
@@ -351,20 +275,23 @@ export default class API {
   // 导入JSON数据
   static async importJson(params: FormData) {
     try {
-      const response = await fetch('/api/app/import-json', {
+      // 特殊处理FormData请求
+      const response = await HttpClient.request<{
+        success: boolean;
+        message: string;
+        error?: string;
+      }>('/api/app/import-json', {
         method: 'POST',
         body: params,
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (response.success) {
         return {
           success: true,
-          message: result.message,
+          message: response.message,
         };
       } else {
-        return { success: false, message: result.error || '上传失败' };
+        return { success: false, message: response.error || '上传失败' };
       }
     } catch (error) {
       console.error('导入JSON错误:', error);
@@ -375,14 +302,13 @@ export default class API {
   // 获取访问日志统计
   static async getVisitStats() {
     try {
-      const response = await fetch('/api/visit/logs');
-
-      if (!response.ok) {
-        console.error('获取访问日志失败:', response.status);
-        return { success: false, total: 0, today: 0 };
-      }
-
-      const result = await response.json();
+      const result = await HttpClient.get<{
+        success: boolean;
+        total: number;
+        data: any[];
+        error?: string;
+        message?: string;
+      }>('/api/visit/logs');
 
       if (result.success) {
         const total = result.total || 0;
@@ -395,7 +321,7 @@ export default class API {
 
         return { success: true, total, today: todayLogs.length };
       } else {
-        console.error('获取访问日志失败:', result.message);
+        console.error('获取访问日志失败:', result.message || result.error);
         return { success: false, total: 0, today: 0 };
       }
     } catch (error) {
