@@ -4,14 +4,23 @@
     margin-bottom: 32px;
     height: 256px;
     text-align: center;
+    transition: all 0.3s ease-in-out;
 
     & > img {
       width: 256px;
       height: 256px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    &:hover > img {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
   }
 
   &__item {
+    transition: all 0.3s ease-in-out;
+
     &:hover {
       .appDetail__item__action {
         opacity: 1;
@@ -22,7 +31,33 @@
     &__action {
       opacity: 0;
       pointer-events: none;
+      transition: all 0.3s ease-in-out;
     }
+
+    &__value {
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        color: var(--accent-indicator);
+      }
+    }
+  }
+
+  &__content {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -34,6 +69,11 @@
       & > img {
         width: 100px;
         height: 100px;
+      }
+
+      &:hover > img {
+        transform: none;
+        box-shadow: none;
       }
     }
 

@@ -295,14 +295,7 @@ const Home: React.FC<IProps> = ({
 
   const background = useMemo(
     () => (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          opacity: 0.2,
-        }}
-      >
+      <div className={styles.background}>
         <GradientBackground
           skew={0}
           blending="overlay"

@@ -332,180 +332,182 @@ const AppDetail: React.FC<IProps> = ({
         <Dialog.Title>{app?.appName ?? '新增应用'}</Dialog.Title>
 
         <Dialog.Description size="2" mb="4">
-          {app && (
-            <div
-              className={styles.appDetail__icon}
-              style={{
-                background: iconUrl ? 'transparent' : '#d0d0d060',
+          <div className={styles.appDetail__content}>
+            {app && (
+              <div
+                className={styles.appDetail__icon}
+                style={{
+                  background: iconUrl ? 'transparent' : '#d0d0d060',
+                }}
+              >
+                {getAppleStoreIconReq.loading && (
+                  <AiOutlineLoading className="loading" />
+                )}
+
+                <img src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon} />
+              </div>
+            )}
+
+            <Form
+              initialValues={{
+                应用名: app?.appName,
+                安卓包名: app?.androidPackageName,
+                鸿蒙包名: app?.harmonyPackageName,
+                图标链接: iconUrl,
+                分类: app?.type,
+                备注: app?.desc,
               }}
+              form={form}
+              onFinish={handleFinish}
             >
-              {getAppleStoreIconReq.loading && (
-                <AiOutlineLoading className="loading" />
-              )}
+              <DataList.Root>
+                {Item('应用名', app?.appName)}
 
-              <img src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon} />
-            </div>
-          )}
+                {Item('安卓包名', app?.androidPackageName)}
 
-          <Form
-            initialValues={{
-              应用名: app?.appName,
-              安卓包名: app?.androidPackageName,
-              鸿蒙包名: app?.harmonyPackageName,
-              图标链接: iconUrl,
-              分类: app?.type,
-              备注: app?.desc,
-            }}
-            form={form}
-            onFinish={handleFinish}
-          >
-            <DataList.Root>
-              {Item('应用名', app?.appName)}
+                {Item('鸿蒙包名', app?.harmonyPackageName)}
 
-              {Item('安卓包名', app?.androidPackageName)}
+                {Item('图标链接', iconUrl)}
 
-              {Item('鸿蒙包名', app?.harmonyPackageName)}
+                {Item('分类', app?.type)}
 
-              {Item('图标链接', iconUrl)}
+                {Item('备注', app?.desc)}
+              </DataList.Root>
 
-              {Item('分类', app?.type)}
+              <Flex
+                gap="3"
+                style={{
+                  marginTop: 24,
+                }}
+              >
+                {app && (
+                  <>
+                    {iconUrl && iconUrl !== '-' && (
+                      <>
+                        <Button
+                          variant="soft"
+                          style={{ flex: 1 }}
+                          onClick={() => setShowImageVectorizer(true)}
+                        >
+                          转矢量
+                        </Button>
+                        <Button
+                          variant="soft"
+                          style={{ flex: 1 }}
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(iconUrl);
+                              const blob = await response.blob();
+                              const item = new ClipboardItem({
+                                [blob.type]: blob,
+                              });
+                              await navigator.clipboard.write([item]);
+                              notify('图标已复制到剪贴板');
+                            } catch (error) {
+                              console.error('复制图标失败:', error);
+                              notify('复制图标失败，请重试');
+                            }
+                          }}
+                        >
+                          复制图标
+                        </Button>
+                      </>
+                    )}
 
-              {Item('备注', app?.desc)}
-            </DataList.Root>
+                    {isAdmin && editing && (
+                      <>
+                        <Button
+                          variant="soft"
+                          style={{ flex: 1 }}
+                          onClick={() => setEditing(false)}
+                        >
+                          取消
+                        </Button>
+                        <Button
+                          loading={loading}
+                          style={{ flex: 1 }}
+                          type="submit"
+                        >
+                          保存
+                        </Button>
+                      </>
+                    )}
 
-            <Flex
-              gap="3"
-              style={{
-                marginTop: 24,
-              }}
-            >
-              {app && (
-                <>
-                  {iconUrl && iconUrl !== '-' && (
-                    <>
-                      <Button
-                        variant="soft"
-                        style={{ flex: 1 }}
-                        onClick={() => setShowImageVectorizer(true)}
-                      >
-                        转矢量
-                      </Button>
-                      <Button
-                        variant="soft"
-                        style={{ flex: 1 }}
-                        onClick={async () => {
-                          try {
-                            const response = await fetch(iconUrl);
-                            const blob = await response.blob();
-                            const item = new ClipboardItem({
-                              [blob.type]: blob,
-                            });
-                            await navigator.clipboard.write([item]);
-                            notify('图标已复制到剪贴板');
-                          } catch (error) {
-                            console.error('复制图标失败:', error);
-                            notify('复制图标失败，请重试');
-                          }
-                        }}
-                      >
-                        复制图标
-                      </Button>
-                    </>
-                  )}
+                    {isAdmin && !editing && (
+                      <>
+                        <Button
+                          color="red"
+                          variant="soft"
+                          loading={loading}
+                          style={{ flex: 1 }}
+                          onClick={handleDelete}
+                        >
+                          删除
+                        </Button>
+                        <Button
+                          variant="soft"
+                          style={{ flex: 1 }}
+                          onClick={() => setEditing(true)}
+                        >
+                          编辑
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
 
-                  {isAdmin && editing && (
-                    <>
-                      <Button
-                        variant="soft"
-                        style={{ flex: 1 }}
-                        onClick={() => setEditing(false)}
-                      >
-                        取消
-                      </Button>
-                      <Button
-                        loading={loading}
-                        style={{ flex: 1 }}
-                        type="submit"
-                      >
-                        保存
-                      </Button>
-                    </>
-                  )}
-
-                  {isAdmin && !editing && (
-                    <>
-                      <Button
-                        color="red"
-                        variant="soft"
-                        loading={loading}
-                        style={{ flex: 1 }}
-                        onClick={handleDelete}
-                      >
-                        删除
-                      </Button>
-                      <Button
-                        variant="soft"
-                        style={{ flex: 1 }}
-                        onClick={() => setEditing(true)}
-                      >
-                        编辑
-                      </Button>
-                    </>
-                  )}
-                </>
-              )}
-
-              {isAdmin && !app && (
-                <Button
-                  loading={loading}
-                  type="submit"
-                  style={{ width: '100%' }}
-                >
-                  添加
-                </Button>
-              )}
-            </Flex>
-          </Form>
-
-          {showImageVectorizer && (
-            <ImageVectorizer
-              open={showImageVectorizer}
-              onClose={() => setShowImageVectorizer(false)}
-              imageUrl={iconUrl}
-            />
-          )}
-
-          <Dialog.Root
-            open={showDeleteConfirm}
-            onOpenChange={setShowDeleteConfirm}
-          >
-            <Dialog.Content maxWidth="360px">
-              <Dialog.Title>确认删除</Dialog.Title>
-              <Dialog.Description size="2">
-                确定要删除应用 &quot;{app?.appName}&quot; 吗？此操作无法撤销。
-              </Dialog.Description>
-              <Flex gap="2" mt="4" justify="end">
-                <Button
-                  variant="soft"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  取消
-                </Button>
-                <Button
-                  color="red"
-                  loading={loading}
-                  onClick={() => {
-                    if (app?.id) {
-                      deleteReq.run({ id: app.id });
-                    }
-                    setShowDeleteConfirm(false);
-                  }}
-                >
-                  删除
-                </Button>
+                {isAdmin && !app && (
+                  <Button
+                    loading={loading}
+                    type="submit"
+                    style={{ width: '100%' }}
+                  >
+                    添加
+                  </Button>
+                )}
               </Flex>
-            </Dialog.Content>
-          </Dialog.Root>
+            </Form>
+
+            {showImageVectorizer && (
+              <ImageVectorizer
+                open={showImageVectorizer}
+                onClose={() => setShowImageVectorizer(false)}
+                imageUrl={iconUrl}
+              />
+            )}
+
+            <Dialog.Root
+              open={showDeleteConfirm}
+              onOpenChange={setShowDeleteConfirm}
+            >
+              <Dialog.Content maxWidth="360px">
+                <Dialog.Title>确认删除</Dialog.Title>
+                <Dialog.Description size="2">
+                  确定要删除应用 &quot;{app?.appName}&quot; 吗？此操作无法撤销。
+                </Dialog.Description>
+                <Flex gap="2" mt="4" justify="end">
+                  <Button
+                    variant="soft"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    color="red"
+                    loading={loading}
+                    onClick={() => {
+                      if (app?.id) {
+                        deleteReq.run({ id: app.id });
+                      }
+                      setShowDeleteConfirm(false);
+                    }}
+                  >
+                    删除
+                  </Button>
+                </Flex>
+              </Dialog.Content>
+            </Dialog.Root>
+          </div>
         </Dialog.Description>
       </Dialog.Content>
     </Dialog.Root>

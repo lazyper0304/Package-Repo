@@ -3,6 +3,44 @@ import { Dialog, Text, Table, Button, Flex } from '@radix-ui/themes';
 import Pagination from '@/components/ui/Pagination';
 import { useRequest } from 'ahooks';
 
+// 表格行进入动画样式
+const tableRowStyle = {
+  animation: 'fadeInUp 0.5s ease-out forwards',
+  opacity: 0,
+  transform: 'translateY(10px)'
+};
+
+// 表格容器动画样式
+const tableContainerStyle = {
+  animation: 'fadeIn 0.6s ease-out forwards',
+  opacity: 0
+};
+
+// 定义动画关键帧
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+`;
+document.head.appendChild(style);
+
 interface LogEntry {
   timestamp: string;
   ip: string;
@@ -54,7 +92,7 @@ const LogViewer: React.FC<{
       <Dialog.Content maxWidth="800px">
         <Dialog.Title>访问日志</Dialog.Title>
         <Dialog.Description>
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 16, ...tableContainerStyle }}>
             <Table.Root>
               <Table.Header>
                 <Table.Row>
@@ -74,7 +112,13 @@ const LogViewer: React.FC<{
                 ) : data?.success ? (
                   data.data.length > 0 ? (
                     data.data.map((log, index) => (
-                      <Table.Row key={index}>
+                      <Table.Row 
+                        key={index} 
+                        style={{
+                          ...tableRowStyle,
+                          animationDelay: `${index * 0.1}s`
+                        }}
+                      >
                         <Table.Cell style={{ minWidth: '100px' }}>
                           <Text size="2">{log.ip}</Text>
                         </Table.Cell>
@@ -90,14 +134,14 @@ const LogViewer: React.FC<{
                       </Table.Row>
                     ))
                   ) : (
-                    <Table.Row>
+                    <Table.Row style={tableRowStyle}>
                       <Table.Cell colSpan={4} style={{ textAlign: 'center' }}>
                         暂无日志记录
                       </Table.Cell>
                     </Table.Row>
                   )
                 ) : (
-                  <Table.Row>
+                  <Table.Row style={tableRowStyle}>
                     <Table.Cell colSpan={4} style={{ textAlign: 'center' }}>
                       获取日志失败
                     </Table.Cell>
