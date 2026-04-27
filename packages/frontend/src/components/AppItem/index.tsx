@@ -81,7 +81,7 @@ const AppItem: React.FC<IProps> = ({
         />
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
-          <Flex justify="center" direction="column" style={{ flex: 1 }}>
+          <Flex direction="column" style={{ flex: 1 }}>
             <Heading
               size="3"
               title="应用名称"
