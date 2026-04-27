@@ -1,21 +1,19 @@
 import type { AppEntity } from '@/entities/app';
 import {
   Badge,
-  Button,
   Card,
   ContextMenu,
-  Dialog,
   Flex,
   Heading,
   Text,
 } from '@radix-ui/themes';
-import emptyIcon from '@/assets/empty.svg';
 import React, { useMemo, useState } from 'react';
 import Highlighter from '../Highlighter';
-import copy from 'copy-to-clipboard';
-import { notify } from '@/utils/notify';
+import AppIcon from '../AppIcon';
+import ConfirmDialog from '../ui/ConfirmDialog';
+import { copyToClipboard } from '@/utils/copy';
 import styles from './index.module.less';
-import { useAppType } from '@/contexts/AppTypeContext';
+import { useSortedTypes } from '@/hooks/useSortedTypes';
 
 type IProps = Readonly<{
   app: AppEntity.Item;
@@ -33,52 +31,22 @@ const AppItem: React.FC<IProps> = ({
   onDelete,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const { state: appTypeState } = useAppType();
 
-  // 对类型进行排序
-  const sortedTypes = useMemo(() => {
-    if (!app.type || app.type.length === 0) return [];
-    if (!appTypeState.appTypes || appTypeState.appTypes.length === 0)
-      return app.type;
-
-    // 创建一个映射，用于快速查找类型的 sort 值
-    const typeSortMap = new Map<string, number>();
-    appTypeState.appTypes.forEach((appType) => {
-      typeSortMap.set(appType.type_name, appType.sort || 0);
-    });
-
-    // 根据 sort 值排序
-    return [...app.type].sort((a, b) => {
-      const sortA = typeSortMap.get(a) ?? 0;
-      const sortB = typeSortMap.get(b) ?? 0;
-      return sortA - sortB;
-    });
-  }, [app.type, appTypeState.appTypes]);
+  const sortedTypes = useSortedTypes(app.type);
 
   function handleCopy(
     e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
     v?: string
   ) {
     e.stopPropagation();
-
     if (!v) return;
-
-    copy(v);
-
-    notify('复制成功');
+    copyToClipboard(v);
   }
 
   const appItem = useMemo(
     () => (app: AppEntity.Item) => (
       <Flex gap="3" style={{ height: '100%' }}>
-        <img
-          loading="lazy"
-          src={app.iconUrl && app.iconUrl !== '-' ? app.iconUrl : emptyIcon}
-          style={{
-            background:
-              app.iconUrl && app.iconUrl !== '-' ? 'transparent' : '#d0d0d060',
-          }}
-        />
+        <AppIcon iconUrl={app.iconUrl} />
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
           <Flex direction="column" style={{ flex: 1 }}>
@@ -185,35 +153,15 @@ const AppItem: React.FC<IProps> = ({
         </ContextMenu.Content>
       </ContextMenu.Root>
 
-      <Dialog.Root open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <Dialog.Content maxWidth="360px">
-          <Dialog.Title>确认删除</Dialog.Title>
-          <Dialog.Description size="2">
-            确定要删除应用 &quot;{app.appName}&quot; 吗？此操作无法撤销。
-          </Dialog.Description>
-          <Flex gap="2" mt="4" justify="end">
-            <Button
-              variant="soft"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteConfirm(false);
-              }}
-            >
-              取消
-            </Button>
-            <Button
-              color="red"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(app.id);
-                setShowDeleteConfirm(false);
-              }}
-            >
-              删除
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        description={`确定要删除应用 "${app.appName}" 吗？此操作无法撤销。`}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          onDelete(app.id);
+          setShowDeleteConfirm(false);
+        }}
+      />
     </Card>
   );
 };

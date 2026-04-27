@@ -6,15 +6,16 @@ export default function useMobile() {
   });
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const mql = window.matchMedia('(max-width: 767px)');
 
-    window.addEventListener('resize', handleResize);
+    // 同步当前状态
+    setIsMobile(mql.matches);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    // 只在断点跨越时触发，而非每次像素变化
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handler);
+
+    return () => mql.removeEventListener('change', handler);
   }, []);
 
   return isMobile;

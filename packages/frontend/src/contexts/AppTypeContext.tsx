@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useMemo, useCallback } from 'react';
 import API from '@/services';
 import type { AppTypeEntity } from '@/entities/appType';
 
@@ -60,7 +60,7 @@ export function AppTypeProvider({ children }: AppTypeProviderProps) {
   const [state, dispatch] = useReducer(appTypeReducer, initialState);
 
   // 刷新应用类型列表
-  const refreshAppTypes = async () => {
+  const refreshAppTypes = useCallback(async () => {
     dispatch({ type: 'FETCH_APP_TYPES_START' });
     try {
       const response = await API.appTypeList();
@@ -75,17 +75,17 @@ export function AppTypeProvider({ children }: AppTypeProviderProps) {
     } catch {
       dispatch({ type: 'FETCH_APP_TYPES_FAILURE', payload: '网络错误' });
     }
-  };
+  }, []);
 
   // 初始加载
   useEffect(() => {
     refreshAppTypes();
-  }, []);
+  }, [refreshAppTypes]);
 
-  const value = {
-    state,
-    refreshAppTypes,
-  };
+  const value = useMemo(
+    () => ({ state, refreshAppTypes }),
+    [state, refreshAppTypes]
+  );
 
   return (
     <AppTypeContext.Provider value={value}>{children}</AppTypeContext.Provider>

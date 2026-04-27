@@ -26,7 +26,12 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
     defaultValue: [],
   });
   const isMobile = useMobile();
-  const historyRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 点击外部关闭搜索历史
+  useClickAway(() => {
+    setShowHistory(false);
+  }, containerRef);
 
   function saveToHistory(value: string) {
     if (!value.trim()) return;
@@ -36,9 +41,9 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
     setHistory(updated);
   }
 
-  function handleFocus() {
+  function handleInputClick() {
     if (!isMobile && history.length > 0) {
-      setShowHistory((prev) => !prev);
+      setShowHistory(true);
     }
   }
 
@@ -75,7 +80,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <Card size="3">
         <Heading as="h1" style={{ marginBottom: 24 }}>
           🔍 搜索应用
@@ -87,7 +92,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
             placeholder="输入关键字"
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            onMouseEnter={handleFocus}
+            onClick={handleInputClick}
             style={{ flex: 1 }}
           >
             <TextField.Slot>
@@ -114,7 +119,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
       </Card>
 
       {!isMobile && history.length > 0 && showHistory && (
-        <div ref={historyRef}>
+        <div>
           <Card
             size="2"
             style={{
@@ -128,9 +133,12 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               zIndex: 9999,
               maxHeight: 300,
               width: 'calc(100% - 106px)',
+              background: 'var(--search-history-bg)',
+              backdropFilter: 'var(--search-history-blur)',
+              WebkitBackdropFilter: 'var(--search-history-blur)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              border: '1px solid var(--gray-a4)',
             }}
-            onMouseLeave={() => setShowHistory(false)}
           >
             <Flex
               justify="between"
@@ -160,9 +168,9 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               style={{ flex: 1, overflowY: 'auto' }}
             >
               <ScrollArea>
-                {history.map((item, index) => (
+                {history.map((item) => (
                   <Flex
-                    key={index}
+                    key={item}
                     align="center"
                     gap="2"
                     onClick={() => handleSelectHistory(item)}

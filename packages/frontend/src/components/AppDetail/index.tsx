@@ -16,11 +16,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styles from './index.module.less';
 import { useRequest } from 'ahooks';
 import { AiOutlineLoading } from 'react-icons/ai';
-import copy from 'copy-to-clipboard';
-import { notify } from '@/utils/notify';
 import Form, { Field } from '@rc-component/form';
-import emptyIcon from '@/assets/empty.svg';
+import AppIcon from '@/components/AppIcon';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import ImageVectorizer from '@/components/ImageVectorizer';
+import { copyToClipboard } from '@/utils/copy';
+import { notify } from '@/utils/notify';
 
 import useMobile from '@/hooks/useMobile';
 import { useAppType } from '@/contexts/AppTypeContext';
@@ -142,10 +143,7 @@ const AppDetail: React.FC<IProps> = ({
 
   function handleCopy(v?: string) {
     if (!v) return;
-
-    copy(v);
-
-    notify('复制成功');
+    copyToClipboard(v);
   }
 
   function handleFinish(fields: Record<string, any>) {
@@ -284,7 +282,7 @@ const AppDetail: React.FC<IProps> = ({
                       {sortedDisplayTypes.length === 0 && '-'}
 
                       {sortedDisplayTypes.map((item) => (
-                        <Badge size="2">{item}</Badge>
+                        <Badge key={item} size="2">{item}</Badge>
                       ))}
                     </Flex>
                   ) : sortedDisplayTypes ? (
@@ -344,7 +342,7 @@ const AppDetail: React.FC<IProps> = ({
                   <AiOutlineLoading className="loading" />
                 )}
 
-                <img src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon} />
+                <AppIcon iconUrl={iconUrl} />
               </div>
             )}
 
@@ -476,37 +474,18 @@ const AppDetail: React.FC<IProps> = ({
               />
             )}
 
-            <Dialog.Root
+            <ConfirmDialog
               open={showDeleteConfirm}
-              onOpenChange={setShowDeleteConfirm}
-            >
-              <Dialog.Content maxWidth="360px">
-                <Dialog.Title>确认删除</Dialog.Title>
-                <Dialog.Description size="2">
-                  确定要删除应用 &quot;{app?.appName}&quot; 吗？此操作无法撤销。
-                </Dialog.Description>
-                <Flex gap="2" mt="4" justify="end">
-                  <Button
-                    variant="soft"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    color="red"
-                    loading={loading}
-                    onClick={() => {
-                      if (app?.id) {
-                        deleteReq.run({ id: app.id });
-                      }
-                      setShowDeleteConfirm(false);
-                    }}
-                  >
-                    删除
-                  </Button>
-                </Flex>
-              </Dialog.Content>
-            </Dialog.Root>
+              description={`确定要删除应用 "${app?.appName}" 吗？此操作无法撤销。`}
+              loading={loading}
+              onCancel={() => setShowDeleteConfirm(false)}
+              onConfirm={() => {
+                if (app?.id) {
+                  deleteReq.run({ id: app.id });
+                }
+                setShowDeleteConfirm(false);
+              }}
+            />
           </div>
         </Dialog.Description>
       </Dialog.Content>

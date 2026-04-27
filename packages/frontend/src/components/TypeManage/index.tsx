@@ -10,10 +10,10 @@ import {
   Text,
 } from '@radix-ui/themes';
 import Form, { Field } from '@rc-component/form';
-import { useRequest } from 'ahooks';
 import React, { useState, useEffect, useMemo } from 'react';
 import { MdAdd, MdEdit } from 'react-icons/md';
-import { notify } from '@/utils/notify';
+import ConfirmDialog from '../ui/ConfirmDialog';
+import { useApiRequest } from '@/hooks/useApiRequest';
 import { useAppType } from '@/contexts/AppTypeContext';
 
 type IProps = Readonly<{
@@ -51,40 +51,25 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
     }
   }, [open]);
 
-  const addReq = useRequest(API.addAppType, {
-    manual: true,
-    onSuccess(res) {
-      if (res.success) {
-        refreshAppTypes();
-        onOk();
-      } else {
-        notify(res.message);
-      }
+  const addReq = useApiRequest(API.addAppType, {
+    onSuccess() {
+      refreshAppTypes();
+      onOk();
     },
   });
 
-  const updateReq = useRequest(API.updateAppType, {
-    manual: true,
-    onSuccess(res) {
-      if (res.success) {
-        refreshAppTypes();
-        onOk();
-        onRefresh();
-      } else {
-        notify(res.message);
-      }
+  const updateReq = useApiRequest(API.updateAppType, {
+    onSuccess() {
+      refreshAppTypes();
+      onOk();
+      onRefresh();
     },
   });
 
-  const deleteReq = useRequest(API.deleteAppType, {
-    manual: true,
-    onSuccess(res) {
-      if (res.success) {
-        refreshAppTypes();
-        onOk();
-      } else {
-        notify(res.message);
-      }
+  const deleteReq = useApiRequest(API.deleteAppType, {
+    onSuccess() {
+      refreshAppTypes();
+      onOk();
     },
   });
 
@@ -253,33 +238,17 @@ const TypeManage: React.FC<IProps> = ({ open, onOk, onClose, onRefresh }) => {
         </Dialog.Description>
       </Dialog.Content>
 
-      <Dialog.Root
+      <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(v) => !v && setDeleteConfirm({ open: false })}
-      >
-        <Dialog.Content maxWidth="360px">
-          <Dialog.Title>确认删除</Dialog.Title>
-          <Dialog.Description size="2">
-            确定要删除分类 &quot;{deleteConfirm.name}&quot; 吗？此操作无法撤销。
-          </Dialog.Description>
-          <Flex gap="2" mt="4" justify="end">
-            <Button variant="soft" onClick={() => setDeleteConfirm({ open: false })}>
-              取消
-            </Button>
-            <Button
-              color="red"
-              onClick={() => {
-                if (deleteConfirm.id) {
-                  deleteReq.run({ id: deleteConfirm.id });
-                }
-                setDeleteConfirm({ open: false });
-              }}
-            >
-              删除
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+        description={`确定要删除分类 "${deleteConfirm.name}" 吗？此操作无法撤销。`}
+        onCancel={() => setDeleteConfirm({ open: false })}
+        onConfirm={() => {
+          if (deleteConfirm.id) {
+            deleteReq.run({ id: deleteConfirm.id });
+          }
+          setDeleteConfirm({ open: false });
+        }}
+      />
     </Dialog.Root>
   );
 };

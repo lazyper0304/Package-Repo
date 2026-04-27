@@ -112,8 +112,8 @@ const LogViewer: React.FC<{
                 ) : data?.success ? (
                   data.data.length > 0 ? (
                     data.data.map((log, index) => (
-                      <Table.Row 
-                        key={index} 
+                      <Table.Row
+                        key={log.ip + log.timestamp} 
                         style={{
                           ...tableRowStyle,
                           animationDelay: `${index * 0.1}s`
