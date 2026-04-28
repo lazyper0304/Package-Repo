@@ -41,10 +41,8 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
     setHistory(updated);
   }
 
-  function handleInputClick() {
-    if (!isMobile && history.length > 0) {
-      setShowHistory(true);
-    }
+  function handleToggleHistory() {
+    setShowHistory((prev) => !prev);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -92,7 +90,6 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
             placeholder="输入关键字"
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            onClick={handleInputClick}
             style={{ flex: 1 }}
           >
             <TextField.Slot>
@@ -106,6 +103,16 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
             )}
           </TextField.Root>
 
+          {!isMobile && history.length > 0 && (
+            <Button
+              variant={showHistory ? 'solid' : 'outline'}
+              onClick={handleToggleHistory}
+              style={{ padding: '0 10px' }}
+            >
+              <MdHistory size={18} />
+            </Button>
+          )}
+
           <Button
             loading={loading}
             onClick={() => {
@@ -118,7 +125,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
         </Flex>
       </Card>
 
-      {!isMobile && history.length > 0 && showHistory && (
+      {showHistory && (
         <div>
           <Card
             size="2"
@@ -132,7 +139,7 @@ const SearchForm: React.FC<IProps> = ({ loading, onChange }) => {
               marginTop: 4,
               zIndex: 9999,
               maxHeight: 300,
-              width: 'calc(100% - 106px)',
+              width: 'calc(100% - 148px)',
               background: 'var(--search-history-bg)',
               backdropFilter: 'var(--search-history-blur)',
               WebkitBackdropFilter: 'var(--search-history-blur)',
