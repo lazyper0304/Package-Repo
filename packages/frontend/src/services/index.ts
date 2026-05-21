@@ -305,6 +305,7 @@ export default class API {
       const result = await HttpClient.get<{
         success: boolean;
         total: number;
+        todayCount: number;
         data: any[];
         error?: string;
         message?: string;
@@ -312,14 +313,9 @@ export default class API {
 
       if (result.success) {
         const total = result.total || 0;
+        const today = result.todayCount || 0;
 
-        // 计算今日访问量
-        const today = new Date().toISOString().split('T')[0];
-        const todayLogs = result.data.filter((log: any) => {
-          return log.timestamp.split('T')[0] === today;
-        });
-
-        return { success: true, total, today: todayLogs.length };
+        return { success: true, total, today };
       } else {
         console.error('获取访问日志失败:', result.message || result.error);
         return { success: false, total: 0, today: 0 };

@@ -87,17 +87,22 @@ app.get('/api/visit/logs', (req, res) => {
       .map(line => JSON.parse(line))
       .reverse(); // 最新的日志在前
     
+    // 计算今日访问量（分页前）
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = logs.filter(log => log.timestamp && log.timestamp.split('T')[0] === today).length;
+
     // 分页处理
     const current = parseInt(req.query.current) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const start = (current - 1) * pageSize;
     const end = start + pageSize;
     const paginatedLogs = logs.slice(start, end);
-    
+
     res.json({
       success: true,
       data: paginatedLogs,
       total: logs.length,
+      todayCount,
       current,
       pageSize
     });
