@@ -30,7 +30,7 @@ const ImportJson: React.FC<IProps> = ({ open, onClose, onUpload }) => {
     manual: true,
     onSuccess(res) {
       if (res.success) {
-        notify('上传完成，请耐心等待服务端导入完成');
+        notify(res.message || '导入完成');
         onClose();
       } else {
         notify(res.message || '上传失败');

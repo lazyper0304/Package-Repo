@@ -279,6 +279,7 @@ export default class API {
       const response = await HttpClient.request<{
         success: boolean;
         message: string;
+        total?: number;
         error?: string;
       }>('/api/app/import-json', {
         method: 'POST',
@@ -289,6 +290,7 @@ export default class API {
         return {
           success: true,
           message: response.message,
+          total: response.total,
         };
       } else {
         return { success: false, message: response.error || '上传失败' };
