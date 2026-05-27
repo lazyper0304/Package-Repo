@@ -34,6 +34,13 @@ export function useHomeState() {
     defaultValue: 'grid1',
   });
 
+  const [packageVisibility, setPackageVisibility] = useLocalStorageState<{
+    showAndroid: boolean;
+    showHarmony: boolean;
+  }>('app-package-visibility', {
+    defaultValue: { showAndroid: true, showHarmony: true },
+  });
+
   const pageSize = displayMode === 'grid3' || displayMode === 'grid4' ? 24 : 21;
 
   // 用 ref 保存 pageSize，避免 handler 依赖它导致频繁重建
@@ -207,6 +214,8 @@ export function useHomeState() {
     setState,
     displayMode,
     setDisplayMode,
+    packageVisibility,
+    setPackageVisibility,
     appTypesWithAll,
     searchAppsReq,
     handleSearch,

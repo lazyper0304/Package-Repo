@@ -280,6 +280,8 @@ export default class API {
         success: boolean;
         message: string;
         total?: number;
+        imported?: number;
+        skipped?: number;
         error?: string;
       }>('/api/app/import-json', {
         method: 'POST',

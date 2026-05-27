@@ -21,6 +21,8 @@ type IProps = Readonly<{
   isAdmin?: boolean;
   onClick: (v?: AppEntity.Item, edit?: boolean) => void;
   onDelete: (id: string) => void;
+  showAndroidPackageName?: boolean;
+  showHarmonyPackageName?: boolean;
 }>;
 
 const AppItem: React.FC<IProps> = ({
@@ -29,6 +31,8 @@ const AppItem: React.FC<IProps> = ({
   isAdmin,
   onClick,
   onDelete,
+  showAndroidPackageName = true,
+  showHarmonyPackageName = true,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -66,36 +70,40 @@ const AppItem: React.FC<IProps> = ({
               </Highlighter>
             </Heading>
 
-            <Text
-              color="gray"
-              title="Android包名"
-              style={{
-                width: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-              onClick={(e) => handleCopy(e, app.androidPackageName)}
-            >
-              <Highlighter searchWords={keyword || ''}>
-                {app.androidPackageName}
-              </Highlighter>
-            </Text>
-            <Text
-              color="gray"
-              title="Harmony包名"
-              style={{
-                width: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-              onClick={(e) => handleCopy(e, app.harmonyPackageName)}
-            >
-              <Highlighter searchWords={keyword || ''}>
-                {app.harmonyPackageName}
-              </Highlighter>
-            </Text>
+            {showAndroidPackageName && (
+              <Text
+                color="gray"
+                title="Android包名"
+                style={{
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+                onClick={(e) => handleCopy(e, app.androidPackageName)}
+              >
+                <Highlighter searchWords={keyword || ''}>
+                  {app.androidPackageName}
+                </Highlighter>
+              </Text>
+            )}
+            {showHarmonyPackageName && (
+              <Text
+                color="gray"
+                title="Harmony包名"
+                style={{
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+                onClick={(e) => handleCopy(e, app.harmonyPackageName)}
+              >
+                <Highlighter searchWords={keyword || ''}>
+                  {app.harmonyPackageName}
+                </Highlighter>
+              </Text>
+            )}
           </Flex>
 
           {sortedTypes.length ? (
@@ -117,7 +125,7 @@ const AppItem: React.FC<IProps> = ({
         </Flex>
       </Flex>
     ),
-    [keyword, sortedTypes]
+    [keyword, sortedTypes, showAndroidPackageName, showHarmonyPackageName]
   );
 
   return (

@@ -27,6 +27,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
     setState,
     displayMode,
     setDisplayMode,
+    packageVisibility,
+    setPackageVisibility,
     appTypesWithAll,
     searchAppsReq,
     handleSearch,
@@ -105,6 +107,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
         isAdmin={isAdmin}
         displayMode={displayMode}
         setDisplayMode={setDisplayMode}
+        packageVisibility={packageVisibility}
+        setPackageVisibility={setPackageVisibility}
       />
     </>
   );

@@ -3,8 +3,10 @@ import {
   Badge,
   Button,
   Card,
+  CheckboxGroup,
   Flex,
   Heading,
+  Popover,
   ScrollArea,
   Spinner,
   Tabs,
@@ -20,6 +22,7 @@ import empty from '@/assets/empty.svg';
 import type { AppTypeEntity } from '@/entities/appType';
 import AppItem from '@/components/AppItem';
 import useMobile from '@/hooks/useMobile';
+import { notify } from '@/utils/notify';
 
 type IProps = Readonly<{
   currentAppType?: string;
@@ -36,6 +39,8 @@ type IProps = Readonly<{
   isAdmin?: boolean;
   displayMode: 'grid1' | 'grid2' | 'grid3' | 'grid4';
   setDisplayMode: (v: 'grid1' | 'grid2' | 'grid3' | 'grid4') => void;
+  packageVisibility: { showAndroid: boolean; showHarmony: boolean };
+  setPackageVisibility: (v: { showAndroid: boolean; showHarmony: boolean }) => void;
 }>;
 
 const SearchResult: React.FC<IProps> = ({
@@ -53,6 +58,8 @@ const SearchResult: React.FC<IProps> = ({
   isAdmin = false,
   displayMode,
   setDisplayMode,
+  packageVisibility,
+  setPackageVisibility,
 }) => {
   const ref = useRef<HTMLHeadingElement>(null);
 
@@ -61,6 +68,17 @@ const SearchResult: React.FC<IProps> = ({
   const size = useSize(ref);
 
   const isMobile = useMobile();
+
+  function handlePackageVisibilityChange(values: string[]) {
+    if (values.length === 0) {
+      notify('至少需要选择一项包名显示');
+      return;
+    }
+    setPackageVisibility({
+      showAndroid: values.includes('android'),
+      showHarmony: values.includes('harmony'),
+    });
+  }
 
   // 对 appTypes 进行排序
   const sortedAppTypes = useMemo(() => {
@@ -105,6 +123,8 @@ const SearchResult: React.FC<IProps> = ({
               isAdmin={isAdmin}
               onClick={onClick}
               onDelete={onDelete}
+              showAndroidPackageName={packageVisibility.showAndroid}
+              showHarmonyPackageName={packageVisibility.showHarmony}
             />
           </div>
         ))}
@@ -137,6 +157,7 @@ const SearchResult: React.FC<IProps> = ({
     isAdmin,
     onClick,
     onDelete,
+    packageVisibility,
   ]);
 
   return (
@@ -175,6 +196,28 @@ const SearchResult: React.FC<IProps> = ({
                     <Select.Item value="grid4">一行四个</Select.Item>
                   </Select.Content>
                 </Select.Root>
+
+                <Popover.Root>
+                  <Popover.Trigger>
+                    <Button variant="soft">显示设置</Button>
+                  </Popover.Trigger>
+                  <Popover.Content style={{ width: 180 }}>
+                    <CheckboxGroup.Root
+                      value={[
+                        ...(packageVisibility.showAndroid ? ['android'] : []),
+                        ...(packageVisibility.showHarmony ? ['harmony'] : []),
+                      ]}
+                      onValueChange={handlePackageVisibilityChange}
+                    >
+                      <CheckboxGroup.Item value="android">
+                        安卓包名
+                      </CheckboxGroup.Item>
+                      <CheckboxGroup.Item value="harmony">
+                        鸿蒙包名
+                      </CheckboxGroup.Item>
+                    </CheckboxGroup.Root>
+                  </Popover.Content>
+                </Popover.Root>
               </Flex>
             )}
 

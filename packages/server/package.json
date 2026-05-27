@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon main.js",
+    "dev": "node main.js",
     "format": "prettier --write ."
   },
   "keywords": [],
@@ -22,7 +22,6 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
     "prettier": "^3.8.1"
   }
 }

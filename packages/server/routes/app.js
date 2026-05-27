@@ -479,19 +479,65 @@ export default class AppController {
         return res.status(400).json({ success: false, error: 'JSON数据格式错误，需要数组格式' });
       }
 
-      // 构建批量数据，空值用 null（MySQL UNIQUE KEY 中 NULL 互不冲突）
-      const values = [];
+      // 解析所有数据
+      const allItems = [];
       for (const appData of jsonData) {
         const { app_name, appName, android_package, androidPackageName, harmony_package, harmonyPackageName, icon_url, iconUrl, type, desc, description } = appData;
-        const appNameValue = app_name || appName || '';
-        const androidPackageValue = android_package || androidPackageName || null;
-        const harmonyPackageValue = harmony_package || harmonyPackageName || null;
-        const iconUrlValue = icon_url || iconUrl || null;
-        const typeValue = type || ['鸿蒙应用'];
-        const descValue = desc || description || null;
-
-        values.push([appNameValue, androidPackageValue, harmonyPackageValue, iconUrlValue, JSON.stringify(typeValue), descValue]);
+        allItems.push({
+          appName: app_name || appName || '',
+          androidPackage: android_package || androidPackageName || null,
+          harmonyPackage: harmony_package || harmonyPackageName || null,
+          iconUrl: icon_url || iconUrl || null,
+          type: type || ['鸿蒙应用'],
+          desc: desc || description || null,
+        });
       }
+
+      // 收集所有 harmony_package 和 android_package 值，查询已存在的记录
+      const harmonyPackages = allItems.map(i => i.harmonyPackage).filter(Boolean);
+      const androidPackages = allItems.map(i => i.androidPackage).filter(Boolean);
+
+      const existingSet = new Set();
+
+      // 查询已存在的 harmony_package
+      if (harmonyPackages.length > 0) {
+        for (let i = 0; i < harmonyPackages.length; i += 1000) {
+          const batch = harmonyPackages.slice(i, i + 1000);
+          const placeholders = batch.map(() => '?').join(', ');
+          const [rows] = await pool.execute(
+            `SELECT harmony_package FROM apps WHERE harmony_package IN (${placeholders})`,
+            batch
+          );
+          rows.forEach(r => existingSet.add(r.harmony_package));
+        }
+      }
+
+      // 查询已存在的 android_package
+      if (androidPackages.length > 0) {
+        for (let i = 0; i < androidPackages.length; i += 1000) {
+          const batch = androidPackages.slice(i, i + 1000);
+          const placeholders = batch.map(() => '?').join(', ');
+          const [rows] = await pool.execute(
+            `SELECT android_package FROM apps WHERE android_package IN (${placeholders})`,
+            batch
+          );
+          rows.forEach(r => existingSet.add(r.android_package));
+        }
+      }
+
+      // 过滤掉已存在的记录（harmony_package 或 android_package 任一匹配即跳过）
+      const newItems = allItems.filter(i => {
+        if (i.harmonyPackage && existingSet.has(i.harmonyPackage)) return false;
+        if (i.androidPackage && existingSet.has(i.androidPackage)) return false;
+        return true;
+      });
+
+      const skipped = allItems.length - newItems.length;
+
+      // 构建批量插入数据
+      const values = newItems.map(i => [
+        i.appName, i.androidPackage, i.harmonyPackage, i.iconUrl, JSON.stringify(i.type), i.desc
+      ]);
 
       // 分批插入，每批 500 条
       const BATCH_SIZE = 500;
@@ -499,6 +545,8 @@ export default class AppController {
 
       for (let i = 0; i < values.length; i += BATCH_SIZE) {
         const batch = values.slice(i, i + BATCH_SIZE);
+        if (batch.length === 0) break;
+
         const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
         const flatParams = batch.flat();
 
@@ -520,13 +568,13 @@ export default class AppController {
 
       res.json({
         success: true,
-        total: jsonData.length,
+        total: allItems.length,
         imported,
-        message: `导入完成，共 ${jsonData.length} 条记录`
+        skipped,
+        message: `导入完成，新增 ${imported} 条，跳过 ${skipped} 条已存在记录`
       });
     } catch (error) {
       console.error('导入JSON失败:', error);
-      // 确保删除临时文件
       if (req.file) {
         try {
           fs.unlinkSync(req.file.path);
