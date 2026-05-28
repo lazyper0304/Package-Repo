@@ -56,6 +56,12 @@ const AppDetail: React.FC<IProps> = ({
   >([]);
   const [showPackageResults, setShowPackageResults] = useState(false);
 
+  const [harmonyPackageNameResults, setHarmonyPackageNameResults] = useState<
+    { name: string; pkgName: string; appId: string }[]
+  >([]);
+  const [showHarmonyPackageResults, setShowHarmonyPackageResults] =
+    useState(false);
+
   const [editing, setEditing] = useState(edit || !app);
 
   const isMobile = useMobile();
@@ -109,6 +115,33 @@ const AppDetail: React.FC<IProps> = ({
       onSuccess(items) {
         setPackageNameResults(items);
         setShowPackageResults(true);
+      },
+      onError() {
+        notify('获取包名失败，请重试');
+      },
+    }
+  );
+
+  const getHarmonyPackageNameReq = useRequest(
+    async (appName: string) => {
+      const res = await fetch(
+        `https://next.betahub.tech/api/v0/apps/list/1?page_size=10&sort=download_count&desc=true&search_key=name&search_value=${encodeURIComponent(appName)}&search_exact=false`
+      );
+      if (!res.ok) throw new Error('请求失败');
+      const data = await res.json();
+      return (data.data?.data ?? []).map(
+        (item: { name: string; pkg_name: string; app_id: string }) => ({
+          name: item.name,
+          pkgName: item.pkg_name,
+          appId: item.app_id,
+        })
+      );
+    },
+    {
+      manual: true,
+      onSuccess(items) {
+        setHarmonyPackageNameResults(items);
+        setShowHarmonyPackageResults(true);
       },
       onError() {
         notify('获取包名失败，请重试');
@@ -275,7 +308,7 @@ const AppDetail: React.FC<IProps> = ({
                     </>
                   )}
 
-                  {label === '安卓包名' && (
+                  {(label === '安卓包名' || label === '鸿蒙包名') && (
                     <div style={{ position: 'relative', width: '100%' }}>
                       <Flex gap="2" align="center">
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -290,76 +323,187 @@ const AppDetail: React.FC<IProps> = ({
                         <Button
                           size="2"
                           variant="soft"
-                          loading={getPackageNameReq.loading}
+                          loading={
+                            label === '安卓包名'
+                              ? getPackageNameReq.loading
+                              : getHarmonyPackageNameReq.loading
+                          }
                           onClick={() => {
                             const appName = form.getFieldValue('应用名');
                             if (!appName) {
                               notify('请先输入应用名');
                               return;
                             }
-                            getPackageNameReq.run(appName);
+                            if (label === '安卓包名') {
+                              getPackageNameReq.run(appName);
+                            } else {
+                              getHarmonyPackageNameReq.run(appName);
+                            }
                           }}
                         >
                           获取包名
                         </Button>
                       </Flex>
-                      {showPackageResults && packageNameResults.length > 0 && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: '100%',
-                            left: 0,
-                            right: 0,
-                            zIndex: 10,
-                            background: 'var(--color-panel-solid)',
-                            border: '1px solid var(--gray-6)',
-                            borderRadius: 'var(--radius-3)',
-                            marginTop: 4,
-                            maxHeight: 240,
-                            overflowY: 'auto',
-                            boxShadow: 'var(--shadow-3)',
-                          }}
-                        >
-                          {packageNameResults.map((item) => (
-                            <div
-                              key={item.id}
-                              style={{
-                                padding: '8px 12px',
-                                cursor: 'pointer',
-                                borderBottom: '1px solid var(--gray-4)',
-                                fontSize: '14px',
-                              }}
-                              onClick={() => {
-                                form.setFieldValue('安卓包名', item.packageName);
-                                setShowPackageResults(false);
-                              }}
-                              onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLDivElement).style.background =
-                                  'var(--accent-a3)';
-                              }}
-                              onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLDivElement).style.background =
-                                  'transparent';
-                              }}
-                            >
-                              <div style={{ fontWeight: 500 }}>{item.appName}</div>
+                      {label === '安卓包名' && showPackageResults && (
+                        <>
+                          <div
+                            style={{
+                              position: 'fixed',
+                              inset: 0,
+                              zIndex: 9,
+                            }}
+                            onClick={() => setShowPackageResults(false)}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: 0,
+                              right: 0,
+                              zIndex: 10,
+                              background: 'var(--color-panel-solid)',
+                              border: '1px solid var(--gray-6)',
+                              borderRadius: 'var(--radius-3)',
+                              marginTop: 4,
+                              maxHeight: 240,
+                              overflowY: 'auto',
+                              boxShadow: 'var(--shadow-3)',
+                            }}
+                          >
+                            {packageNameResults.length === 0 ? (
                               <div
                                 style={{
-                                  fontSize: '12px',
+                                  padding: '16px 12px',
+                                  textAlign: 'center',
                                   color: 'var(--gray-9)',
-                                  marginTop: 2,
+                                  fontSize: '14px',
                                 }}
                               >
-                                {item.packageName}
+                                暂无结果
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            ) : (
+                              packageNameResults.map((item) => (
+                                <div
+                                  key={item.id}
+                                  style={{
+                                    padding: '8px 12px',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid var(--gray-4)',
+                                    fontSize: '14px',
+                                  }}
+                                  onClick={() => {
+                                    form.setFieldValue('安卓包名', item.packageName);
+                                    setShowPackageResults(false);
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    (e.currentTarget as HTMLDivElement).style.background =
+                                      'var(--accent-a3)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    (e.currentTarget as HTMLDivElement).style.background =
+                                      'transparent';
+                                  }}
+                                >
+                                  <div style={{ fontWeight: 500 }}>
+                                    {item.appName}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: '12px',
+                                      color: 'var(--gray-9)',
+                                      marginTop: 2,
+                                    }}
+                                  >
+                                    {item.packageName}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </>
+                      )}
+                      {label === '鸿蒙包名' && showHarmonyPackageResults && (
+                        <>
+                          <div
+                            style={{
+                              position: 'fixed',
+                              inset: 0,
+                              zIndex: 9,
+                            }}
+                            onClick={() => setShowHarmonyPackageResults(false)}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: 0,
+                              right: 0,
+                              zIndex: 10,
+                              background: 'var(--color-panel-solid)',
+                              border: '1px solid var(--gray-6)',
+                              borderRadius: 'var(--radius-3)',
+                              marginTop: 4,
+                              maxHeight: 240,
+                              overflowY: 'auto',
+                              boxShadow: 'var(--shadow-3)',
+                            }}
+                          >
+                            {harmonyPackageNameResults.length === 0 ? (
+                              <div
+                                style={{
+                                  padding: '16px 12px',
+                                  textAlign: 'center',
+                                  color: 'var(--gray-9)',
+                                  fontSize: '14px',
+                                }}
+                              >
+                                暂无结果
+                              </div>
+                            ) : (
+                              harmonyPackageNameResults.map((item) => (
+                                <div
+                                  key={item.appId}
+                                  style={{
+                                    padding: '8px 12px',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid var(--gray-4)',
+                                    fontSize: '14px',
+                                  }}
+                                  onClick={() => {
+                                    form.setFieldValue('鸿蒙包名', item.pkgName);
+                                    setShowHarmonyPackageResults(false);
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    (e.currentTarget as HTMLDivElement).style.background =
+                                      'var(--accent-a3)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    (e.currentTarget as HTMLDivElement).style.background =
+                                      'transparent';
+                                  }}
+                                >
+                                  <div style={{ fontWeight: 500 }}>
+                                    {item.name}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: '12px',
+                                      color: 'var(--gray-9)',
+                                      marginTop: 2,
+                                    }}
+                                  >
+                                    {item.pkgName}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
 
-                  {label !== '分类' && label !== '备注' && label !== '安卓包名' && (
+                  {label !== '分类' && label !== '备注' && label !== '安卓包名' && label !== '鸿蒙包名' && (
                     <Field name={label}>
                       <TextField.Root
                         defaultValue={v}
