@@ -1,0 +1,81 @@
+.uploadArea {
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: #fafafa;
+  padding: 16px;
+
+  &:hover {
+    border-color: #1890ff;
+    background-color: #e6f7ff;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    &:hover {
+      border-color: #d9d9d9;
+      background-color: #fafafa;
+    }
+  }
+
+  p {
+    margin: 8px 0;
+    font-size: 16px;
+    color: #333;
+  }
+
+  span {
+    font-size: 12px;
+    color: #999;
+  }
+}
+
+.result {
+  &__header {
+    margin-bottom: 16px;
+  }
+
+  &__stats {
+    margin-bottom: 16px;
+  }
+
+  &__queue {
+    margin-bottom: 16px;
+  }
+
+  &__queueItem {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--gray-4);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__pkgName {
+    font-family: monospace;
+    font-size: 12px;
+  }
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

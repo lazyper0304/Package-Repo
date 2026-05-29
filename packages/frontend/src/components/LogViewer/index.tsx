@@ -46,6 +46,7 @@ interface LogEntry {
   ip: string;
   location: string;
   userAgent: string;
+  username?: string;
 }
 
 interface LogResponse {
@@ -64,7 +65,10 @@ const LogViewer: React.FC<{
   const pageSize = 10;
 
   const fetchLogs = async (params: { current: number; pageSize: number }): Promise<LogResponse> => {
-    const response = await fetch(`/api/visit/logs?current=${params.current}&pageSize=${params.pageSize}`);
+    const token = sessionStorage.getItem('auth_token');
+    const response = await fetch(`/api/visit/logs?current=${params.current}&pageSize=${params.pageSize}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     return response.json();
   };
 
@@ -96,6 +100,7 @@ const LogViewer: React.FC<{
             <Table.Root>
               <Table.Header>
                 <Table.Row>
+                  <Table.ColumnHeaderCell style={{ minWidth: '80px' }}>账号</Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>IP地址</Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>归属地</Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell style={{ minWidth: '100px' }}>用户代理</Table.ColumnHeaderCell>
@@ -105,7 +110,7 @@ const LogViewer: React.FC<{
               <Table.Body>
                 {loading ? (
                   <Table.Row>
-                    <Table.Cell colSpan={4} style={{ textAlign: 'center' }}>
+                    <Table.Cell colSpan={5} style={{ textAlign: 'center' }}>
                       加载中...
                     </Table.Cell>
                   </Table.Row>
@@ -113,12 +118,15 @@ const LogViewer: React.FC<{
                   data.data.length > 0 ? (
                     data.data.map((log, index) => (
                       <Table.Row
-                        key={log.ip + log.timestamp} 
+                        key={log.ip + log.timestamp}
                         style={{
                           ...tableRowStyle,
                           animationDelay: `${index * 0.1}s`
                         }}
                       >
+                        <Table.Cell style={{ minWidth: '80px' }}>
+                          <Text size="2">{log.username || '-'}</Text>
+                        </Table.Cell>
                         <Table.Cell style={{ minWidth: '100px' }}>
                           <Text size="2">{log.ip}</Text>
                         </Table.Cell>
@@ -135,14 +143,14 @@ const LogViewer: React.FC<{
                     ))
                   ) : (
                     <Table.Row style={tableRowStyle}>
-                      <Table.Cell colSpan={4} style={{ textAlign: 'center' }}>
+                      <Table.Cell colSpan={5} style={{ textAlign: 'center' }}>
                         暂无日志记录
                       </Table.Cell>
                     </Table.Row>
                   )
                 ) : (
                   <Table.Row style={tableRowStyle}>
-                    <Table.Cell colSpan={4} style={{ textAlign: 'center' }}>
+                    <Table.Cell colSpan={5} style={{ textAlign: 'center' }}>
                       获取日志失败
                     </Table.Cell>
                   </Table.Row>

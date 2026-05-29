@@ -12,5 +12,7 @@ export namespace AppEntity {
     type?: string[];
     /** 备注 */
     desc?: string;
+    /** 操作人 */
+    updatedBy?: string;
   }
 }

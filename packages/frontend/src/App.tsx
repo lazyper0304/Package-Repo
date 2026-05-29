@@ -1,26 +1,104 @@
-import React, { Suspense, useMemo, useEffect, useState } from 'react';
+import React, { Suspense, useMemo, useEffect, useState, useCallback } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import Home from './pages/Home';
 import { Theme } from '@radix-ui/themes';
 import Notify from './components/ui/Notify';
 import { AppTypeProvider } from './contexts/AppTypeContext';
 import { useLocalStorageState } from 'ahooks';
+import LoginDialog from './components/LoginDialog';
+import API from './services';
 
 // 主题模式类型
 type ThemeMode = 'light' | 'dark' | 'system';
 
 // 权限检查组件
-const AuthWrapper: React.FC<{ children: React.ReactNode; themeMode: ThemeMode; setThemeMode: (value: ThemeMode) => void }> = ({ children, themeMode, setThemeMode }) => {
+const AuthWrapper: React.FC<{
+  children: React.ReactNode;
+  themeMode: ThemeMode;
+  setThemeMode: (value: ThemeMode) => void;
+}> = ({ children, themeMode, setThemeMode }) => {
   const location = useLocation();
 
-  // 根据访问的 URL 路径判断权限
   const isAdmin = useMemo(() => {
-    // 检查是否访问的是 repo（管理员权限）
     return location.pathname === '/repo';
   }, [location.pathname]);
 
-  // 将权限信息传递给子组件
-  return React.cloneElement(children as React.ReactElement, { isAdmin, themeMode, setThemeMode });
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginExpired, setLoginExpired] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // 检查 token 是否有效
+  const checkAuth = useCallback(async () => {
+    if (!isAdmin) {
+      setAuthChecked(true);
+      return;
+    }
+    const token = sessionStorage.getItem('auth_token');
+    if (!token) {
+      setShowLogin(true);
+      setAuthChecked(true);
+      return;
+    }
+    const valid = await API.verifyToken();
+    if (!valid) {
+      sessionStorage.removeItem('auth_token');
+      setShowLogin(true);
+    }
+    setAuthChecked(true);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    setAuthChecked(false);
+    checkAuth();
+  }, [isAdmin]);
+
+  // 监听 token 过期事件：不跳转，直接弹登录框
+  useEffect(() => {
+    function handleAuthExpired() {
+      if (isAdmin) {
+        setLoginExpired(true);
+        setShowLogin(true);
+      }
+    }
+    window.addEventListener('auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('auth-expired', handleAuthExpired);
+  }, [isAdmin]);
+
+  if (isAdmin && !authChecked) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {React.cloneElement(children as React.ReactElement, {
+        isAdmin,
+        themeMode,
+        setThemeMode,
+      })}
+      {isAdmin && (
+        <LoginDialog
+          open={showLogin}
+          expired={loginExpired}
+          onLoginSuccess={() => {
+            setShowLogin(false);
+            setLoginExpired(false);
+          }}
+        />
+      )}
+    </>
+  );
 };
 
 const App: React.FC = () => {
@@ -61,10 +139,10 @@ const App: React.FC = () => {
   // 根据主题模式设置根元素的 data-theme 属性
   useEffect(() => {
     const rootElement = document.documentElement;
-    const currentTheme = themeMode === 'system' 
+    const currentTheme = themeMode === 'system'
       ? (systemDarkMode ? 'dark' : 'light')
       : themeMode;
-    
+
     rootElement.setAttribute('data-theme', currentTheme);
   }, [themeMode, systemDarkMode]);
 
@@ -72,12 +150,14 @@ const App: React.FC = () => {
   useEffect(() => {
     const logVisit = async () => {
       try {
-        await fetch('/api/visit/log');
+        const token = sessionStorage.getItem('auth_token');
+        await fetch('/api/visit/log', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
       } catch (error) {
         console.error('记录访问信息失败:', error);
       }
     };
-
     logVisit();
   }, []);
 

@@ -21,6 +21,7 @@ type IState = {
   pngVectorizerOpen: boolean;
   logOpen: boolean;
   huaweiIconCheckerOpen: boolean;
+  androidToHarmonyOpen: boolean;
   edit: boolean;
 };
 
@@ -66,6 +67,7 @@ export function useHomeState() {
     pngVectorizerOpen: false,
     logOpen: false,
     huaweiIconCheckerOpen: false,
+    androidToHarmonyOpen: false,
     edit: false,
   });
 
@@ -209,6 +211,14 @@ export function useHomeState() {
     refreshAppTypes();
   }, [refreshAppTypes]);
 
+  const handleOpenAndroidToHarmony = useCallback(() => {
+    setState({ androidToHarmonyOpen: true });
+  }, [setState]);
+
+  const handleCloseAndroidToHarmony = useCallback(() => {
+    setState({ androidToHarmonyOpen: false });
+  }, [setState]);
+
   return {
     state,
     setState,
@@ -226,6 +236,8 @@ export function useHomeState() {
     handleCloseAppDetail,
     handleRefreshSearch,
     handleRefreshAll,
+    handleOpenAndroidToHarmony,
+    handleCloseAndroidToHarmony,
     refreshAppTypes,
   };
 }

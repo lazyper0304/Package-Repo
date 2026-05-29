@@ -40,6 +40,7 @@ export default class API {
             iconUrl: item.icon_url,
             type: item.type,
             desc: item.desc,
+            updatedBy: item.updated_by,
           })),
           pageSize: res.pageSize,
           total: res.total,
@@ -303,6 +304,29 @@ export default class API {
     }
   }
 
+  // 安卓包名转鸿蒙包名 - 查询映射关系
+  static async getHarmonyMapping(params: { androidPackages: string[] }): Promise<{
+    success: boolean;
+    mapping: Record<string, string>;
+    message?: string;
+  }> {
+    try {
+      const response = await HttpClient.post<{
+        success: boolean;
+        mapping: Record<string, string>;
+        message?: string;
+      }>('/api/app/harmony-mapping', params);
+      return response;
+    } catch (error) {
+      console.error('查询鸿蒙映射错误:', error);
+      return {
+        success: false,
+        mapping: {},
+        message: '网络错误，无法连接到服务器',
+      };
+    }
+  }
+
   // 获取访问日志统计
   static async getVisitStats() {
     try {
@@ -327,6 +351,42 @@ export default class API {
     } catch (error) {
       console.error('获取访问日志错误:', error);
       return { success: false, total: 0, today: 0 };
+    }
+  }
+
+  // 登录
+  static async login(params: { username: string; password: string }) {
+    try {
+      const result = await HttpClient.post<{
+        success: boolean;
+        token?: string;
+        message?: string;
+      }>('/api/auth/login', params);
+
+      if (result.success && result.token) {
+        sessionStorage.setItem('auth_token', result.token);
+        return { success: true };
+      } else {
+        return { success: false, message: result.message || '登录失败' };
+      }
+    } catch (error) {
+      console.error('登录错误:', error);
+      return { success: false, message: '网络错误，无法连接到服务器' };
+    }
+  }
+
+  // 验证 token（不走 HttpClient，避免触发 auth-expired 事件）
+  static async verifyToken() {
+    try {
+      const token = sessionStorage.getItem('auth_token');
+      if (!token) return false;
+      const res = await fetch('/api/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      return data.success === true;
+    } catch {
+      return false;
     }
   }
 }

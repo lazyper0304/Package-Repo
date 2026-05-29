@@ -3,16 +3,16 @@ import { pool } from '../db.js';
 export default class AppTypeController {
   static async typeList(req, res) {
     try {
-      // 使用 LEFT JOIN 统计每个类型的应用数量，使用 JSON_CONTAINS 函数处理 JSON 数组
+      // 使用关联表统计每个类型的应用数量
       const [rows] = await pool.execute(`
-      SELECT 
+      SELECT
         t.id,
         t.type_name,
         t.created_at,
         t.sort,
-        COUNT(a.id) as app_count
+        COUNT(r.app_id) as app_count
       FROM app_types t
-      LEFT JOIN apps a ON JSON_CONTAINS(a.type, JSON_ARRAY(t.type_name))
+      LEFT JOIN app_type_relations r ON r.type_id = t.id
       GROUP BY t.id, t.type_name, t.created_at, t.sort
       ORDER BY t.sort ASC, t.id ASC
     `);
@@ -150,23 +150,9 @@ export default class AppTypeController {
         updateParams
       );
 
-      // 同步更新所有使用该类型的应用（使用 JSON 函数处理数组）
-      // 注意：由于 type 现在是数组，更新类型名称需要更复杂的逻辑
-      // 这里我们使用 JSON_REMOVE 和 JSON_ARRAY_APPEND 函数来处理
-      const [updateResult] = await pool.execute(
-        `
-        UPDATE apps 
-        SET type = JSON_ARRAY_APPEND(
-          JSON_REMOVE(type, JSON_UNQUOTE(JSON_SEARCH(type, 'one', ?))),
-          '$',
-          ?
-        ) 
-        WHERE JSON_CONTAINS(type, JSON_ARRAY(?))
-      `,
-        [oldTypeName, newTypeName, oldTypeName]
-      );
+      // 关联表通过 type_id 关联，不需要同步更新
 
-      console.log(`已更新 ${updateResult.affectedRows} 个应用的类型`);
+      console.log(`已更新类型 ${id}: ${oldTypeName} -> ${newTypeName}`);
 
       // 获取更新后的记录
       const [updatedType] = await pool.execute(
@@ -178,7 +164,6 @@ export default class AppTypeController {
         success: true,
         message: '应用类型更新成功',
         data: updatedType[0],
-        updatedApps: updateResult.affectedRows,
       });
     } catch (error) {
       console.error('更新应用类型失败:', error);
@@ -210,10 +195,10 @@ export default class AppTypeController {
 
       const typeName = typeToDelete[0].type_name;
 
-      // 检查是否有应用使用了该类型（使用 JSON 函数处理数组）
+      // 检查是否有应用使用了该类型（通过关联表）
       const [appsUsingType] = await pool.execute(
-        'SELECT COUNT(*) as count FROM apps WHERE JSON_CONTAINS(type, JSON_ARRAY(?))',
-        [typeName]
+        'SELECT COUNT(*) as count FROM app_type_relations WHERE type_id = ?',
+        [id]
       );
 
       const appsCount = appsUsingType[0].count;

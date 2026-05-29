@@ -10,16 +10,67 @@ export default class AppController {
       const pageLimit = Math.max(1, parseInt(pageSize));
       const offset = (currentPage - 1) * pageLimit;
 
-      let query =
-        'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, created_at FROM apps';
+      // 有类型筛选时，先从关联表查 id，再查 apps（性能优化）
+      if (typeName && typeName.trim() && (!keyword || !keyword.trim())) {
+        // COUNT：直接从关联表计数
+        const [countResult] = await pool.execute(
+          `SELECT COUNT(*) as total FROM app_type_relations r
+           INNER JOIN app_types t ON t.id = r.type_id AND t.type_name = ?`,
+          [typeName.trim()]
+        );
+        const total = countResult[0].total;
+
+        // 分页查询关联表获取 app_id
+        const [relRows] = await pool.execute(
+          `SELECT r.app_id FROM app_type_relations r
+           INNER JOIN app_types t ON t.id = r.type_id AND t.type_name = ?
+           ORDER BY r.app_id DESC
+           LIMIT ${pageLimit} OFFSET ${offset}`,
+          [typeName.trim()]
+        );
+
+        const ids = relRows.map(r => r.app_id);
+        let rows = [];
+        if (ids.length > 0) {
+          const ph = ids.map(() => '?').join(',');
+          [rows] = await pool.execute(
+            `SELECT id, app_name, harmony_package, android_package, icon_url, type, \`desc\`, updated_by, created_at, updated_at
+             FROM apps WHERE id IN (${ph})`,
+            ids
+          );
+          // 保持关联表的顺序
+          const orderMap = new Map(ids.map((id, i) => [id, i]));
+          rows.sort((a, b) => (orderMap.get(a.id) || 0) - (orderMap.get(b.id) || 0));
+        }
+
+        return res.json({
+          success: true,
+          data: rows,
+          total,
+          current: currentPage,
+          pageSize: pageLimit,
+          pages: Math.ceil(total / pageLimit),
+          filters: { keyword: null, typeName: typeName.trim() },
+        });
+      }
+
+      // 无类型筛选或有关键字时，走原有逻辑
+      let query = 'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, updated_by, created_at, updated_at FROM apps';
       let countQuery = 'SELECT COUNT(*) as total FROM apps';
       const params = [];
       const countParams = [];
 
-      // 构建查询条件
       const conditions = [];
 
-      // 关键字搜索
+      // 有类型+关键字：先查关联表的 id，再在这些 id 中搜关键字
+      if (typeName && typeName.trim()) {
+        conditions.push(
+          `id IN (SELECT r.app_id FROM app_type_relations r INNER JOIN app_types t ON t.id = r.type_id AND t.type_name = ?)`
+        );
+        params.push(typeName.trim());
+        countParams.push(typeName.trim());
+      }
+
       if (keyword && keyword.trim()) {
         const searchPattern = `%${keyword.trim()}%`;
         conditions.push(
@@ -29,42 +80,27 @@ export default class AppController {
         countParams.push(searchPattern, searchPattern, searchPattern);
       }
 
-      // 类型筛选
-      if (typeName && typeName.trim()) {
-        // 使用 JSON_CONTAINS 函数检查 JSON 数组是否包含特定值
-        conditions.push('JSON_CONTAINS(type, JSON_ARRAY(?))');
-        params.push(typeName.trim());
-        countParams.push(typeName.trim());
-      }
-
-      // 应用查询条件
       if (conditions.length > 0) {
         const whereClause = ' WHERE ' + conditions.join(' AND ');
         query += whereClause;
         countQuery += whereClause;
       }
 
-      // 分页和排序
       if (keyword && keyword.trim()) {
-        // 优先显示完全匹配的结果，然后是包含匹配的结果，最后按更新时间排序
-        query += ` ORDER BY 
-          CASE 
+        query += ` ORDER BY
+          CASE
             WHEN app_name = ? OR harmony_package = ? OR android_package = ? THEN 0
             WHEN app_name LIKE ? OR harmony_package LIKE ? OR android_package LIKE ? THEN 1
             ELSE 2
-          END, 
-          updated_at DESC 
+          END,
+          updated_at DESC
           LIMIT ${pageLimit} OFFSET ${offset}`;
-        
-        // 添加排序参数
         params.push(keyword.trim(), keyword.trim(), keyword.trim());
         params.push(`%${keyword.trim()}%`, `%${keyword.trim()}%`, `%${keyword.trim()}%`);
       } else {
-        // 没有关键字时，仅按更新时间排序
         query += ` ORDER BY updated_at DESC LIMIT ${pageLimit} OFFSET ${offset}`;
       }
 
-      // 执行查询
       const [rows] = await pool.execute(query, params);
       const [countResult] = await pool.execute(countQuery, countParams);
       const total = countResult[0].total;
@@ -72,14 +108,11 @@ export default class AppController {
       res.json({
         success: true,
         data: rows,
-        total: total,
+        total,
         current: currentPage,
         pageSize: pageLimit,
         pages: Math.ceil(total / pageLimit),
-        filters: {
-          keyword: keyword || null,
-          typeName: typeName || null,
-        },
+        filters: { keyword: keyword || null, typeName: typeName || null },
       });
     } catch (error) {
       console.error('搜索应用失败:', error);
@@ -202,15 +235,41 @@ export default class AppController {
       placeholders.push('?');
       params.push(app_desc);
 
+      // 记录操作账号
+      if (req.user?.username) {
+        fields.push('updated_by');
+        placeholders.push('?');
+        params.push(req.user.username);
+      }
+
       // 执行插入
       const [result] = await pool.execute(
         `INSERT INTO apps (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`,
         params
       );
 
+      // 同步创建关联记录
+      if (appType.length > 0) {
+        const typePlaceholders = appType.map(() => '?').join(',');
+        const [typeRows] = await pool.execute(
+          `SELECT id, type_name FROM app_types WHERE type_name IN (${typePlaceholders})`,
+          appType
+        );
+
+        if (typeRows.length > 0) {
+          const relValues = typeRows.map(t => [result.insertId, t.id]);
+          const relPlaceholders = relValues.map(() => '(?, ?)').join(',');
+          const relParams = relValues.flat();
+          await pool.execute(
+            `INSERT IGNORE INTO app_type_relations (app_id, type_id) VALUES ${relPlaceholders}`,
+            relParams
+          );
+        }
+      }
+
       // 获取刚插入的记录
       const [newApp] = await pool.execute(
-        'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, created_at FROM apps WHERE id = ?',
+        'SELECT id, app_name, harmony_package, android_package, icon_url, type, `desc`, updated_by, created_at FROM apps WHERE id = ?',
         [result.insertId]
       );
 
@@ -291,12 +350,37 @@ export default class AppController {
         }
         updateFields.push('type = ?');
         params.push(JSON.stringify(appType));
+
+        // 重建关联记录
+        await pool.execute('DELETE FROM app_type_relations WHERE app_id = ?', [id]);
+        if (appType.length > 0) {
+          const typePlaceholders = appType.map(() => '?').join(',');
+          const [typeRows] = await pool.execute(
+            `SELECT id, type_name FROM app_types WHERE type_name IN (${typePlaceholders})`,
+            appType
+          );
+          if (typeRows.length > 0) {
+            const relValues = typeRows.map(t => [parseInt(id), t.id]);
+            const relPlaceholders = relValues.map(() => '(?, ?)').join(',');
+            const relParams = relValues.flat();
+            await pool.execute(
+              `INSERT IGNORE INTO app_type_relations (app_id, type_id) VALUES ${relPlaceholders}`,
+              relParams
+            );
+          }
+        }
       }
 
       if (desc !== undefined) {
         const app_desc = String(desc).trim() || null;
         updateFields.push('`desc` = ?');
         params.push(app_desc);
+      }
+
+      // 记录操作账号
+      if (req.user?.username) {
+        updateFields.push('updated_by = ?');
+        params.push(req.user.username);
       }
 
       // 添加WHERE条件参数
@@ -327,6 +411,7 @@ export default class AppController {
   static async deleteApp(req, res) {
     try {
       const { id } = req.body;
+      const username = req.user?.username || '未知';
 
       const [result] = await pool.execute('DELETE FROM apps WHERE id = ?', [
         id,
@@ -336,6 +421,7 @@ export default class AppController {
         return res.status(404).json({ error: '应用不存在' });
       }
 
+      console.log(`应用删除成功 - 操作人: ${username}, 应用ID: ${id}`);
       res.json({
         success: true,
         message: '应用删除成功',
@@ -440,11 +526,12 @@ export default class AppController {
         return res.status(400).json({ success: false, error: '类型名称不能为空' });
       }
 
-      // 查询数据库中type字段包含该类型的所有应用
+      // 使用关联表查询
       const query = `
-        SELECT app_name, harmony_package, android_package 
-        FROM apps 
-        WHERE JSON_CONTAINS(type, JSON_ARRAY(?))
+        SELECT a.app_name, a.harmony_package, a.android_package
+        FROM apps a
+        INNER JOIN app_type_relations r ON r.app_id = a.id
+        INNER JOIN app_types t ON t.id = r.type_id AND t.type_name = ?
       `;
 
       const [rows] = await pool.execute(query, [typeName.trim()]);
@@ -539,12 +626,20 @@ export default class AppController {
         i.appName, i.androidPackage, i.harmonyPackage, i.iconUrl, JSON.stringify(i.type), i.desc
       ]);
 
+      // 预加载类型映射
+      const [allTypes] = await pool.execute('SELECT id, type_name FROM app_types');
+      const typeNameToId = new Map();
+      for (const t of allTypes) {
+        typeNameToId.set(t.type_name, t.id);
+      }
+
       // 分批插入，每批 500 条
       const BATCH_SIZE = 500;
       let imported = 0;
 
       for (let i = 0; i < values.length; i += BATCH_SIZE) {
         const batch = values.slice(i, i + BATCH_SIZE);
+        const batchItems = newItems.slice(i, i + BATCH_SIZE);
         if (batch.length === 0) break;
 
         const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
@@ -561,6 +656,46 @@ export default class AppController {
         );
 
         imported += result.affectedRows;
+
+        // 为新插入的记录创建关联
+        // 查询这批插入的记录的 id
+        const insertedApps = batchItems.filter((_, idx) => {
+          // ON DUPLICATE KEY UPDATE 时 affectedRows 可能包含更新的记录
+          // 这里简化处理，为所有非重复记录创建关联
+          return true;
+        });
+
+        if (insertedApps.length > 0) {
+          // 批量查询刚插入的记录的 id
+          const appNames = insertedApps.map(i => i.appName);
+          const namePlaceholders = appNames.map(() => '?').join(',');
+          const [insertedRows] = await pool.execute(
+            `SELECT id, app_name FROM apps WHERE app_name IN (${namePlaceholders})`,
+            appNames
+          );
+
+          // 创建关联记录
+          const relValues = [];
+          for (const row of insertedRows) {
+            const appItem = insertedApps.find(i => i.appName === row.app_name);
+            if (appItem && Array.isArray(appItem.type)) {
+              for (const typeName of appItem.type) {
+                if (typeName && typeNameToId.has(typeName)) {
+                  relValues.push([row.id, typeNameToId.get(typeName)]);
+                }
+              }
+            }
+          }
+
+          if (relValues.length > 0) {
+            const relPlaceholders = relValues.map(() => '(?, ?)').join(',');
+            const relParams = relValues.flat();
+            await pool.execute(
+              `INSERT IGNORE INTO app_type_relations (app_id, type_id) VALUES ${relPlaceholders}`,
+              relParams
+            );
+          }
+        }
       }
 
       // 删除临时文件
@@ -585,6 +720,42 @@ export default class AppController {
       res.status(500).json({
         success: false,
         error: '导入JSON失败: ' + error.message
+      });
+    }
+  }
+
+  // 安卓包名转鸿蒙包名 - 查询映射关系
+  static async getHarmonyMapping(req, res) {
+    try {
+      const { androidPackages } = req.body;
+
+      if (!Array.isArray(androidPackages) || androidPackages.length === 0) {
+        return res.status(400).json({ success: false, message: '请提供安卓包名列表' });
+      }
+
+      // 查询数据库获取鸿蒙包名
+      const mapping = {};
+      for (let i = 0; i < androidPackages.length; i += 1000) {
+        const batch = androidPackages.slice(i, i + 1000);
+        const placeholders = batch.map(() => '?').join(', ');
+        const [rows] = await pool.execute(
+          `SELECT android_package, harmony_package FROM apps WHERE android_package IN (${placeholders}) AND harmony_package IS NOT NULL AND harmony_package != ''`,
+          batch
+        );
+        for (const row of rows) {
+          mapping[row.android_package] = row.harmony_package;
+        }
+      }
+
+      res.json({
+        success: true,
+        mapping,
+      });
+    } catch (error) {
+      console.error('查询鸿蒙映射失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '查询失败: ' + error.message,
       });
     }
   }

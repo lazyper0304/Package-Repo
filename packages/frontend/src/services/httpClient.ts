@@ -7,7 +7,17 @@ export class HttpClient {
     options: RequestInit = {}
   ): Promise<T> {
     try {
-      const response = await fetch(url, options);
+      // 自动注入 token
+      const token = sessionStorage.getItem('auth_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string> || {}),
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, { ...options, headers });
 
       // 检查响应是否成功
       if (!response.ok) {
@@ -18,8 +28,17 @@ export class HttpClient {
       // 尝试解析JSON
       try {
         const data = await response.json();
+
+        // 检查 token 过期
+        if (data && data.code === 401) {
+          sessionStorage.removeItem('auth_token');
+          window.dispatchEvent(new CustomEvent('auth-expired'));
+          throw new Error('token已过期');
+        }
+
         return data as T;
       } catch (jsonError) {
+        if ((jsonError as Error).message === 'token已过期') throw jsonError;
         console.error('JSON解析错误:', jsonError);
         throw new Error('JSON解析错误');
       }
@@ -34,7 +53,7 @@ export class HttpClient {
    */
   static async get<T>(url: string, params?: Record<string, any>): Promise<T> {
     let finalUrl = url;
-    
+
     if (params) {
       const query = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -50,9 +69,6 @@ export class HttpClient {
 
     return this.request<T>(finalUrl, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
   }
 
@@ -62,9 +78,6 @@ export class HttpClient {
   static async post<T>(url: string, data?: any): Promise<T> {
     return this.request<T>(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -75,9 +88,6 @@ export class HttpClient {
   static async put<T>(url: string, data?: any): Promise<T> {
     return this.request<T>(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -88,9 +98,6 @@ export class HttpClient {
   static async delete<T>(url: string, data?: any): Promise<T> {
     return this.request<T>(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: data ? JSON.stringify(data) : undefined,
     });
   }

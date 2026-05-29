@@ -214,7 +214,7 @@ const AppDetail: React.FC<IProps> = ({
       androidPackageName: fields?.['安卓包名'],
       harmonyPackageName: fields?.['鸿蒙包名'],
       type: fields?.['分类'] === '无' ? '' : fields?.['分类'],
-      desc: fields?.['备注'],
+      desc: fields?.['备注'] ?? '',
     });
   }
 
@@ -503,20 +503,24 @@ const AppDetail: React.FC<IProps> = ({
                     </div>
                   )}
 
-                  {label !== '分类' && label !== '备注' && label !== '安卓包名' && label !== '鸿蒙包名' && (
+                  {label !== '分类' && label !== '备注' && label !== '安卓包名' && label !== '鸿蒙包名' && label !== '操作人' && (
                     <Field name={label}>
                       <TextField.Root
-                        defaultValue={v}
+                        defaultValue={v === 'null' || v === null ? '' : v}
                         style={{ minWidth: '390px' }}
                         placeholder={`请输入${label}`}
                       />
                     </Field>
                   )}
 
+                  {label === '操作人' && (
+                    <div style={{ color: 'var(--gray-9)', fontSize: '14px' }}>{v || '-'}</div>
+                  )}
+
                   {label === '备注' && (
                     <Field name={label}>
                       <TextArea
-                        defaultValue={v}
+                        defaultValue={v === 'null' || v === null ? '' : v}
                         style={{
                           minWidth: '390px',
                           minHeight: '80px',
@@ -624,6 +628,8 @@ const AppDetail: React.FC<IProps> = ({
                 {Item('分类', app?.type)}
 
                 {Item('备注', app?.desc)}
+
+                {app?.updatedBy && Item('操作人', app.updatedBy)}
               </DataList.Root>
 
               <Flex

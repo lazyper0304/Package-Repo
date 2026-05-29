@@ -11,6 +11,7 @@ const ImageVectorizer = React.lazy(() => import('@/components/ImageVectorizer'))
 const LogViewer = React.lazy(() => import('@/components/LogViewer'));
 const HuaweiIconChecker = React.lazy(() => import('@/components/HuaweiIconChecker'));
 const ImportJson = React.lazy(() => import('@/components/ImportJson'));
+const AndroidToHarmony = React.lazy(() => import('@/components/AndroidToHarmony'));
 
 type ToolDialogsProps = {
   isAdmin: boolean;
@@ -43,6 +44,9 @@ type ToolDialogsProps = {
   // ImportJson
   importJsonOpen: boolean;
   onCloseImportJson: () => void;
+  // AndroidToHarmony
+  androidToHarmonyOpen: boolean;
+  onCloseAndroidToHarmony: () => void;
 };
 
 const ToolDialogs: React.FC<ToolDialogsProps> = ({
@@ -68,6 +72,8 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
   onCloseHuaweiIconChecker,
   importJsonOpen,
   onCloseImportJson,
+  androidToHarmonyOpen,
+  onCloseAndroidToHarmony,
 }) => {
   return (
     <Suspense fallback={null}>
@@ -111,6 +117,10 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
 
       {importJsonOpen && (
         <ImportJson open={importJsonOpen} onClose={onCloseImportJson} onUpload={() => {}} />
+      )}
+
+      {androidToHarmonyOpen && (
+        <AndroidToHarmony open={androidToHarmonyOpen} onClose={onCloseAndroidToHarmony} />
       )}
     </Suspense>
   );

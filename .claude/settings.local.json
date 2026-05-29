@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(mysql -u root -p123456 -e \"SELECT VERSION\\(\\);\")",
+      "Bash(node -e \"const mysql = require\\('mysql2/promise'\\); \\(async \\(\\) => { const pool = mysql.createPool\\({ host: 'localhost', user: 'root', password: '123456', database: 'app_search' }\\); const [rows] = await pool.execute\\('SELECT VERSION\\(\\) as version'\\); console.log\\(rows[0].version\\); await pool.end\\(\\); }\\)\\(\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(sc query *)",
+      "Bash(net start *)",
+      "Bash(powershell -Command \"Get-Service *mysql* | Select-Object Name, Status\")",
+      "Bash(powershell *)"
     ]
   }
 }

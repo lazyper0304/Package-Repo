@@ -39,6 +39,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
     handleCloseAppDetail,
     handleRefreshSearch,
     handleRefreshAll,
+    handleOpenAndroidToHarmony,
+    handleCloseAndroidToHarmony,
     refreshAppTypes,
   } = useHomeState();
 
@@ -86,6 +88,7 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
       onOpenHuaweiIconChecker={openHuaweiIconChecker}
       onOpenType={openType}
       onOpenLog={openLog}
+      onOpenAndroidToHarmony={handleOpenAndroidToHarmony}
     />
   );
 
@@ -166,6 +169,8 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
         onCloseHuaweiIconChecker={closeHuaweiIconChecker}
         importJsonOpen={state.importJsonOpen}
         onCloseImportJson={closeImportJson}
+        androidToHarmonyOpen={state.androidToHarmonyOpen}
+        onCloseAndroidToHarmony={handleCloseAndroidToHarmony}
       />
     </>
   );

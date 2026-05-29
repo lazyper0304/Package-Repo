@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import crypto from 'crypto';
 
 // 先创建数据库的连接（不指定数据库）
 const createDbPool = mysql.createPool({
@@ -32,6 +33,11 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
+// 密码哈希
+export function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
 
 // 测试数据库连接
 async function testConnection() {
@@ -141,6 +147,52 @@ async function initDatabase() {
       )
     `);
 
+    // 创建用户表
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // 检查并添加 updated_by 字段（如果不存在）
+    try {
+      const [columns] = await connection.execute(
+        "SHOW COLUMNS FROM apps WHERE Field = 'updated_by'"
+      );
+
+      if (columns.length === 0) {
+        console.log('检测到 apps 表缺少 updated_by 字段，开始添加...');
+        await connection.execute('ALTER TABLE apps ADD COLUMN updated_by VARCHAR(255)');
+        console.log('updated_by 字段添加成功');
+      }
+    } catch (addUpdatedByError) {
+      console.error('添加 updated_by 字段失败:', addUpdatedByError);
+    }
+
+    // 插入默认账号（如果不存在）
+    const defaultUsers = [
+      ['admin', 'admin2026'],
+      ['KYLOD', '888888'],
+      ['fanxing', '888888'],
+      ['ranran', '888888'],
+    ];
+    for (const [username, password] of defaultUsers) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM users WHERE username = ?',
+        [username]
+      );
+      if (existing.length === 0) {
+        await connection.execute(
+          'INSERT INTO users (username, password) VALUES (?, ?)',
+          [username, hashPassword(password)]
+        );
+        console.log(`默认账号创建成功: ${username}`);
+      }
+    }
+
     // 检查并添加 sort 字段（如果不存在）
     try {
       const [columns] = await connection.execute(
@@ -156,6 +208,20 @@ async function initDatabase() {
       console.error('添加 sort 字段失败:', addSortError);
       // 继续执行，不中断初始化过程
     }
+
+    // 创建应用-分类关联表
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS app_type_relations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        app_id INT NOT NULL,
+        type_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY idx_app_type (app_id, type_id),
+        KEY idx_type_id (type_id),
+        CONSTRAINT fk_rel_app FOREIGN KEY (app_id) REFERENCES apps(id) ON DELETE CASCADE,
+        CONSTRAINT fk_rel_type FOREIGN KEY (type_id) REFERENCES app_types(id) ON DELETE CASCADE
+      )
+    `);
 
     console.log('数据库表初始化成功');
     connection.release();
