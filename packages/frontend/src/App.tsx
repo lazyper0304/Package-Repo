@@ -20,7 +20,8 @@ const AuthWrapper: React.FC<{
   const location = useLocation();
 
   const isAdmin = useMemo(() => {
-    return location.pathname === '/repo';
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    return location.pathname === `${base}/repo`;
   }, [location.pathname]);
 
   const [showLogin, setShowLogin] = useState(false);
@@ -169,7 +170,7 @@ const App: React.FC = () => {
         grayColor="gray"
         panelBackground="translucent"
       >
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <Suspense
             fallback={
               <div

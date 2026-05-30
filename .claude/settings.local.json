@@ -8,7 +8,9 @@
       "Bash(sc query *)",
       "Bash(net start *)",
       "Bash(powershell -Command \"Get-Service *mysql* | Select-Object Name, Status\")",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(yarn build:frontend)",
+      "Bash(yarn dev:frontend)"
     ]
   }
 }
