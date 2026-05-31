@@ -54,9 +54,9 @@ const Header: React.FC<HeaderProps> = ({
           <Button onClick={onOpenHarmonyIconFolder}>鸿蒙图标文件夹转 bgfg 图标</Button>
           <Button onClick={onOpenPngVectorizer}>图片矢量化</Button>
           <Button onClick={onOpenHuaweiIconChecker}>华为必做图标检查</Button>
-          <Button onClick={onOpenAndroidToHarmony}>安卓包名转鸿蒙</Button>
           {isAdmin && (
             <>
+              <Button onClick={onOpenAndroidToHarmony}>安卓包名转鸿蒙</Button>
               <Button onClick={onOpenType}>类型管理</Button>
               <Button onClick={onOpenLog}>访问日志</Button>
             </>

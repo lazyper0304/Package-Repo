@@ -5,7 +5,6 @@ import { Theme } from '@radix-ui/themes';
 import Notify from './components/ui/Notify';
 import { AppTypeProvider } from './contexts/AppTypeContext';
 import { useLocalStorageState } from 'ahooks';
-import LoginDialog from './components/LoginDialog';
 import API from './services';
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -16,26 +15,9 @@ const AuthWrapper: React.FC<{
   setThemeMode: (value: ThemeMode) => void;
 }> = ({ children, themeMode, setThemeMode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginExpired, setLoginExpired] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   const checkAuth = useCallback(async () => {
-    // 开发环境自动登录
-    if (import.meta.env.DEV && !localStorage.getItem('auth_token')) {
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'admin', password: 'admin2026' }),
-        });
-        const data = await res.json();
-        if (data.success && data.token) {
-          localStorage.setItem('auth_token', data.token);
-        }
-      } catch {}
-    }
-
     const token = localStorage.getItem('auth_token');
     if (!token) {
       setIsAdmin(false);
@@ -43,11 +25,9 @@ const AuthWrapper: React.FC<{
       return;
     }
     const valid = await API.verifyToken();
-    if (valid) {
-      setIsAdmin(true);
-    } else {
+    setIsAdmin(valid);
+    if (!valid) {
       localStorage.removeItem('auth_token');
-      setIsAdmin(false);
     }
     setAuthChecked(true);
   }, []);
@@ -59,8 +39,6 @@ const AuthWrapper: React.FC<{
   useEffect(() => {
     function handleAuthExpired() {
       setIsAdmin(false);
-      setLoginExpired(true);
-      setShowLogin(true);
     }
     window.addEventListener('auth-expired', handleAuthExpired);
     return () => window.removeEventListener('auth-expired', handleAuthExpired);
@@ -81,17 +59,6 @@ const AuthWrapper: React.FC<{
         themeMode,
         setThemeMode,
       })}
-      {!isAdmin && (
-        <LoginDialog
-          open={showLogin || !isAdmin}
-          expired={loginExpired}
-          onLoginSuccess={() => {
-            setShowLogin(false);
-            setLoginExpired(false);
-            setIsAdmin(true);
-          }}
-        />
-      )}
     </>
   );
 };
