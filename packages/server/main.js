@@ -99,6 +99,29 @@ app.get('/api/visit/log', (req, res) => {
   res.json({ success: true, message: '访问记录已保存' });
 });
 
+// 获取总访问量（无需认证）
+app.get('/api/visit/count', (req, res) => {
+  try {
+    const logFilePath = path.join('logs', 'access.log');
+    if (!fs.existsSync(logFilePath)) {
+      return res.json({ success: true, total: 0, today: 0 });
+    }
+    const logContent = fs.readFileSync(logFilePath, 'utf8');
+    const logs = logContent.split('\n').filter(line => line.trim());
+    const today = new Date().toISOString().slice(0, 10);
+    const todayCount = logs.filter(line => {
+      try {
+        const entry = JSON.parse(line);
+        return entry.timestamp && entry.timestamp.startsWith(today);
+      } catch { return false; }
+    }).length;
+    res.json({ success: true, total: logs.length, today: todayCount });
+  } catch (error) {
+    console.error('获取访问量失败:', error);
+    res.json({ success: false, total: 0, today: 0 });
+  }
+});
+
 // 获取日志的接口（需要认证）
 app.get('/api/visit/logs', authMiddleware, (req, res) => {
   try {

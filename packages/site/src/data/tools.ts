@@ -1,0 +1,26 @@
+export interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  externalUrl: string;
+}
+
+const isDev = import.meta.env.DEV;
+
+export const tools: Tool[] = [
+  {
+    id: "package-repo",
+    name: "Package Repo",
+    description: "查询 Android 和 HarmonyOS 应用元数据",
+    icon: `${import.meta.env.BASE_URL}repo-logo.png`,
+    externalUrl: isDev ? "http://localhost:3003/repo/" : "/repo/",
+  },
+  {
+    id: "fish-watermark",
+    name: "闲鱼水印工具",
+    description: "生成闲鱼搞怪图片",
+    icon: `${import.meta.env.BASE_URL}fish-logo.png`,
+    externalUrl: isDev ? "http://localhost:3004/fish/" : "/fish/",
+  },
+];
