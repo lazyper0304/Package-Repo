@@ -153,9 +153,21 @@ async function initDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_login TIMESTAMP NULL
       )
     `);
+
+    // 检查并添加 last_login 字段（如果不存在）
+    try {
+      const [columns] = await connection.execute(
+        "SHOW COLUMNS FROM users WHERE Field = 'last_login'"
+      );
+      if (columns.length === 0) {
+        await connection.execute('ALTER TABLE users ADD COLUMN last_login TIMESTAMP NULL');
+        console.log('last_login 字段添加成功');
+      }
+    } catch (e) {}
 
     // 检查并添加 updated_by 字段（如果不存在）
     try {
@@ -174,7 +186,7 @@ async function initDatabase() {
 
     // 插入默认账号（如果不存在）
     const defaultUsers = [
-      ['admin', 'admin2026'],
+      ['admin', 'admin1030'],
       ['KYLOD', '888888'],
       ['fanxing', '888888'],
       ['ranran', '888888'],

@@ -10,7 +10,15 @@
       "Bash(powershell -Command \"Get-Service *mysql* | Select-Object Name, Status\")",
       "Bash(powershell *)",
       "Bash(yarn build:frontend)",
-      "Bash(yarn dev:frontend)"
+      "Bash(yarn dev:frontend)",
+      "Bash(yarn add *)",
+      "Bash(yarn install *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3002/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3003/repo/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3004/fish/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3003/repo)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3004/fish)",
+      "WebFetch(domain:test.ybxylazycats.dpdns.org)"
     ]
   }
 }

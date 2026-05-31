@@ -1,39 +1,44 @@
-import { useState } from "react";
-import { useRequest } from "ahooks";
-import styles from "./index.module.less";
-import { Header } from "../../components/Header";
-import { Footer } from "../../components/Footer";
-import { GradientBackground } from "../../components/GradientBackground";
-import { SearchBar } from "../../components/SearchBar";
-import { ToolCard } from "../../components/ToolCard";
-import { tools } from "../../data/tools";
+import { useState } from 'react'
+import { useRequest } from 'ahooks'
+import styles from './index.module.less'
+import { Header } from '../../components/Header'
+import { Footer } from '../../components/Footer'
+import { GradientBackground } from '../../components/GradientBackground'
+import { SearchBar } from '../../components/SearchBar'
+import { ToolCard } from '../../components/ToolCard'
+import { tools } from '../../data/tools'
 
-export function Home() {
-  const [keyword, setKeyword] = useState("");
+type ThemeMode = 'light' | 'dark' | 'system'
+
+interface HomeProps {
+  themeMode: ThemeMode
+  setThemeMode: (value: ThemeMode) => void
+  isLoggedIn: boolean
+  setIsLoggedIn: (value: boolean) => void
+}
+
+export function Home({ themeMode, setThemeMode, isLoggedIn, setIsLoggedIn }: HomeProps) {
+  const [keyword, setKeyword] = useState('')
 
   const { data: filteredTools } = useRequest(
     async () => {
-      let result = tools;
+      let result = tools
       if (keyword.trim()) {
-        const kw = keyword.trim().toLowerCase();
-        result = result.filter(
-          (t) =>
-            t.name.toLowerCase().includes(kw) ||
-            t.description.toLowerCase().includes(kw)
-        );
+        const kw = keyword.trim().toLowerCase()
+        result = result.filter((t) => t.name.toLowerCase().includes(kw) || t.description.toLowerCase().includes(kw))
       }
-      return result;
+      return result
     },
     {
       refreshDeps: [keyword],
       debounceWait: 200,
-    }
-  );
+    },
+  )
 
   return (
-    <>
+    <div className={styles.home}>
       <GradientBackground />
-      <Header />
+      <Header themeMode={themeMode} setThemeMode={setThemeMode} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
       <main className={styles.main}>
         <div className={styles.hero}>
           <h1 className={styles.heroTitle}>Vince Hub</h1>
@@ -55,7 +60,7 @@ export function Home() {
           )}
         </div>
       </main>
-      <Footer name="Vince Hub" />
-    </>
-  );
+      <Footer name='Vince Hub' />
+    </div>
+  )
 }

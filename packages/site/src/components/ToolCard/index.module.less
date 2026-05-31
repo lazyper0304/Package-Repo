@@ -1,26 +1,12 @@
 .card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  background: var(--bg-card) !important;
-  backdrop-filter: blur(12px) saturate(1.5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  border: 1px solid var(--border-color) !important;
-  border-radius: var(--radius-lg) !important;
-  cursor: pointer;
+  display: block;
   text-decoration: none;
   color: inherit;
-  transition: all var(--transition-slow);
   animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  box-shadow: var(--shadow-card);
+  transition: transform 0.3s ease-in-out;
 
   &:hover {
     transform: translateY(-4px);
-    background: var(--bg-card-hover) !important;
-    border-color: var(--border-hover) !important;
-    box-shadow: var(--shadow-card-hover);
   }
 
   &:hover .iconWrap {
@@ -28,14 +14,24 @@
   }
 }
 
+.cardInner {
+  height: 100%;
+  padding: 28px;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
 .iconWrap {
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--transition-slow);
+  transition: transform 0.3s ease-in-out;
   flex-shrink: 0;
 }
 
@@ -55,7 +51,6 @@
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

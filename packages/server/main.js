@@ -55,12 +55,29 @@ if (!fs.existsSync('logs')) {
 
 // 记录用户访问信息的接口
 app.get('/api/visit/log', (req, res) => {
-  // 获取用户IP
-  const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+  // 获取客户端真实IP
+  let ip = req.headers['x-forwarded-for'] || req.ip || req.connection.remoteAddress || '';
+  // x-forwarded-for 可能是逗号分隔的多个IP，取第一个
+  if (ip.includes(',')) {
+    ip = ip.split(',')[0].trim();
+  }
+  // IPv6 转 IPv4
+  if (ip.includes(':')) {
+    ip = ip.substring(ip.lastIndexOf(':') + 1);
+  }
+  // 去除 IPv6 前缀
+  ip = ip.replace(/^::ffff:/, '');
 
   // 获取IP归属信息
-  const geo = geoip.lookup(ip);
-  const location = geo ? `${geo.country}-${geo.region}-${geo.city}` : 'Unknown';
+  let location = '未知';
+  try {
+    const geo = geoip.lookup(ip);
+    if (geo) {
+      location = [geo.country, geo.region, geo.city].filter(Boolean).join('-');
+    }
+  } catch (e) {
+    // geoip lookup failed
+  }
 
   // 获取用户代理
   const userAgent = req.headers['user-agent'] || 'Unknown';
@@ -189,6 +206,8 @@ app.post('/api/auth/login', async (req, res) => {
       [username, hashPassword(password)]
     );
     if (rows.length > 0) {
+      // 更新最后登录时间
+      await pool.execute('UPDATE users SET last_login = NOW() WHERE username = ?', [username]);
       const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
       res.json({ success: true, token });
     } else {
@@ -203,6 +222,71 @@ app.post('/api/auth/login', async (req, res) => {
 // 验证 token 是否有效
 app.get('/api/auth/verify', authMiddleware, (req, res) => {
   res.json({ success: true });
+});
+
+// 获取所有用户（管理员）
+app.get('/api/users', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      'SELECT id, username, password, created_at, last_login FROM users ORDER BY id'
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('获取用户列表失败:', err);
+    res.json({ success: false, message: '获取用户列表失败' });
+  }
+});
+
+// 创建用户（管理员）
+app.post('/api/users', authMiddleware, async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.json({ success: false, message: '用户名和密码不能为空' });
+  }
+  try {
+    const [existing] = await pool.execute('SELECT id FROM users WHERE username = ?', [username]);
+    if (existing.length > 0) {
+      return res.json({ success: false, message: '用户名已存在' });
+    }
+    await pool.execute('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashPassword(password)]);
+    res.json({ success: true, message: '创建成功' });
+  } catch (err) {
+    console.error('创建用户失败:', err);
+    res.json({ success: false, message: '创建用户失败' });
+  }
+});
+
+// 更新用户密码（管理员）
+app.put('/api/users/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  if (!password) {
+    return res.json({ success: false, message: '密码不能为空' });
+  }
+  try {
+    await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashPassword(password), id]);
+    res.json({ success: true, message: '更新成功' });
+  } catch (err) {
+    console.error('更新用户失败:', err);
+    res.json({ success: false, message: '更新用户失败' });
+  }
+});
+
+// 删除用户（管理员）
+app.delete('/api/users/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    // 不允许删除自己
+    const [user] = await pool.execute('SELECT username FROM users WHERE id = ?', [id]);
+    if (user.length > 0 && user[0].username === req.user.username) {
+      return res.json({ success: false, message: '不能删除自己的账号' });
+    }
+    await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+    res.json({ success: true, message: '删除成功' });
+  } catch (err) {
+    console.error('删除用户失败:', err);
+    res.json({ success: false, message: '删除用户失败' });
+  }
 });
 
 // 搜索应用数据（无需认证）

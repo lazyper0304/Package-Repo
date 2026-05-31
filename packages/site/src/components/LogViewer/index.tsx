@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, Text, Table, Flex } from '@radix-ui/themes';
+import { Dialog, Text, Table, Flex, Button } from '@radix-ui/themes';
 import { getAuthToken } from '../../utils/auth';
 
 interface LogEntry {
@@ -79,7 +79,7 @@ export function LogViewer({ open, onClose }: LogViewerProps) {
             ) : data?.data && data.data.length > 0 ? (
               data.data.map((log) => (
                 <Table.Row key={log.timestamp + log.ip}>
-                  <Table.Cell><Text size="2">{log.username || '-'}</Text></Table.Cell>
+                  <Table.Cell><Text size="2">{log.username || '未登录'}</Text></Table.Cell>
                   <Table.Cell><Text size="2">{log.ip}</Text></Table.Cell>
                   <Table.Cell><Text size="2">{log.location}</Text></Table.Cell>
                   <Table.Cell><Text size="2">{new Date(log.timestamp).toLocaleString()}</Text></Table.Cell>
@@ -95,23 +95,25 @@ export function LogViewer({ open, onClose }: LogViewerProps) {
 
         {data?.success && data.total > pageSize && (
           <Flex justify="end" gap="2" mt="4">
-            <button
+            <Button
+              variant="soft"
+              size="2"
               disabled={current <= 1}
               onClick={() => fetchLogs(current - 1)}
-              style={{ padding: '4px 12px', cursor: current <= 1 ? 'default' : 'pointer', opacity: current <= 1 ? 0.5 : 1 }}
             >
               上一页
-            </button>
+            </Button>
             <Text size="2" style={{ padding: '4px 8px' }}>
               {current} / {Math.ceil(data.total / pageSize)}
             </Text>
-            <button
+            <Button
+              variant="soft"
+              size="2"
               disabled={current >= Math.ceil(data.total / pageSize)}
               onClick={() => fetchLogs(current + 1)}
-              style={{ padding: '4px 12px', cursor: current >= Math.ceil(data.total / pageSize) ? 'default' : 'pointer', opacity: current >= Math.ceil(data.total / pageSize) ? 0.5 : 1 }}
             >
               下一页
-            </button>
+            </Button>
           </Flex>
         )}
       </Dialog.Content>

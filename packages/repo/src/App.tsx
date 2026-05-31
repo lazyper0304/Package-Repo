@@ -20,13 +20,16 @@ const AuthWrapper: React.FC<{
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      setIsAdmin(false);
       setAuthChecked(true);
       return;
     }
-    const valid = await API.verifyToken();
-    setIsAdmin(valid);
-    if (!valid) {
+    try {
+      const valid = await API.verifyToken();
+      setIsAdmin(valid);
+      if (!valid) {
+        localStorage.removeItem('auth_token');
+      }
+    } catch {
       localStorage.removeItem('auth_token');
     }
     setAuthChecked(true);
