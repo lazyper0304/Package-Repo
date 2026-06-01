@@ -14,6 +14,7 @@ const AppIcon: React.FC<IProps> = ({ iconUrl, style, className }) => {
       src={iconUrl && iconUrl !== '-' ? iconUrl : emptyIcon}
       style={{
         background: iconUrl && iconUrl !== '-' ? 'transparent' : '#d0d0d060',
+        userSelect: 'none',
         ...style,
       }}
       className={className}

@@ -4,6 +4,7 @@ export interface Tool {
   description: string;
   icon: string;
   externalUrl: string;
+  tags: string[];
 }
 
 const isDev = import.meta.env.DEV;
@@ -15,6 +16,7 @@ export const tools: Tool[] = [
     description: "查询 Android 和 HarmonyOS 应用元数据",
     icon: `${import.meta.env.BASE_URL}repo-logo.png`,
     externalUrl: isDev ? "http://localhost:3003/repo/" : "/repo/",
+    tags: ["开发辅助"],
   },
   {
     id: "fish-watermark",
@@ -22,5 +24,8 @@ export const tools: Tool[] = [
     description: "生成闲鱼搞怪图片",
     icon: `${import.meta.env.BASE_URL}fish-logo.png`,
     externalUrl: isDev ? "http://localhost:3004/fish/" : "/fish/",
+    tags: ["图像处理"],
   },
 ];
+
+export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];

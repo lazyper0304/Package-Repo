@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useRequest } from 'ahooks'
+import { Tabs } from '@radix-ui/themes'
 import styles from './index.module.less'
 import { Header } from '../../components/Header'
 import { Footer } from '../../components/Footer'
 import { GradientBackground } from '../../components/GradientBackground'
 import { SearchBar } from '../../components/SearchBar'
 import { ToolCard } from '../../components/ToolCard'
-import { tools } from '../../data/tools'
+import { tools, allTags } from '../../data/tools'
 
 type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -19,10 +20,14 @@ interface HomeProps {
 
 export function Home({ themeMode, setThemeMode, isLoggedIn, setIsLoggedIn }: HomeProps) {
   const [keyword, setKeyword] = useState('')
+  const [activeTag, setActiveTag] = useState('all')
 
   const { data: filteredTools } = useRequest(
     async () => {
       let result = tools
+      if (activeTag !== 'all') {
+        result = result.filter((t) => t.tags.includes(activeTag))
+      }
       if (keyword.trim()) {
         const kw = keyword.trim().toLowerCase()
         result = result.filter((t) => t.name.toLowerCase().includes(kw) || t.description.toLowerCase().includes(kw))
@@ -30,7 +35,7 @@ export function Home({ themeMode, setThemeMode, isLoggedIn, setIsLoggedIn }: Hom
       return result
     },
     {
-      refreshDeps: [keyword],
+      refreshDeps: [keyword, activeTag],
       debounceWait: 200,
     },
   )
@@ -48,6 +53,15 @@ export function Home({ themeMode, setThemeMode, isLoggedIn, setIsLoggedIn }: Hom
         <div className={styles.toolbar}>
           <SearchBar value={keyword} onChange={setKeyword} />
         </div>
+
+        <Tabs.Root value={activeTag} onValueChange={setActiveTag} className={styles.tabs}>
+          <Tabs.List>
+            <Tabs.Trigger value="all">全部</Tabs.Trigger>
+            {allTags.map((tag) => (
+              <Tabs.Trigger key={tag} value={tag}>{tag}</Tabs.Trigger>
+            ))}
+          </Tabs.List>
+        </Tabs.Root>
 
         <div className={styles.grid}>
           {filteredTools?.map((tool, i) => (

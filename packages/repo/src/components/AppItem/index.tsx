@@ -49,7 +49,7 @@ const AppItem: React.FC<IProps> = ({
 
   const appItem = useMemo(
     () => (app: AppEntity.Item) => (
-      <Flex gap="3" style={{ height: '100%' }}>
+      <Flex gap="3" style={{ height: '100%' }} onClick={() => onClick(app)}>
         <AppIcon iconUrl={app.iconUrl} />
 
         <Flex direction="column" style={{ flex: 1, overflow: 'hidden' }}>
@@ -133,7 +133,6 @@ const AppItem: React.FC<IProps> = ({
       key={app.id}
       className={styles.app}
       style={{ cursor: 'pointer' }}
-      onClick={() => onClick(app)}
     >
       <ContextMenu.Root>
         {isAdmin ? (

@@ -1,6 +1,6 @@
 import styles from "./index.module.less";
 import { ExternalLink } from "lucide-react";
-import { Card, Text } from "@radix-ui/themes";
+import { Badge, Card, Text } from "@radix-ui/themes";
 import type { Tool } from "../../data/tools";
 
 interface ToolCardProps {
@@ -12,6 +12,8 @@ export function ToolCard({ tool, index }: ToolCardProps) {
   return (
     <a
       href={tool.externalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
       style={{ textDecoration: "none", color: "inherit", display: "block", animationDelay: `${index * 0.06}s` }}
       className={styles.card}
     >
@@ -29,6 +31,15 @@ export function ToolCard({ tool, index }: ToolCardProps) {
           <Text size="2" className={styles.desc}>
             {tool.description}
           </Text>
+          {tool.tags.length > 0 && (
+            <div style={{ display: "flex", gap: "6px", marginTop: "8px", flexWrap: "wrap" }}>
+              {tool.tags.map((tag) => (
+                <Badge key={tag} variant="soft" size="1">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
     </a>

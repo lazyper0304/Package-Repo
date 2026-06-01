@@ -42,14 +42,12 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("auth_token"));
 
   useEffect(() => {
-    fetch("/api/visit/log").catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (isLoggedIn) {
+      fetch("/api/visit/log?logged=true").catch(() => {});
+    } else {
       fetch("/api/visit/log").catch(() => {});
     }
-  }, [isLoggedIn]);
+  }, []);
 
   return (
     <Theme appearance={appearance} accentColor={appearance === "dark" ? "teal" : "blue"} grayColor="gray" panelBackground="translucent">
