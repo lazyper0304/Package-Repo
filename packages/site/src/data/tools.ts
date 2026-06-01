@@ -26,6 +26,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3004/fish/" : "/fish/",
     tags: ["图像处理"],
   },
+  {
+    id: "tier-list",
+    name: "从夯到拉排名生成器",
+    description: "拖拽素材生成等级排名图，支持文字、图片和自定义配置",
+    icon: `${import.meta.env.BASE_URL}tier-logo.png`,
+    externalUrl: isDev ? "http://localhost:3005/tier/" : "/tier/",
+    tags: ["休闲娱乐"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];

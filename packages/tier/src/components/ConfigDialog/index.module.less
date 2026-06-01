@@ -1,0 +1,77 @@
+.dialog {
+  max-width: 500px;
+  width: 90vw;
+}
+
+.rowItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.colorBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform var(--transition);
+  padding: 0;
+}
+
+.colorBtn:hover {
+  transform: scale(1.1);
+}
+
+.colorInput {
+  width: 32px;
+  height: 32px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.labelInput {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: rgba(241, 245, 249, 0.5);
+  color: var(--text-primary);
+  transition: border-color var(--transition);
+}
+
+.labelInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.removeRowBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color var(--transition), background var(--transition);
+}
+
+.removeRowBtn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.addBtn {
+  margin-top: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

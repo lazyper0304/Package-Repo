@@ -19,7 +19,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3003/repo)",
       "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3004/fish)",
       "WebFetch(domain:test.ybxylazycats.dpdns.org)",
-      "Bash(xargs grep -l \"visit/log\")"
+      "Bash(xargs grep -l \"visit/log\")",
+      "WebFetch(domain:www.tooladd.com)"
     ]
   }
 }
