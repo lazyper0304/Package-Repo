@@ -84,7 +84,10 @@ cd packages/rust && wasm-pack build --target web
     - 圆角 `border-radius: var(--radius-md)`
     - 悬停效果：边框变色 `var(--accent)`
     - 拖拽效果：背景色变化 `rgba(6, 182, 212, 0.08)`
+    - 背景色 `rgba(241, 245, 249, 0.1)`
     - 不同项目只是换图标和文案
+12. **卡片比例**：
+    - PC端卡片比例建议 4:3，避免太瘦长
 
 ## 注意事项
 
