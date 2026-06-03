@@ -161,17 +161,12 @@ export default function App() {
             <div className={styles.mainGrid}>
               {/* Left: Image area */}
               <Card className={styles.glassCard}>
-                <h1 className={styles.sectionTitle}>上传图片</h1>
-
-                {!image ? (
-                  <UploadArea onImageLoad={handleImageLoad} styles={styles} />
-                ) : (
-                  <div className={styles.previewSection}>
-                    <div className={styles.previewContainer}>
-                      <img src={previewUrl || image} alt='预览' />
-                    </div>
-                  </div>
-                )}
+                <UploadArea
+                  onImageLoad={handleImageLoad}
+                  previewUrl={previewUrl}
+                  hasFile={!!image}
+                  onReset={handleReset}
+                />
               </Card>
               <Card className={styles.glassCard}>
                 <div className={styles.controlsSection}>

@@ -1,14 +1,19 @@
-import { useRef, useCallback } from 'react'
-import { Card, Button, Text } from '@radix-ui/themes'
+import { useRef, useCallback, useState } from 'react'
+import { Flex, Text, Button } from '@radix-ui/themes'
+import { AiOutlineUpload, AiOutlineDelete } from 'react-icons/ai'
+import classnames from 'classnames'
+import styles from './UploadArea.module.less'
 
 interface UploadAreaProps {
   onImageLoad: (dataUrl: string) => void
-  styles: Record<string, string>
+  previewUrl: string | null
+  hasFile: boolean
+  onReset: () => void
 }
 
-export default function UploadArea({ onImageLoad, styles }: UploadAreaProps) {
+export default function UploadArea({ onImageLoad, previewUrl, hasFile, onReset }: UploadAreaProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const areaRef = useRef<HTMLDivElement>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const handleFile = useCallback(
     (file: File) => {
@@ -29,70 +34,67 @@ export default function UploadArea({ onImageLoad, styles }: UploadAreaProps) {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
-    areaRef.current?.classList.add('drag-over')
+    setIsDragOver(true)
   }
 
   const handleDragLeave = () => {
-    areaRef.current?.classList.remove('drag-over')
+    setIsDragOver(false)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
-    areaRef.current?.classList.remove('drag-over')
+    setIsDragOver(false)
     if (e.dataTransfer.files.length > 0) {
       handleFile(e.dataTransfer.files[0])
     }
   }
 
   return (
-    <Card
-      ref={areaRef}
-      className={styles.uploadSection}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={() => fileInputRef.current?.click()}
-    >
-
-      <div className={styles.uploadIcon}>
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          width='48'
-          height='48'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth='2'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        >
-          <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
-          <polyline points='17 8 12 3 7 8'></polyline>
-          <line x1='12' y1='3' x2='12' y2='15'></line>
-        </svg>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <Text size="4" weight="bold">上传图片</Text>
+        {hasFile && (
+          <Button size="1" color="gray" variant="soft" onClick={onReset}>
+            <AiOutlineDelete /> 重新选择
+          </Button>
+        )}
       </div>
-      <Text size='2' style={{ marginBottom: 16, color: 'var(--text-primary)' }}>
-        拖放图片到这里，或者
-      </Text>
-      <Button
-        variant='solid'
-        onClick={(e) => {
-          e.stopPropagation()
-          fileInputRef.current?.click()
-        }}
-      >
-        选择图片
-      </Button>
-      <input
-        type='file'
-        ref={fileInputRef}
-        accept='image/*'
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          const files = e.target.files
-          if (files && files[0]) handleFile(files[0])
-        }}
-      />
-    </Card>
+
+      {!hasFile ? (
+        <div
+          className={classnames(styles.uploadArea, isDragOver && styles.dragOver)}
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const files = e.target.files
+              if (files && files[0]) handleFile(files[0])
+            }}
+          />
+          <div className={styles.icon}>
+            <AiOutlineUpload size={48} />
+          </div>
+          <Flex direction="column" align="center">
+            <Text size="3" style={{ marginBottom: 8 }}>
+              点击或拖拽图片文件到此处上传
+            </Text>
+            <Text size="2" color="gray">
+              支持格式：JPG、PNG、BMP、WebP、GIF
+            </Text>
+          </Flex>
+        </div>
+      ) : (
+        <div className={styles.preview}>
+          <img src={previewUrl!} alt="预览" />
+        </div>
+      )}
+    </div>
   )
 }
