@@ -20,7 +20,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3004/fish)",
       "WebFetch(domain:test.ybxylazycats.dpdns.org)",
       "Bash(xargs grep -l \"visit/log\")",
-      "WebFetch(domain:www.tooladd.com)"
+      "WebFetch(domain:www.tooladd.com)",
+      "Bash(xargs grep -ln \"visit/log\")"
     ]
   }
 }

@@ -99,10 +99,6 @@ const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', currentTheme);
   }, [themeMode, systemDarkMode]);
 
-  useEffect(() => {
-    fetch('/api/visit/log').catch(() => {});
-  }, []);
-
   return (
     <AppTypeProvider>
       <Theme appearance={appearance} accentColor={appearance === 'dark' ? 'teal' : 'blue'} grayColor="gray" panelBackground="translucent">

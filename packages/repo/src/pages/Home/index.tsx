@@ -67,13 +67,11 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
   const openPngVectorizer = useCallback(() => setState({ pngVectorizerOpen: true }), [setState]);
   const openHuaweiIconChecker = useCallback(() => setState({ huaweiIconCheckerOpen: true }), [setState]);
   const openType = useCallback(() => setState({ typeOpen: true }), [setState]);
-  const openLog = useCallback(() => setState({ logOpen: true }), [setState]);
   const openImportJson = useCallback(() => setState({ importJsonOpen: true }), [setState]);
   const closeType = useCallback(() => setState({ typeOpen: false }), [setState]);
   const closeHarmonyIconSingle = useCallback(() => setState({ harmonyIconSingleOpen: false }), [setState]);
   const closeHarmonyIconFolder = useCallback(() => setState({ harmonyIconFolderOpen: false }), [setState]);
   const closePngVectorizer = useCallback(() => setState({ pngVectorizerOpen: false }), [setState]);
-  const closeLog = useCallback(() => setState({ logOpen: false }), [setState]);
   const closeHuaweiIconChecker = useCallback(() => setState({ huaweiIconCheckerOpen: false }), [setState]);
   const closeImportJson = useCallback(() => setState({ importJsonOpen: false }), [setState]);
 
@@ -87,7 +85,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
       onOpenPngVectorizer={openPngVectorizer}
       onOpenHuaweiIconChecker={openHuaweiIconChecker}
       onOpenType={openType}
-      onOpenLog={openLog}
       onOpenAndroidToHarmony={handleOpenAndroidToHarmony}
     />
   );
@@ -163,8 +160,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
         onCloseHarmonyIconFolder={closeHarmonyIconFolder}
         pngVectorizerOpen={state.pngVectorizerOpen}
         onClosePngVectorizer={closePngVectorizer}
-        logOpen={state.logOpen}
-        onCloseLog={closeLog}
         huaweiIconCheckerOpen={state.huaweiIconCheckerOpen}
         onCloseHuaweiIconChecker={closeHuaweiIconChecker}
         importJsonOpen={state.importJsonOpen}

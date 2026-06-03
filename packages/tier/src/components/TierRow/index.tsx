@@ -32,12 +32,7 @@ export const TierRow: React.FC<Props> = ({ row }) => {
 
     if (sourceContainer === row.id) return;
 
-    // 从其他行或素材库移到这一行
-    if (sourceContainer === 'pool') {
-      dispatch({ type: 'REMOVE_POOL_ITEM', id: item.id });
-    } else {
-      dispatch({ type: 'MOVE_TO_POOL', itemId: item.id });
-    }
+    // MOVE_TO_ROW 内部会自动从当前位置移除 item
     dispatch({ type: 'MOVE_TO_ROW', itemId: item.id, rowId: row.id });
   };
 

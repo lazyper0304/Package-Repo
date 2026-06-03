@@ -4,12 +4,27 @@ import { MdAdd } from 'react-icons/md';
 import { useTierList } from '../../store/TierListContext';
 
 export const TextCardInput: React.FC = () => {
-  const { dispatch } = useTierList();
+  const { state, dispatch } = useTierList();
   const [text, setText] = useState('');
 
   const handleAdd = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
+
+    // 检查是否重复
+    const allItems = [
+      ...state.poolItems,
+      ...state.rows.flatMap((row) => row.items),
+    ];
+    const isDuplicate = allItems.some(
+      (item) => item.type === 'text' && item.content === trimmed
+    );
+
+    if (isDuplicate) {
+      alert(`"${trimmed}" 已存在，请勿重复添加`);
+      return;
+    }
+
     dispatch({
       type: 'ADD_POOL_ITEM',
       item: { id: crypto.randomUUID(), type: 'text', content: trimmed },

@@ -20,7 +20,6 @@ type HeaderProps = {
   onOpenPngVectorizer: () => void;
   onOpenHuaweiIconChecker: () => void;
   onOpenType: () => void;
-  onOpenLog: () => void;
   onOpenAndroidToHarmony: () => void;
 };
 
@@ -33,7 +32,6 @@ const Header: React.FC<HeaderProps> = ({
   onOpenPngVectorizer,
   onOpenHuaweiIconChecker,
   onOpenType,
-  onOpenLog,
   onOpenAndroidToHarmony,
 }) => {
   const [functionsExpanded, setFunctionsExpanded] = useState(false);
@@ -58,7 +56,6 @@ const Header: React.FC<HeaderProps> = ({
             <>
               <Button onClick={onOpenAndroidToHarmony}>安卓包名转鸿蒙</Button>
               <Button onClick={onOpenType}>类型管理</Button>
-              <Button onClick={onOpenLog}>访问日志</Button>
             </>
           )}
         </div>

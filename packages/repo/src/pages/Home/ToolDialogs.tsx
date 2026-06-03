@@ -8,7 +8,6 @@ const TypeManage = React.lazy(() => import('@/components/TypeManage'));
 const HarmonyIconSingle = React.lazy(() => import('@/components/HarmonyIconSingle'));
 const HarmonyIconFolder = React.lazy(() => import('@/components/HarmonyIconFolder'));
 const ImageVectorizer = React.lazy(() => import('@/components/ImageVectorizer'));
-const LogViewer = React.lazy(() => import('@/components/LogViewer'));
 const HuaweiIconChecker = React.lazy(() => import('@/components/HuaweiIconChecker'));
 const ImportJson = React.lazy(() => import('@/components/ImportJson'));
 const AndroidToHarmony = React.lazy(() => import('@/components/AndroidToHarmony'));
@@ -35,9 +34,6 @@ type ToolDialogsProps = {
   // ImageVectorizer
   pngVectorizerOpen: boolean;
   onClosePngVectorizer: () => void;
-  // LogViewer
-  logOpen: boolean;
-  onCloseLog: () => void;
   // HuaweiIconChecker
   huaweiIconCheckerOpen: boolean;
   onCloseHuaweiIconChecker: () => void;
@@ -66,8 +62,6 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
   onCloseHarmonyIconFolder,
   pngVectorizerOpen,
   onClosePngVectorizer,
-  logOpen,
-  onCloseLog,
   huaweiIconCheckerOpen,
   onCloseHuaweiIconChecker,
   importJsonOpen,
@@ -108,8 +102,6 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
       {pngVectorizerOpen && (
         <ImageVectorizer open={pngVectorizerOpen} onClose={onClosePngVectorizer} />
       )}
-
-      {logOpen && <LogViewer open={logOpen} onClose={onCloseLog} />}
 
       {huaweiIconCheckerOpen && (
         <HuaweiIconChecker open={huaweiIconCheckerOpen} onClose={onCloseHuaweiIconChecker} />
