@@ -144,7 +144,9 @@ function App() {
             </Card>
           </div>
         </div>
-        <Footer name="图片尺寸格式工具" />
+        <div className={styles.footer}>
+          <Footer name="图片尺寸格式工具" />
+        </div>
       </div>
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </Theme>

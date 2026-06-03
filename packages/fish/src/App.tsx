@@ -198,7 +198,9 @@ export default function App() {
             </div>
           </div>
 
-          <Footer name='闲鱼水印工具' />
+          <div className={styles.footer}>
+            <Footer name='闲鱼水印工具' />
+          </div>
         </div>
 
         <canvas ref={canvasRef} style={{ display: 'none' }} />

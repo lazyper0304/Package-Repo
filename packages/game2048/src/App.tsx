@@ -216,7 +216,9 @@ function App() {
             </Text>
           </div>
         </div>
-        <Footer name="2048" />
+        <div className={styles.footer}>
+          <Footer name="2048" />
+        </div>
       </div>
     </Theme>
   );

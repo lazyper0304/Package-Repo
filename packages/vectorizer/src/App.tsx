@@ -171,7 +171,9 @@ function App() {
             </Card>
           </div>
         </div>
-        <Footer name="图片矢量化" />
+        <div className={styles.footer}>
+          <Footer name="图片矢量化" />
+        </div>
       </div>
     </Theme>
   );
