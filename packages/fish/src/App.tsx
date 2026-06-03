@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Theme, Button, Flex, IconButton, Card } from '@radix-ui/themes'
 import { MdBrightness2, MdBrightnessAuto, MdBrightnessHigh } from 'react-icons/md'
 import { useLocalStorageState } from 'ahooks'
+import { useMobile } from './hooks/useMobile'
 import { GradientBackground } from './components/GradientBackground'
 import UploadArea from './components/UploadArea'
 import WatermarkSelector from './components/WatermarkSelector'
@@ -12,6 +13,7 @@ import { watermarks, drawWatermark, drawTiledWatermark, type PositionValue, type
 import styles from './App.module.less'
 
 export default function App() {
+  const isMobile = useMobile()
   const [image, setImage] = useState<string | null>(null)
   const [selectedWatermark, setSelectedWatermark] = useState<string>(watermarks[0].id)
   const [position, setPosition] = useState<PositionValue>('center')
@@ -156,8 +158,8 @@ export default function App() {
           </IconButton>
         </header>
 
-        <div className={styles.appWrapper}>
-          <div className={styles.container}>
+        <div className={isMobile ? styles.appWrapperMobile : styles.appWrapper}>
+          <div className={isMobile ? styles.containerMobile : styles.container}>
             <div className={styles.mainGrid}>
               {/* Left: Image area */}
               <Card className={styles.glassCard}>

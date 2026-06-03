@@ -38,6 +38,12 @@ body {
   height: 100vh;
 }
 
+.app-wrapper-mobile {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
 .container {
   position: absolute;
   left: 50%;
@@ -49,6 +55,15 @@ body {
   display: flex;
   flex-direction: column;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+}
+
+.container-mobile {
+  width: 100%;
+  padding: 68px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUpMobile 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
 }
 
@@ -67,6 +82,17 @@ body {
   to {
     opacity: 1;
     transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
+@keyframes fadeInUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
