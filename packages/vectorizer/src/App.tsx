@@ -61,13 +61,15 @@ function App() {
     setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light');
   }, [themeMode, setThemeMode]);
 
-  const handleConvert = useCallback(async (f: File, cfg: VectorizeConfig) => {
+  const handleConvert = useCallback(async () => {
+    if (!file) return;
     cancelRef.current = false;
     setProcessing(true);
     setProgress(0);
+    setResult(null);
 
     try {
-      const res = await vectorizeImage(f, cfg, (p) => {
+      const res = await vectorizeImage(file, config, (p) => {
         if (!cancelRef.current) setProgress(p);
       });
       if (!cancelRef.current) {
@@ -83,22 +85,15 @@ function App() {
         setProcessing(false);
       }
     }
-  }, []);
+  }, [file, config]);
 
   const handleFileSelect = useCallback((f: File) => {
     cancelRef.current = true;
     setFile(f);
     setPreviewUrl(URL.createObjectURL(f));
     setResult(null);
-    setTimeout(() => handleConvert(f, config), 0);
-  }, [config, handleConvert]);
-
-  const handleConfigChange = useCallback((newConfig: VectorizeConfig) => {
-    setConfig(newConfig);
-    if (file && !processing) {
-      handleConvert(file, newConfig);
-    }
-  }, [file, processing, handleConvert]);
+    setProcessing(false);
+  }, []);
 
   const handleReset = useCallback(() => {
     cancelRef.current = true;
@@ -132,7 +127,8 @@ function App() {
             <Card className={styles.card}>
               <ConfigPanel
                 config={config}
-                onChange={handleConfigChange}
+                onChange={setConfig}
+                onConvert={handleConvert}
                 disabled={!file || processing}
               />
             </Card>
@@ -163,24 +159,13 @@ function App() {
                 </div>
               ) : result ? (
                 <div className={styles.resultContent}>
-                  <div className={styles.compareRow}>
-                    <div className={styles.compareItem}>
-                      <Text size="2" color="gray" style={{ marginBottom: 8 }}>原图</Text>
-                      <div className={styles.compareImage}>
-                        <img src={result.originalUrl} alt="原图" />
-                      </div>
-                    </div>
-                    <div className={styles.compareItem}>
-                      <Text size="2" color="gray" style={{ marginBottom: 8 }}>矢量化结果</Text>
-                      <div className={styles.compareImage}>
-                        <img src={result.svgUrl} alt="SVG结果" />
-                      </div>
-                    </div>
+                  <div className={styles.resultImage}>
+                    <img src={result.svgUrl} alt="SVG结果" />
                   </div>
                 </div>
               ) : (
                 <div className={styles.emptyResult}>
-                  <Text size="2" color="gray">上传图片后自动开始转换</Text>
+                  <Text size="2" color="gray">上传图片后点击"开始转换"</Text>
                 </div>
               )}
             </Card>

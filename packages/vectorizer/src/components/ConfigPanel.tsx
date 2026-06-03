@@ -1,11 +1,12 @@
 import React from 'react';
-import { Flex, Text, ScrollArea } from '@radix-ui/themes';
+import { Flex, Text, ScrollArea, Button } from '@radix-ui/themes';
 import type { VectorizeConfig } from '../utils/vectorize';
 import styles from './ConfigPanel.module.less';
 
 type Props = {
   config: VectorizeConfig;
   onChange: (config: VectorizeConfig) => void;
+  onConvert: () => void;
   disabled?: boolean;
 };
 
@@ -115,6 +116,7 @@ function ButtonGroup({
 export const ConfigPanel: React.FC<Props> = ({
   config,
   onChange,
+  onConvert,
   disabled,
 }) => {
   const update = (partial: Partial<VectorizeConfig>) =>
@@ -122,9 +124,12 @@ export const ConfigPanel: React.FC<Props> = ({
 
   return (
     <div className={styles.panel}>
-      <Text size="4" weight="bold" style={{ marginBottom: 16 }}>
-        参数配置
-      </Text>
+      <Flex justify="between" align="center" style={{ marginBottom: 16 }}>
+        <Text size="4" weight="bold">参数配置</Text>
+        <Button onClick={onConvert} disabled={disabled}>
+          开始转换
+        </Button>
+      </Flex>
 
       <ScrollArea style={{ flex: 1 }}>
         <Flex gap="4" direction="column">
