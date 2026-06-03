@@ -53,9 +53,13 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
     scene.background = new THREE.Color(0xfaf8ef);
     sceneRef.current = scene;
 
-    // 相机 - 调整为俯视角
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
-    camera.position.set(0, 10, 5);
+    // 相机 - 正俯视角
+    const camera = new THREE.OrthographicCamera(
+      -BOARD_SIZE / 2, BOARD_SIZE / 2,
+      BOARD_SIZE / 2, -BOARD_SIZE / 2,
+      0.1, 100
+    );
+    camera.position.set(0, 10, 0);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -177,7 +181,7 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
         const tile = new THREE.Mesh(tileGeometry, materials);
         tile.position.set(
           c * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2,
-          0.2,
+          0.25,
           r * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2
         );
         tile.castShadow = true;
@@ -194,8 +198,18 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
       if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
       const width = containerRef.current.clientWidth;
       const height = containerRef.current.clientHeight;
-      cameraRef.current.aspect = width / height;
-      cameraRef.current.updateProjectionMatrix();
+
+      // 更新正交相机
+      if (cameraRef.current instanceof THREE.OrthographicCamera) {
+        const aspect = width / height;
+        const halfSize = BOARD_SIZE / 2;
+        cameraRef.current.left = -halfSize * aspect;
+        cameraRef.current.right = halfSize * aspect;
+        cameraRef.current.top = halfSize;
+        cameraRef.current.bottom = -halfSize;
+        cameraRef.current.updateProjectionMatrix();
+      }
+
       rendererRef.current.setSize(width, height);
     };
 
