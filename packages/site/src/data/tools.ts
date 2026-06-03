@@ -34,6 +34,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3005/tier/" : "/tier/",
     tags: ["休闲娱乐"],
   },
+  {
+    id: "vectorizer",
+    name: "图片矢量化工具",
+    description: "将位图转换为 SVG 矢量图形，支持多种参数配置",
+    icon: `${import.meta.env.BASE_URL}vectorizer.png`,
+    externalUrl: isDev ? "http://localhost:3006/vectorizer/" : "/vectorizer/",
+    tags: ["图像处理"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];
