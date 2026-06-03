@@ -50,6 +50,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3007/imgtool/" : "/imgtool/",
     tags: ["图像处理"],
   },
+  {
+    id: "game2048",
+    name: "2048",
+    description: "经典2048游戏，3D版本",
+    icon: `${import.meta.env.BASE_URL}game2048.png`,
+    externalUrl: isDev ? "http://localhost:3008/game2048/" : "/game2048/",
+    tags: ["休闲娱乐"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];
