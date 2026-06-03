@@ -4,6 +4,12 @@
   height: 100vh;
 }
 
+.appWrapperMobile {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
 .container {
   position: absolute;
   left: 50%;
@@ -17,6 +23,15 @@
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
   padding: 16px;
+}
+
+.containerMobile {
+  width: 100%;
+  padding: 68px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUpMobile 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
 }
 
 .footer {
@@ -100,6 +115,17 @@
   }
 }
 
+@keyframes fadeInUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1024px) {
   .mainGrid {
     grid-template-columns: 1fr 1fr;
@@ -111,11 +137,6 @@
 }
 
 @media (max-width: 768px) {
-  .container {
-    width: 95vw;
-    max-width: 95vw;
-  }
-
   .mainGrid {
     grid-template-columns: 1fr;
   }

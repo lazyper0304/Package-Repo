@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Theme, Card } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
+import { useMobile } from './hooks/useMobile';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -9,6 +10,7 @@ import { EditPanel } from './components/EditPanel';
 import styles from './App.module.less';
 
 function App() {
+  const isMobile = useMobile();
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [originalWidth, setOriginalWidth] = useState(0);
@@ -122,8 +124,8 @@ function App() {
     >
       <GradientBackground />
       <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
-      <div className={styles.appWrapper}>
-        <div className={styles.container}>
+      <div className={isMobile ? styles.appWrapperMobile : styles.appWrapper}>
+        <div className={isMobile ? styles.containerMobile : styles.container}>
           <div className={styles.mainGrid}>
             <Card className={styles.card}>
               <UploadArea

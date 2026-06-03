@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Theme, Card, Button, Flex, Text } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
+import { useMobile } from './hooks/useMobile';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -10,13 +11,13 @@ import {
   move,
   canMove,
   hasWon,
-  getMaxTile,
   type Direction,
   type Grid,
 } from './utils/gameLogic';
 import styles from './App.module.less';
 
 function App() {
+  const isMobile = useMobile();
   const [grid, setGrid] = useState<Grid>(initializeGame);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useLocalStorageState<number>('game2048-best', {
@@ -134,8 +135,8 @@ function App() {
     >
       <GradientBackground />
       <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
-      <div className={styles.appWrapper}>
-        <div className={styles.container}>
+      <div className={isMobile ? styles.appWrapperMobile : styles.appWrapper}>
+        <div className={isMobile ? styles.containerMobile : styles.container}>
           <div className={styles.gameArea}>
             <Card className={styles.scoreCard}>
               <Flex justify="between" align="center">
