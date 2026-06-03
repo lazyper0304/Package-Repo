@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Theme, Card } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
 import { GradientBackground } from './components/GradientBackground';
@@ -23,6 +23,7 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<VectorizeResult | null>(null);
+  const cancelRef = useRef(false);
 
   const [themeMode, setThemeMode] = useLocalStorageState<'light' | 'dark' | 'system'>('theme-mode', {
     defaultValue: 'system',
@@ -59,35 +60,53 @@ function App() {
     setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light');
   }, [themeMode, setThemeMode]);
 
-  const handleFileSelect = useCallback((f: File) => {
-    setFile(f);
-    setPreviewUrl(URL.createObjectURL(f));
-    setResult(null);
-  }, []);
-
-  const handleBack = useCallback(() => {
-    setFile(null);
-    setPreviewUrl(null);
-    setResult(null);
-    setProgress(0);
-  }, []);
-
-  const handleConvert = useCallback(async () => {
-    if (!file) return;
+  const handleConvert = useCallback(async (f: File, cfg: VectorizeConfig) => {
+    cancelRef.current = false;
     setProcessing(true);
     setProgress(0);
     setResult(null);
 
     try {
-      const res = await vectorizeImage(file, config, setProgress);
-      setResult(res);
+      const res = await vectorizeImage(f, cfg, (p) => {
+        if (!cancelRef.current) setProgress(p);
+      });
+      if (!cancelRef.current) {
+        setResult(res);
+      }
     } catch (err) {
       console.error('转换失败:', err);
-      alert('转换失败，请重试');
+      if (!cancelRef.current) {
+        alert('转换失败，请重试');
+      }
     } finally {
-      setProcessing(false);
+      if (!cancelRef.current) {
+        setProcessing(false);
+      }
     }
-  }, [file, config]);
+  }, []);
+
+  const handleFileSelect = useCallback((f: File) => {
+    setFile(f);
+    setPreviewUrl(URL.createObjectURL(f));
+    setResult(null);
+    handleConvert(f, config);
+  }, [config, handleConvert]);
+
+  const handleConfigChange = useCallback((newConfig: VectorizeConfig) => {
+    setConfig(newConfig);
+    if (file && !processing) {
+      handleConvert(file, newConfig);
+    }
+  }, [file, processing, handleConvert]);
+
+  const handleReset = useCallback(() => {
+    cancelRef.current = true;
+    setFile(null);
+    setPreviewUrl(null);
+    setResult(null);
+    setProgress(0);
+    setProcessing(false);
+  }, []);
 
   return (
     <Theme
@@ -112,7 +131,7 @@ function App() {
                 originalUrl={result.originalUrl}
                 fileName={file?.name || 'image.svg'}
                 onBack={() => setResult(null)}
-                onReset={handleBack}
+                onReset={handleReset}
               />
             </Card>
           ) : (
@@ -122,15 +141,14 @@ function App() {
                   onFileSelect={handleFileSelect}
                   previewUrl={previewUrl}
                   hasFile={!!file}
-                  onReset={handleBack}
+                  onReset={handleReset}
                 />
               </Card>
               <Card className={styles.card}>
                 <ConfigPanel
                   config={config}
-                  onChange={setConfig}
-                  onConvert={handleConvert}
-                  disabled={!file}
+                  onChange={handleConfigChange}
+                  disabled={!file || processing}
                 />
               </Card>
             </div>
