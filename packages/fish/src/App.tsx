@@ -201,35 +201,6 @@ export default function App() {
                 </div>
               </Card>
             </div>
-
-            <Card className={`${styles.aboutSection} ${styles.glassCard}`}>
-              <h3 className={styles.aboutTitle}>关于闲鱼风格水印生成器</h3>
-              <p>
-                这是一款免费在线图片水印工具，为您的图片添加闲鱼风格的透明水印。所有处理均在浏览器本地完成，不上传任何数据。
-              </p>
-              <br />
-              <h3 className={styles.aboutTitle}>功能特点</h3>
-              <ul>
-                <li>
-                  <strong>多种水印样式</strong> — 提供12种闲鱼风格印章水印可选
-                </li>
-                <li>
-                  <strong>高度自定义</strong> — 可调整水印位置、透明度和大小
-                </li>
-                <li>
-                  <strong>即时预览</strong> — 实时查看水印效果
-                </li>
-                <li>
-                  <strong>无需注册</strong> — 无需注册账号，保护您的隐私
-                </li>
-                <li>
-                  <strong>完全免费</strong> — 所有功能完全免费使用
-                </li>
-                <li>
-                  <strong>平铺水印</strong> — 支持全图平铺水印效果
-                </li>
-              </ul>
-            </Card>
           </div>
 
           <Footer name='闲鱼水印工具' />
