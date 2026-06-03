@@ -122,41 +122,41 @@ export default function App() {
       <>
         <GradientBackground />
 
-        <div className={styles.appWrapper}>
-          <header
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              zIndex: 999,
-              padding: '12px 8px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
+        <header
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            zIndex: 999,
+            padding: '12px 8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img src={`${import.meta.env.BASE_URL}logo.png`} style={{ width: '42px', height: '42px' }} />
+            <h1 style={{ fontSize: '22px', fontWeight: 500, margin: 0 }}>闲鱼水印工具</h1>
+          </div>
+          <IconButton
+            variant='soft'
+            size='3'
+            radius='full'
+            onClick={cycleTheme}
+            title={`当前: ${{ light: '浅色', dark: '深色', system: '跟随系统' }[themeMode || 'system']}，点击切换`}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={`${import.meta.env.BASE_URL}logo.png`} style={{ width: '42px', height: '42px' }} />
-              <h1 style={{ fontSize: '22px', fontWeight: 500, margin: 0 }}>闲鱼水印工具</h1>
-            </div>
-            <IconButton
-              variant='soft'
-              size='3'
-              radius='full'
-              onClick={cycleTheme}
-              title={`当前: ${{ light: '浅色', dark: '深色', system: '跟随系统' }[themeMode || 'system']}，点击切换`}
-            >
-              {(themeMode || 'system') === 'light' ? (
-                <MdBrightnessHigh size={20} />
-              ) : (themeMode || 'system') === 'dark' ? (
-                <MdBrightness2 size={20} />
-              ) : (
-                <MdBrightnessAuto size={20} />
-              )}
-            </IconButton>
-          </header>
+            {(themeMode || 'system') === 'light' ? (
+              <MdBrightnessHigh size={20} />
+            ) : (themeMode || 'system') === 'dark' ? (
+              <MdBrightness2 size={20} />
+            ) : (
+              <MdBrightnessAuto size={20} />
+            )}
+          </IconButton>
+        </header>
 
+        <div className={styles.appWrapper}>
           <div className={styles.container}>
             <div className={styles.mainGrid}>
               {/* Left: Image area */}

@@ -24,6 +24,7 @@ export function GradientBackground() {
       overflow: "hidden",
       opacity: 0,
       animation: "bgFadeIn 1.5s ease forwards",
+      zIndex: 0,
     }}>
       {content}
       <style>{`
