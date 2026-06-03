@@ -4,7 +4,7 @@ This file provides guidance to kscc (claude.ai/code) when working with code in t
 
 ## 项目概述
 
-Yarn workspaces monorepo，包含多个中文 Web 工具应用。
+Yarn workspaces monorepo，包含多个 Web 工具应用。
 
 ## 常用命令
 
@@ -69,6 +69,11 @@ cd packages/rust && wasm-pack build --target web
 6. **根目录 package.json**：添加 `dev:xxx`、`build:xxx`，更新 concurrently
 7. **site/tools.ts**：添加工具配置，开发环境 URL 不带路径前缀
 8. **组件风格**：统一使用 Radix UI，不要自定义背景/卡片样式
+9. **Header 样式统一**：
+   - 固定定位 `position: fixed`，`z-index: 999`
+   - 左侧：Logo（42x42）+ 标题（fontSize: 22, fontWeight: 500）
+   - 右侧：主题切换按钮（IconButton, variant="soft", size="3", radius="full"）
+   - 背景透明，padding: 12px 8px
 
 ## 注意事项
 
