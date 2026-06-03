@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Theme, Flex } from '@radix-ui/themes';
+import { Theme, Card } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
@@ -101,11 +101,11 @@ function App() {
       <div className={styles.appWrapper}>
         <div className={styles.container}>
           {processing ? (
-            <div className={styles.card}>
+            <Card className={styles.card}>
               <ProgressBar progress={progress} />
-            </div>
+            </Card>
           ) : result ? (
-            <div className={styles.card}>
+            <Card className={styles.card}>
               <ResultView
                 svgContent={result.svgContent}
                 svgUrl={result.svgUrl}
@@ -114,25 +114,25 @@ function App() {
                 onBack={() => setResult(null)}
                 onReset={handleBack}
               />
-            </div>
+            </Card>
           ) : (
             <div className={styles.mainGrid}>
-              <div className={styles.card}>
+              <Card className={styles.card}>
                 <UploadArea
                   onFileSelect={handleFileSelect}
                   previewUrl={previewUrl}
                   hasFile={!!file}
                   onReset={handleBack}
                 />
-              </div>
-              <div className={styles.card}>
+              </Card>
+              <Card className={styles.card}>
                 <ConfigPanel
                   config={config}
                   onChange={setConfig}
                   onConvert={handleConvert}
                   disabled={!file}
                 />
-              </div>
+              </Card>
             </div>
           )}
         </div>
