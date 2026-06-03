@@ -42,6 +42,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3006/vectorizer/" : "/vectorizer/",
     tags: ["图像处理"],
   },
+  {
+    id: "imgtool",
+    name: "图片尺寸格式工具",
+    description: "调整图片尺寸、转换图片格式，支持锁定比例",
+    icon: `${import.meta.env.BASE_URL}imgtool.png`,
+    externalUrl: isDev ? "http://localhost:3007/imgtool/" : "/imgtool/",
+    tags: ["图像处理"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];

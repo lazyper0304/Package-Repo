@@ -1,0 +1,61 @@
+.appWrapper {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 68px;
+}
+
+.container {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.card {
+  background: var(--color-panel-solid);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
