@@ -86,7 +86,7 @@ export const GameScene: React.FC<Props> = ({ grid, onMove }) => {
 
     // 场景
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
+    scene.background = new THREE.Color(0xfaf8ef);
     sceneRef.current = scene;
 
     // 相机
@@ -112,11 +112,7 @@ export const GameScene: React.FC<Props> = ({ grid, onMove }) => {
 
     // 底盘
     const boardGeometry = new THREE.BoxGeometry(BOARD_SIZE + 0.2, 0.2, BOARD_SIZE + 0.2);
-    const boardMaterial = new THREE.MeshPhongMaterial({
-      color: 0x16213e,
-      emissive: 0x0f3460,
-      emissiveIntensity: 0.2,
-    });
+    const boardMaterial = new THREE.MeshPhongMaterial({ color: 0xbbada0 });
     const board = new THREE.Mesh(boardGeometry, boardMaterial);
     board.position.y = -0.1;
     scene.add(board);
@@ -125,11 +121,7 @@ export const GameScene: React.FC<Props> = ({ grid, onMove }) => {
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
         const cellGeometry = new THREE.BoxGeometry(TILE_SIZE, 0.05, TILE_SIZE);
-        const cellMaterial = new THREE.MeshPhongMaterial({
-          color: 0x16213e,
-          emissive: 0x0f3460,
-          emissiveIntensity: 0.1,
-        });
+        const cellMaterial = new THREE.MeshPhongMaterial({ color: 0xcdc1b4 });
         const cell = new THREE.Mesh(cellGeometry, cellMaterial);
         cell.position.set(
           c * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2,
@@ -183,7 +175,7 @@ export const GameScene: React.FC<Props> = ({ grid, onMove }) => {
         const tile = createTile(value);
         tile.position.set(
           c * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2,
-          TILE_SIZE * 0.15,
+          0.2,
           r * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2
         );
         tilesRef.current.add(tile);

@@ -108,23 +108,16 @@ function App() {
   // 键盘控制
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          handleMove('up');
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          handleMove('down');
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          handleMove('left');
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          handleMove('right');
-          break;
+      const keyMap: Record<string, Direction> = {
+        'ArrowUp': 'up', 'ArrowDown': 'down', 'ArrowLeft': 'left', 'ArrowRight': 'right',
+        'w': 'up', 's': 'down', 'a': 'left', 'd': 'right',
+        'W': 'up', 'S': 'down', 'A': 'left', 'D': 'right',
+      };
+
+      const direction = keyMap[e.key];
+      if (direction) {
+        e.preventDefault();
+        handleMove(direction);
       }
     };
 
