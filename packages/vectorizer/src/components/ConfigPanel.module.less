@@ -1,5 +1,8 @@
 .panel {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .param {
@@ -17,7 +20,7 @@
   transition: all var(--transition);
 }
 
-.modeBtn:hover {
+.modeBtn:hover:not(:disabled) {
   background: var(--gray-4);
 }
 
@@ -26,8 +29,13 @@
   color: white;
 }
 
-.modeBtnActive:hover {
+.modeBtnActive:hover:not(:disabled) {
   background: var(--blue-10);
+}
+
+.modeBtnDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .slider {
@@ -39,6 +47,11 @@
   border-radius: 3px;
   outline: none;
   margin-top: 4px;
+}
+
+.slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .slider::-webkit-slider-thumb {
@@ -55,4 +68,8 @@
 
 .slider::-webkit-slider-thumb:hover {
   transform: scale(1.15);
+}
+
+.slider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
 }

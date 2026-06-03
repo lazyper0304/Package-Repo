@@ -10,6 +10,7 @@ type Props = {
   originalUrl: string;
   fileName: string;
   onBack: () => void;
+  onReset: () => void;
 };
 
 export const ResultView: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const ResultView: React.FC<Props> = ({
   originalUrl,
   fileName,
   onBack,
+  onReset,
 }) => {
   return (
     <div className={styles.container}>
@@ -29,6 +31,9 @@ export const ResultView: React.FC<Props> = ({
           <Button size="2" color="gray" variant="soft" onClick={onBack}>
             修改参数
           </Button>
+          <Button size="2" color="gray" variant="soft" onClick={onReset}>
+            重新开始
+          </Button>
           <Button
             size="2"
             color="green"
@@ -37,7 +42,7 @@ export const ResultView: React.FC<Props> = ({
               alert('SVG内容已复制到剪贴板');
             }}
           >
-            复制到剪贴板
+            复制SVG
           </Button>
           <Button size="2" onClick={() => downloadSvg(svgContent, fileName)}>
             下载SVG

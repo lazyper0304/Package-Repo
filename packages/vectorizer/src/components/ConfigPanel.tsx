@@ -7,7 +7,7 @@ type Props = {
   config: VectorizeConfig;
   onChange: (config: VectorizeConfig) => void;
   onConvert: () => void;
-  onBack: () => void;
+  disabled?: boolean;
 };
 
 const MODE_OPTIONS = [
@@ -35,6 +35,7 @@ function SliderParam({
   step,
   unit,
   onChange,
+  disabled,
 }: {
   label: string;
   description: string;
@@ -44,6 +45,7 @@ function SliderParam({
   step?: number;
   unit?: string;
   onChange: (v: number) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className={styles.param}>
@@ -62,6 +64,7 @@ function SliderParam({
         max={max}
         step={step || 1}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className={styles.slider}
       />
@@ -75,12 +78,14 @@ function ButtonGroup({
   value,
   options,
   onChange,
+  disabled,
 }: {
   label: string;
   description: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className={styles.param}>
@@ -96,8 +101,9 @@ function ButtonGroup({
         {options.map((opt) => (
           <button
             key={opt.value}
-            onClick={() => onChange(opt.value)}
-            className={`${styles.modeBtn} ${value === opt.value ? styles.modeBtnActive : ''}`}
+            onClick={() => !disabled && onChange(opt.value)}
+            disabled={disabled}
+            className={`${styles.modeBtn} ${value === opt.value ? styles.modeBtnActive : ''} ${disabled ? styles.modeBtnDisabled : ''}`}
           >
             {opt.label}
           </button>
@@ -111,128 +117,135 @@ export const ConfigPanel: React.FC<Props> = ({
   config,
   onChange,
   onConvert,
-  onBack,
+  disabled,
 }) => {
   const update = (partial: Partial<VectorizeConfig>) =>
     onChange({ ...config, ...partial });
 
   return (
-    <Card className={styles.panel}>
+    <div className={styles.panel}>
       <Flex justify="between" align="center" style={{ marginBottom: 16 }}>
-        <Text size="5" weight="bold">
-          配置参数
+        <Text size="4" weight="bold">
+          参数配置
         </Text>
-        <Button size="1" color="gray" variant="soft" onClick={onBack}>
-          重新选择图片
+        <Button onClick={onConvert} disabled={disabled}>
+          开始转换
         </Button>
       </Flex>
 
-      <ScrollArea style={{ maxHeight: '60vh' }}>
+      <ScrollArea style={{ maxHeight: 'calc(100vh - 200px)' }}>
         <Flex gap="4" direction="column">
           <ButtonGroup
             label="模式"
-            description="选择路径简化模式：无（保留原始路径）、多边形（使用直线）、样条曲线（使用曲线）"
+            description="路径简化模式"
             value={config.mode}
             options={MODE_OPTIONS}
             onChange={(v) => update({ mode: v })}
+            disabled={disabled}
           />
 
           <ButtonGroup
             label="聚类模式"
-            description="选择颜色聚类模式：二值化（黑白）、彩色（保留颜色）"
+            description="颜色聚类模式"
             value={config.clusteringMode}
             options={CLUSTERING_OPTIONS}
             onChange={(v) => update({ clusteringMode: v })}
+            disabled={disabled}
           />
 
           <ButtonGroup
             label="层次模式"
-            description="选择图层层次模式：剪切（保留透明区域）、堆叠（图层叠加）"
+            description="图层层次模式"
             value={config.hierarchical}
             options={HIERARCHICAL_OPTIONS}
             onChange={(v) => update({ hierarchical: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="角度阈值"
-            description="控制角点检测的敏感度，值越大，检测到的角点越少"
+            description="角点检测敏感度"
             value={config.cornerThreshold}
             min={0}
             max={180}
             unit="°"
             onChange={(v) => update({ cornerThreshold: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="长度阈值"
-            description="控制路径点的简化程度，值越大，路径点越少"
+            description="路径点简化程度"
             value={config.lengthThreshold}
             min={1}
             max={10}
             step={0.1}
             onChange={(v) => update({ lengthThreshold: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="拼接阈值"
-            description="控制路径拼接的角度阈值，值越大，拼接的路径越多"
+            description="路径拼接角度"
             value={config.spliceThreshold}
             min={0}
             max={90}
             unit="°"
             onChange={(v) => update({ spliceThreshold: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="噪点过滤"
-            description="控制噪点过滤的阈值，值越大，过滤的噪点越多"
+            description="噪点过滤阈值"
             value={config.filterSpeckle}
             min={0}
             max={10}
             onChange={(v) => update({ filterSpeckle: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="颜色精度"
-            description="控制颜色量化的精度，值越大，颜色越丰富"
+            description="颜色量化精度"
             value={config.colorPrecision}
             min={1}
             max={8}
             onChange={(v) => update({ colorPrecision: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="图层差异"
-            description="控制图层分离的阈值，值越大，图层分离越明显"
+            description="图层分离阈值"
             value={config.layerDifference}
             min={0}
             max={100}
             onChange={(v) => update({ layerDifference: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="路径精度"
-            description="控制SVG路径的精度，值越大，路径越精确"
+            description="SVG路径精度"
             value={config.pathPrecision}
             min={1}
             max={10}
             onChange={(v) => update({ pathPrecision: v })}
+            disabled={disabled}
           />
 
           <SliderParam
             label="最大迭代次数"
-            description="控制路径优化的最大迭代次数，值越大，优化效果越好"
+            description="路径优化迭代次数"
             value={config.maxIterations}
             min={1}
             max={20}
             onChange={(v) => update({ maxIterations: v })}
+            disabled={disabled}
           />
         </Flex>
       </ScrollArea>
-
-      <Flex justify="end" style={{ marginTop: 16 }}>
-        <Button onClick={onConvert}>确定并转换</Button>
-      </Flex>
-    </Card>
+    </div>
   );
 };

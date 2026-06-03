@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Theme } from '@radix-ui/themes';
+import { Theme, Flex } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
@@ -16,13 +16,12 @@ import {
 } from './utils/vectorize';
 import styles from './App.module.less';
 
-type ViewState = 'upload' | 'config' | 'processing' | 'result';
-
 function App() {
-  const [viewState, setViewState] = useState<ViewState>('upload');
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [config, setConfig] = useState<VectorizeConfig>(DEFAULT_CONFIG);
   const [progress, setProgress] = useState(0);
+  const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<VectorizeResult | null>(null);
 
   const [themeMode, setThemeMode] = useLocalStorageState<'light' | 'dark' | 'system'>('theme-mode', {
@@ -62,35 +61,31 @@ function App() {
 
   const handleFileSelect = useCallback((f: File) => {
     setFile(f);
-    setViewState('config');
+    setPreviewUrl(URL.createObjectURL(f));
+    setResult(null);
   }, []);
 
   const handleBack = useCallback(() => {
-    setViewState('upload');
     setFile(null);
-    setResult(null);
-    setProgress(0);
-  }, []);
-
-  const handleBackToConfig = useCallback(() => {
-    setViewState('config');
+    setPreviewUrl(null);
     setResult(null);
     setProgress(0);
   }, []);
 
   const handleConvert = useCallback(async () => {
     if (!file) return;
-    setViewState('processing');
+    setProcessing(true);
     setProgress(0);
+    setResult(null);
 
     try {
       const res = await vectorizeImage(file, config, setProgress);
       setResult(res);
-      setViewState('result');
     } catch (err) {
       console.error('转换失败:', err);
       alert('转换失败，请重试');
-      setViewState('config');
+    } finally {
+      setProcessing(false);
     }
   }, [file, config]);
 
@@ -105,38 +100,39 @@ function App() {
       <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
       <div className={styles.appWrapper}>
         <div className={styles.container}>
-          {viewState === 'upload' && (
-            <div className={styles.card}>
-              <UploadArea onFileSelect={handleFileSelect} />
-            </div>
-          )}
-
-          {viewState === 'config' && (
-            <div className={styles.card}>
-              <ConfigPanel
-                config={config}
-                onChange={setConfig}
-                onConvert={handleConvert}
-                onBack={handleBack}
-              />
-            </div>
-          )}
-
-          {viewState === 'processing' && (
+          {processing ? (
             <div className={styles.card}>
               <ProgressBar progress={progress} />
             </div>
-          )}
-
-          {viewState === 'result' && result && (
+          ) : result ? (
             <div className={styles.card}>
               <ResultView
                 svgContent={result.svgContent}
                 svgUrl={result.svgUrl}
                 originalUrl={result.originalUrl}
                 fileName={file?.name || 'image.svg'}
-                onBack={handleBackToConfig}
+                onBack={() => setResult(null)}
+                onReset={handleBack}
               />
+            </div>
+          ) : (
+            <div className={styles.mainGrid}>
+              <div className={styles.card}>
+                <UploadArea
+                  onFileSelect={handleFileSelect}
+                  previewUrl={previewUrl}
+                  hasFile={!!file}
+                  onReset={handleBack}
+                />
+              </div>
+              <div className={styles.card}>
+                <ConfigPanel
+                  config={config}
+                  onChange={setConfig}
+                  onConvert={handleConvert}
+                  disabled={!file}
+                />
+              </div>
             </div>
           )}
         </div>
