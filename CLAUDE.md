@@ -74,6 +74,11 @@ cd packages/rust && wasm-pack build --target web
    - 左侧：Logo（42x42）+ 标题（fontSize: 22, fontWeight: 500）
    - 右侧：主题切换按钮（IconButton, variant="soft", size="3", radius="full"）
    - 背景透明，padding: 12px 8px
+10. **移动端布局**：
+    - 参考 repo 项目的 `useMobile` hook（断点 768px）
+    - JS 层条件渲染不同 DOM 结构
+    - CSS 层 `@media (max-width: 640px)` 做样式微调
+    - 移动端简化 UI，隐藏非核心控件
 
 ## 注意事项
 
