@@ -39,7 +39,7 @@ export const tools: Tool[] = [
     name: "图片矢量化工具",
     description: "将位图转换为 SVG 矢量图形，支持多种参数配置",
     icon: `${import.meta.env.BASE_URL}vectorizer.png`,
-    externalUrl: isDev ? "http://localhost:3006/vectorizer/" : "/vectorizer/",
+    externalUrl: isDev ? "http://localhost:3007/vectorizer/" : "/vectorizer/",
     tags: ["图像处理"],
   },
 ];

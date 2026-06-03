@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Theme } from '@radix-ui/themes';
+import { useLocalStorageState } from 'ahooks';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -23,6 +24,41 @@ function App() {
   const [config, setConfig] = useState<VectorizeConfig>(DEFAULT_CONFIG);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<VectorizeResult | null>(null);
+
+  const [themeMode, setThemeMode] = useLocalStorageState<'light' | 'dark' | 'system'>('theme-mode', {
+    defaultValue: 'system',
+  });
+
+  const [systemDarkMode, setSystemDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  const appearance = useMemo(() => {
+    if (themeMode === 'system') {
+      return systemDarkMode ? 'dark' : 'light';
+    }
+    return themeMode;
+  }, [themeMode, systemDarkMode]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => setSystemDarkMode(e.matches);
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', appearance);
+  }, [appearance]);
+
+  const cycleTheme = useCallback(() => {
+    setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light');
+  }, [themeMode, setThemeMode]);
 
   const handleFileSelect = useCallback((f: File) => {
     setFile(f);
@@ -58,26 +94,15 @@ function App() {
     }
   }, [file, config]);
 
-  // 获取系统主题
-  const getThemeMode = () => {
-    const saved = localStorage.getItem('theme-mode') || 'system';
-    if (saved === 'system') {
-      return window.matchMedia?.('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    }
-    return saved;
-  };
-
   return (
     <Theme
-      appearance={getThemeMode() as 'light' | 'dark'}
-      accentColor="teal"
+      appearance={appearance}
+      accentColor={appearance === 'dark' ? 'teal' : 'blue'}
       grayColor="gray"
       panelBackground="translucent"
     >
       <GradientBackground />
-      <Header />
+      <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
       <div className={styles.appWrapper}>
         <div className={styles.container}>
           {viewState === 'upload' && (

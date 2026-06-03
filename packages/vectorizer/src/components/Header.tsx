@@ -1,4 +1,3 @@
-import { useState, useCallback, useEffect } from 'react';
 import { IconButton } from '@radix-ui/themes';
 import {
   MdBrightness2,
@@ -8,43 +7,12 @@ import {
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
-export function Header() {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('theme-mode');
-    return (saved as ThemeMode) || 'system';
-  });
+type HeaderProps = {
+  themeMode: ThemeMode;
+  onCycleTheme: () => void;
+};
 
-  const [systemDarkMode, setSystemDarkMode] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : false
-  );
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => setSystemDarkMode(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  useEffect(() => {
-    const appearance =
-      themeMode === 'system' ? (systemDarkMode ? 'dark' : 'light') : themeMode;
-    document.documentElement.setAttribute('data-theme', appearance);
-  }, [themeMode, systemDarkMode]);
-
-  const cycleTheme = useCallback(() => {
-    const next =
-      themeMode === 'light'
-        ? 'dark'
-        : themeMode === 'dark'
-          ? 'system'
-          : 'light';
-    setThemeMode(next);
-    localStorage.setItem('theme-mode', next);
-  }, [themeMode]);
-
+export function Header({ themeMode, onCycleTheme }: HeaderProps) {
   return (
     <header
       style={{
@@ -73,12 +41,12 @@ export function Header() {
         variant="soft"
         size="3"
         radius="full"
-        onClick={cycleTheme}
-        title={`当前: ${{ light: '浅色', dark: '深色', system: '跟随系统' }[themeMode || 'system']}，点击切换`}
+        onClick={onCycleTheme}
+        title={`当前: ${{ light: '浅色', dark: '深色', system: '跟随系统' }[themeMode]}，点击切换`}
       >
-        {(themeMode || 'system') === 'light' ? (
+        {themeMode === 'light' ? (
           <MdBrightnessHigh size={20} />
-        ) : (themeMode || 'system') === 'dark' ? (
+        ) : themeMode === 'dark' ? (
           <MdBrightness2 size={20} />
         ) : (
           <MdBrightnessAuto size={20} />

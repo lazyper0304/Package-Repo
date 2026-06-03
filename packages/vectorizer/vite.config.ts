@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3006,
+    port: 3007,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
