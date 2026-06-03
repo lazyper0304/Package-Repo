@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Theme, Card, Flex, Text } from '@radix-ui/themes';
+import { Theme, Card } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UploadArea } from './components/UploadArea';
-import { ResizePanel } from './components/ResizePanel';
-import { FormatPanel } from './components/FormatPanel';
+import { EditPanel } from './components/EditPanel';
 import styles from './App.module.less';
 
 function App() {
@@ -76,8 +75,8 @@ function App() {
     setOriginalFormat('');
   }, []);
 
-  const handleResize = useCallback(
-    (width: number, height: number) => {
+  const handleExport = useCallback(
+    (width: number, height: number, format: string) => {
       if (!file || !canvasRef.current) return;
 
       const canvas = canvasRef.current;
@@ -90,56 +89,8 @@ function App() {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
 
-        const newUrl = canvas.toDataURL('image/png');
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(newUrl);
-      };
-      img.src = URL.createObjectURL(file);
-    },
-    [file, previewUrl]
-  );
-
-  const handleConvert = useCallback(
-    (format: string) => {
-      if (!file || !canvasRef.current) return;
-
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const img = new Image();
-      img.onload = () => {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        ctx.drawImage(img, 0, 0);
-
         const mimeType = format === 'jpeg' ? 'image/jpeg' : format === 'bmp' ? 'image/bmp' : `image/${format}`;
-        const newUrl = canvas.toDataURL(mimeType, 0.9);
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(newUrl);
-        setOriginalFormat(format);
-      };
-      img.src = URL.createObjectURL(file);
-    },
-    [file, previewUrl]
-  );
-
-  const handleDownload = useCallback(
-    (format: string) => {
-      if (!previewUrl) return;
-
-      const mimeType = format === 'jpeg' ? 'image/jpeg' : format === 'bmp' ? 'image/bmp' : `image/${format}`;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const img = new Image();
-      img.onload = () => {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        ctx.drawImage(img, 0, 0);
+        const quality = format === 'jpeg' || format === 'webp' ? 0.9 : undefined;
 
         canvas.toBlob(
           (blob) => {
@@ -147,19 +98,19 @@ function App() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `image.${format}`;
+            a.download = `image.${format === 'jpeg' ? 'jpg' : format}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
           },
           mimeType,
-          0.9
+          quality
         );
       };
-      img.src = previewUrl;
+      img.src = URL.createObjectURL(file);
     },
-    [previewUrl]
+    [file]
   );
 
   return (
@@ -183,18 +134,11 @@ function App() {
               />
             </Card>
             <Card className={styles.card}>
-              <ResizePanel
+              <EditPanel
                 originalWidth={originalWidth}
                 originalHeight={originalHeight}
-                onResize={handleResize}
-                disabled={!file}
-              />
-            </Card>
-            <Card className={styles.card}>
-              <FormatPanel
                 originalFormat={originalFormat}
-                onConvert={handleConvert}
-                onDownload={handleDownload}
+                onExport={handleExport}
                 disabled={!file}
               />
             </Card>
