@@ -75,10 +75,11 @@ cd packages/rust && wasm-pack build --target web
    - 右侧：主题切换按钮（IconButton, variant="soft", size="3", radius="full"）
    - 背景透明，padding: 12px 8px
 10. **移动端布局**：
-    - 参考 repo 项目的 `useMobile` hook（断点 768px）
-    - JS 层条件渲染不同 DOM 结构
-    - CSS 层 `@media (max-width: 640px)` 做样式微调
-    - 移动端简化 UI，隐藏非核心控件
+    - 使用 `useMobile` hook（断点 768px）
+    - 桌面端：绝对定位居中 `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%)`
+    - 移动端：`min-height: 100vh`，`padding-top: 68px`，从顶部开始
+    - 使用 `isMobile ? styles.appWrapperMobile : styles.appWrapper` 条件渲染
+    - 移动端动画使用 `translateY` 而非 `translate(-50%, -50%)`
 11. **上传卡片样式统一**：
     - 虚线边框 `border: 2px dashed var(--text-muted)`
     - 圆角 `border-radius: var(--radius-md)`
