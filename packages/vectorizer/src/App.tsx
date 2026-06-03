@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Theme, Card } from '@radix-ui/themes';
+import { Theme, Card, Flex, Text, Button } from '@radix-ui/themes';
 import { useLocalStorageState } from 'ahooks';
+import copy from 'copy-to-clipboard';
 import { GradientBackground } from './components/GradientBackground';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { UploadArea } from './components/UploadArea';
 import { ConfigPanel } from './components/ConfigPanel';
 import { ProgressBar } from './components/ProgressBar';
-import { ResultView } from './components/ResultView';
+import { downloadSvg } from './utils/vectorize';
 import {
   vectorizeImage,
   DEFAULT_CONFIG,
@@ -64,7 +65,6 @@ function App() {
     cancelRef.current = false;
     setProcessing(true);
     setProgress(0);
-    setResult(null);
 
     try {
       const res = await vectorizeImage(f, cfg, (p) => {
@@ -86,10 +86,11 @@ function App() {
   }, []);
 
   const handleFileSelect = useCallback((f: File) => {
+    cancelRef.current = true;
     setFile(f);
     setPreviewUrl(URL.createObjectURL(f));
     setResult(null);
-    handleConvert(f, config);
+    setTimeout(() => handleConvert(f, config), 0);
   }, [config, handleConvert]);
 
   const handleConfigChange = useCallback((newConfig: VectorizeConfig) => {
@@ -119,39 +120,65 @@ function App() {
       <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
       <div className={styles.appWrapper}>
         <div className={styles.container}>
-          {processing ? (
+          <div className={styles.topGrid}>
             <Card className={styles.card}>
-              <ProgressBar progress={progress} />
-            </Card>
-          ) : result ? (
-            <Card className={styles.card}>
-              <ResultView
-                svgContent={result.svgContent}
-                svgUrl={result.svgUrl}
-                originalUrl={result.originalUrl}
-                fileName={file?.name || 'image.svg'}
-                onBack={() => setResult(null)}
+              <UploadArea
+                onFileSelect={handleFileSelect}
+                previewUrl={previewUrl}
+                hasFile={!!file}
                 onReset={handleReset}
               />
             </Card>
-          ) : (
-            <div className={styles.mainGrid}>
-              <Card className={styles.card}>
-                <UploadArea
-                  onFileSelect={handleFileSelect}
-                  previewUrl={previewUrl}
-                  hasFile={!!file}
-                  onReset={handleReset}
-                />
-              </Card>
-              <Card className={styles.card}>
-                <ConfigPanel
-                  config={config}
-                  onChange={handleConfigChange}
-                  disabled={!file || processing}
-                />
-              </Card>
-            </div>
+            <Card className={styles.card}>
+              <ConfigPanel
+                config={config}
+                onChange={handleConfigChange}
+                disabled={!file || processing}
+              />
+            </Card>
+          </div>
+
+          {processing && (
+            <Card className={styles.card}>
+              <ProgressBar progress={progress} />
+            </Card>
+          )}
+
+          {result && (
+            <Card className={styles.resultCard}>
+              <Flex justify="between" align="center" style={{ marginBottom: 16 }}>
+                <Text size="4" weight="bold">转换结果</Text>
+                <Flex gap="2">
+                  <Button
+                    size="2"
+                    color="green"
+                    onClick={() => {
+                      copy(result.svgContent);
+                      alert('SVG内容已复制到剪贴板');
+                    }}
+                  >
+                    复制SVG
+                  </Button>
+                  <Button size="2" onClick={() => downloadSvg(result.svgContent, file?.name || 'image.svg')}>
+                    下载SVG
+                  </Button>
+                </Flex>
+              </Flex>
+              <Flex gap="4" className={styles.compareGrid}>
+                <div className={styles.compareItem}>
+                  <Text size="2" weight="bold" style={{ marginBottom: 8 }}>原图</Text>
+                  <div className={styles.compareImage}>
+                    <img src={result.originalUrl} alt="原图" />
+                  </div>
+                </div>
+                <div className={styles.compareItem}>
+                  <Text size="2" weight="bold" style={{ marginBottom: 8 }}>矢量化结果</Text>
+                  <div className={styles.compareImage}>
+                    <img src={result.svgUrl} alt="SVG结果" />
+                  </div>
+                </div>
+              </Flex>
+            </Card>
           )}
         </div>
         <Footer name="图片矢量化" />

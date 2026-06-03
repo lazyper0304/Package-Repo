@@ -14,13 +14,14 @@
   max-width: 1200px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 24px;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
   padding: 0 24px;
+  padding-bottom: 24px;
 }
 
-.mainGrid {
+.topGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
@@ -31,6 +32,40 @@
   background: var(--color-panel-solid);
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-3);
+}
+
+.resultCard {
+  background: var(--color-panel-solid);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-3);
+  padding: 24px;
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.compareItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.compareImage {
+  background: var(--gray-2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.compareImage img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
 }
 
 @keyframes fadeInUp {
@@ -45,7 +80,11 @@
 }
 
 @media (max-width: 768px) {
-  .mainGrid {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .compareGrid {
     grid-template-columns: 1fr;
   }
 }
