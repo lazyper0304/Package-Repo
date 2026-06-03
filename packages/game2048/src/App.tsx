@@ -132,41 +132,6 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // 触摸控制
-  useEffect(() => {
-    let startX = 0;
-    let startY = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const diffX = endX - startX;
-      const diffY = endY - startY;
-
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > 30) {
-          handleMove(diffX > 0 ? 'right' : 'left');
-        }
-      } else {
-        if (Math.abs(diffY) > 30) {
-          handleMove(diffY > 0 ? 'down' : 'up');
-        }
-      }
-    };
-
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchend', handleTouchEnd);
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [handleMove]);
-
   return (
     <Theme
       appearance={appearance}
@@ -194,7 +159,7 @@ function App() {
             </Card>
 
             <div className={styles.gameBoard}>
-              <GameScene grid={grid} />
+              <GameScene grid={grid} onMove={handleMove} />
             </div>
 
             {(gameOver || won) && (
