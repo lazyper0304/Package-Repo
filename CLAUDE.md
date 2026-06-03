@@ -4,7 +4,7 @@ This file provides guidance to kscc (claude.ai/code) when working with code in t
 
 ## 项目概述
 
-Yarn workspaces monorepo，包含多个中文 Web 工具应用，部署在 `test.ybxylazycats.dpdns.org`。
+Yarn workspaces monorepo，包含多个中文 Web 工具应用。
 
 ## 常用命令
 
@@ -73,6 +73,5 @@ cd packages/rust && wasm-pack build --target web
 ## 注意事项
 
 - UI 语言为中文
-- 数据库凭据在 `db.js` 中（root/123456）
 - site 的 `src/data/tools.ts` 控制工具导航，区分开发/正式环境 URL
-- 构建产物在 `dist/` 目录，nginx 从那里提供静态文件
+- 构建产物在 `dist/` 目录
