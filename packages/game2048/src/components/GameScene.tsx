@@ -11,6 +11,29 @@ const TILE_SIZE = 1.2;
 const GAP = 0.15;
 const BOARD_SIZE = GRID_SIZE * (TILE_SIZE + GAP) + GAP;
 
+// 创建带有数字的纹理
+function createTextTexture(value: number, bgColor: string, textColor: string): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d')!;
+
+  // 背景
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, 128, 128);
+
+  // 文字
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${value >= 1000 ? 36 : value >= 100 ? 42 : 48}px Arial`;
+  ctx.fillText(value.toString(), 64, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
 export const GameScene: React.FC<Props> = ({ grid }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -30,9 +53,9 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
     scene.background = new THREE.Color(0xfaf8ef);
     sceneRef.current = scene;
 
-    // 相机
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 8, 8);
+    // 相机 - 调整为俯视角
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+    camera.position.set(0, 10, 5);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -46,31 +69,31 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
     rendererRef.current = renderer;
 
     // 灯光
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 10, 5);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(5, 15, 8);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
     directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
 
     // 底板
-    const boardGeometry = new THREE.BoxGeometry(BOARD_SIZE, 0.3, BOARD_SIZE);
+    const boardGeometry = new THREE.BoxGeometry(BOARD_SIZE, 0.2, BOARD_SIZE);
     const boardMaterial = new THREE.MeshStandardMaterial({
       color: 0xbbada0,
       roughness: 0.8,
     });
     const board = new THREE.Mesh(boardGeometry, boardMaterial);
-    board.position.y = -0.15;
+    board.position.y = -0.1;
     board.receiveShadow = true;
     scene.add(board);
 
     // 格子背景
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
-        const cellGeometry = new THREE.BoxGeometry(TILE_SIZE, 0.1, TILE_SIZE);
+        const cellGeometry = new THREE.BoxGeometry(TILE_SIZE, 0.05, TILE_SIZE);
         const cellMaterial = new THREE.MeshStandardMaterial({
           color: 0xcdc1b4,
           roughness: 0.6,
@@ -78,7 +101,7 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
         const cell = new THREE.Mesh(cellGeometry, cellMaterial);
         cell.position.set(
           c * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2,
-          0.05,
+          0.025,
           r * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2
         );
         cell.receiveShadow = true;
@@ -108,7 +131,11 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
       tilesRef.current.remove(child);
       if (child instanceof THREE.Mesh) {
         child.geometry.dispose();
-        (child.material as THREE.Material).dispose();
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose());
+        } else {
+          child.material.dispose();
+        }
       }
     }
 
@@ -119,16 +146,38 @@ export const GameScene: React.FC<Props> = ({ grid }) => {
         if (value === 0) continue;
 
         const colors = getTileColor(value);
-        const tileGeometry = new THREE.BoxGeometry(TILE_SIZE * 0.9, 0.4, TILE_SIZE * 0.9);
-        const tileMaterial = new THREE.MeshStandardMaterial({
+
+        // 创建方块几何体
+        const tileGeometry = new THREE.BoxGeometry(TILE_SIZE * 0.9, 0.3, TILE_SIZE * 0.9);
+
+        // 创建带数字的纹理（用于顶面）
+        const textTexture = createTextTexture(value, colors.bg, colors.text);
+
+        // 材质：顶面带数字，其他面纯色
+        const topMaterial = new THREE.MeshStandardMaterial({
+          map: textTexture,
+          roughness: 0.3,
+          metalness: 0.1,
+        });
+        const sideMaterial = new THREE.MeshStandardMaterial({
           color: new THREE.Color(colors.bg),
           roughness: 0.4,
           metalness: 0.1,
         });
-        const tile = new THREE.Mesh(tileGeometry, tileMaterial);
+
+        const materials = [
+          sideMaterial, // 右
+          sideMaterial, // 左
+          topMaterial,  // 顶
+          sideMaterial, // 底
+          sideMaterial, // 前
+          sideMaterial, // 后
+        ];
+
+        const tile = new THREE.Mesh(tileGeometry, materials);
         tile.position.set(
           c * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2,
-          0.25,
+          0.2,
           r * (TILE_SIZE + GAP) - BOARD_SIZE / 2 + GAP + TILE_SIZE / 2
         );
         tile.castShadow = true;
