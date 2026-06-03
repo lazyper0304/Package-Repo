@@ -79,6 +79,12 @@ cd packages/rust && wasm-pack build --target web
     - JS 层条件渲染不同 DOM 结构
     - CSS 层 `@media (max-width: 640px)` 做样式微调
     - 移动端简化 UI，隐藏非核心控件
+11. **上传卡片样式统一**：
+    - 虚线边框 `border: 2px dashed var(--text-muted)`
+    - 圆角 `border-radius: var(--radius-md)`
+    - 悬停效果：边框变色 `var(--accent)`
+    - 拖拽效果：背景色变化 `rgba(6, 182, 212, 0.08)`
+    - 不同项目只是换图标和文案
 
 ## 注意事项
 
