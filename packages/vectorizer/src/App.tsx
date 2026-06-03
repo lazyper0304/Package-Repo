@@ -120,7 +120,7 @@ function App() {
       <Header themeMode={themeMode || 'system'} onCycleTheme={cycleTheme} />
       <div className={styles.appWrapper}>
         <div className={styles.container}>
-          <div className={styles.topGrid}>
+          <div className={styles.mainGrid}>
             <Card className={styles.card}>
               <UploadArea
                 onFileSelect={handleFileSelect}
@@ -136,50 +136,55 @@ function App() {
                 disabled={!file || processing}
               />
             </Card>
-          </div>
-
-          {processing && (
-            <Card className={styles.card}>
-              <ProgressBar progress={progress} />
-            </Card>
-          )}
-
-          {result && (
             <Card className={styles.resultCard}>
               <Flex justify="between" align="center" style={{ marginBottom: 16 }}>
                 <Text size="4" weight="bold">转换结果</Text>
-                <Flex gap="2">
-                  <Button
-                    size="2"
-                    color="green"
-                    onClick={() => {
-                      copy(result.svgContent);
-                      alert('SVG内容已复制到剪贴板');
-                    }}
-                  >
-                    复制SVG
-                  </Button>
-                  <Button size="2" onClick={() => downloadSvg(result.svgContent, file?.name || 'image.svg')}>
-                    下载SVG
-                  </Button>
-                </Flex>
+                {result && (
+                  <Flex gap="2">
+                    <Button
+                      size="2"
+                      color="green"
+                      onClick={() => {
+                        copy(result.svgContent);
+                        alert('SVG内容已复制到剪贴板');
+                      }}
+                    >
+                      复制SVG
+                    </Button>
+                    <Button size="2" onClick={() => downloadSvg(result.svgContent, file?.name || 'image.svg')}>
+                      下载SVG
+                    </Button>
+                  </Flex>
+                )}
               </Flex>
-              <Flex gap="4" className={styles.compareGrid}>
-                <div className={styles.compareItem}>
-                  <Text size="2" weight="bold" style={{ marginBottom: 8 }}>原图</Text>
-                  <div className={styles.compareImage}>
-                    <img src={result.originalUrl} alt="原图" />
+              {processing ? (
+                <div className={styles.resultContent}>
+                  <ProgressBar progress={progress} />
+                </div>
+              ) : result ? (
+                <div className={styles.resultContent}>
+                  <div className={styles.compareRow}>
+                    <div className={styles.compareItem}>
+                      <Text size="2" color="gray" style={{ marginBottom: 8 }}>原图</Text>
+                      <div className={styles.compareImage}>
+                        <img src={result.originalUrl} alt="原图" />
+                      </div>
+                    </div>
+                    <div className={styles.compareItem}>
+                      <Text size="2" color="gray" style={{ marginBottom: 8 }}>矢量化结果</Text>
+                      <div className={styles.compareImage}>
+                        <img src={result.svgUrl} alt="SVG结果" />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className={styles.compareItem}>
-                  <Text size="2" weight="bold" style={{ marginBottom: 8 }}>矢量化结果</Text>
-                  <div className={styles.compareImage}>
-                    <img src={result.svgUrl} alt="SVG结果" />
-                  </div>
+              ) : (
+                <div className={styles.emptyResult}>
+                  <Text size="2" color="gray">上传图片后自动开始转换</Text>
                 </div>
-              </Flex>
+              )}
             </Card>
-          )}
+          </div>
         </div>
         <Footer name="图片矢量化" />
       </div>

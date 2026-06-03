@@ -1,37 +1,39 @@
 .appWrapper {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-top: 80px;
+  padding-top: 68px;
 }
 
 .container {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
-  padding: 0 24px;
-  padding-bottom: 24px;
+  padding: 16px 24px;
+  overflow: hidden;
 }
 
-.topGrid {
+.mainGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
 }
 
 .card {
   background: var(--color-panel-solid);
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .resultCard {
@@ -39,20 +41,34 @@
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-3);
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.compareGrid {
+.resultContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.compareRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
+  flex: 1;
 }
 
 .compareItem {
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .compareImage {
+  flex: 1;
   background: var(--gray-2);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -60,12 +76,23 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
+  overflow: hidden;
 }
 
 .compareImage img {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 100%;
   object-fit: contain;
+}
+
+.emptyResult {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-2);
+  border-radius: var(--radius-md);
+  min-height: 200px;
 }
 
 @keyframes fadeInUp {
@@ -79,12 +106,26 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .resultCard {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 768px) {
-  .topGrid {
+  .mainGrid {
     grid-template-columns: 1fr;
   }
 
-  .compareGrid {
+  .resultCard {
+    grid-column: span 1;
+  }
+
+  .compareRow {
     grid-template-columns: 1fr;
   }
 }
