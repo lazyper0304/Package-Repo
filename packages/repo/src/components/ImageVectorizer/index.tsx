@@ -1,8 +1,7 @@
 import { Card, Dialog, Flex, Text, Button, ScrollArea } from '@radix-ui/themes';
 import { useSetState } from 'ahooks';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './index.module.less';
-import classnames from 'classnames';
 import { AiOutlineLoading } from 'react-icons/ai';
 import { notify } from '@/utils/notify';
 import { ColorImageConverter } from 'vtracer';
@@ -11,7 +10,7 @@ import copy from 'copy-to-clipboard';
 type IProps = Readonly<{
   open: boolean;
   onClose: () => void;
-  imageUrl?: string;
+  imageUrl: string;
 }>;
 
 type ProcessedFile = {
@@ -23,12 +22,10 @@ type ProcessedFile = {
 
 const ImageVectorizer: React.FC<IProps> = (props) => {
   const { open, onClose, imageUrl } = props;
-  const ref = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
 
   const [state, setState] = useSetState({
     fileName: '',
-    file: null as File | null,
     processedFile: null as ProcessedFile | null,
     success: false,
     loading: false,
@@ -63,33 +60,7 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
         processedFile: null,
       });
     }
-  }, [open, imageUrl]); // setState is stable, no need to add to dependency array
-
-  // 处理矢量化
-  async function processFiles(files: FileList) {
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-
-    // 检查文件扩展名
-    const allowedExtensions = ['.jpg', '.jpeg', '.bmp', '.png', '.webp'];
-    const fileExtension = file.name
-      .toLowerCase()
-      .substring(file.name.lastIndexOf('.'));
-    if (!allowedExtensions.includes(fileExtension)) {
-      notify('请上传支持的图片格式：JPG、JPEG、BMP、PNG、WebP');
-      return;
-    }
-
-    // 显示配置界面
-    setState({
-      fileName: file.name,
-      file: file,
-      showConfig: true,
-      success: false,
-      processedFile: null,
-    });
-  }
+  }, [open, imageUrl]);
 
   // 从URL下载图片并转换为File对象
   async function downloadImageFromUrl(url: string): Promise<File> {
@@ -101,23 +72,11 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
 
   // 执行转换
   async function executeConversion() {
-    let file: File;
-
-    if (imageUrl) {
-      // 从URL下载图片
-      file = await downloadImageFromUrl(imageUrl);
-    } else {
-      // 从状态中获取文件
-      if (!state.file) return;
-      file = state.file;
-    }
-
-    setState({
-      loading: true,
-      showConfig: false,
-    });
+    setState({ loading: true, showConfig: false });
 
     try {
+      const file = await downloadImageFromUrl(imageUrl);
+
       // 创建临时canvas和svg元素
       const canvas = document.createElement('canvas');
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -197,7 +156,6 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
 
       // 获取SVG内容
       const svgContent = new XMLSerializer().serializeToString(svg);
-      console.log('SVG conversion successful, length:', svgContent.length);
 
       // 创建SVG URL
       const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
@@ -211,8 +169,6 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
         svgUrl,
         originalUrl,
       };
-
-      console.log(`文件 ${file.name} 处理成功`);
 
       // 释放资源
       converter.free();
@@ -230,33 +186,9 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
       notify('图片矢量化成功');
     } catch (error) {
       console.error('处理失败:', error);
-      console.error('错误堆栈:', error.stack);
       notify('处理失败，请重试');
-      setState({
-        loading: false,
-      });
+      setState({ loading: false });
     }
-  }
-
-  function handleClick() {
-    if (state.loading) return;
-
-    ref.current?.click();
-  }
-
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    processFiles(files);
-  }
-
-  function handleFileDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-
-    processFiles(files);
   }
 
   // 下载 SVG 文件
@@ -284,56 +216,10 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
         </Dialog.Title>
 
         <Dialog.Description>
-          {!state.showConfig && !state.success && !state.loading && (
-            <div
-              className={classnames(
-                styles.pngVectorizer,
-                state.loading ? styles['pngVectorizer--disabled'] : undefined
-              )}
-              onClick={handleClick}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-            >
-              <input
-                ref={ref}
-                type="file"
-                accept=".jpg,.jpeg,.bmp,.png,.webp"
-                disabled={state.loading}
-                style={{ display: 'none' }}
-                onChange={handleFileUpload}
-              />
-              <div style={{ marginBottom: 24, fontSize: 24 }}>
-                {state.loading ? (
-                  <AiOutlineLoading className="loading" />
-                ) : (
-                  '🖼️'
-                )}
-              </div>
-
-              <Flex direction="column">
-                <p>点击或拖拽图片文件到此处上传</p>
-                <span>支持格式：JPG、JPEG、BMP、PNG、WebP</span>
-                <span>一次上传一个图片文件</span>
-              </Flex>
-            </div>
-          )}
-
           {state.showConfig && (
             <Card style={{ marginTop: 16, marginBottom: 16, padding: 16 }}>
               <Flex justify="between" style={{ marginBottom: 16 }}>
                 <Text size="5">配置参数</Text>
-                {!imageUrl && (
-                  <Button
-                    size="1"
-                    color="gray"
-                    variant="soft"
-                    onClick={() =>
-                      setState({ showConfig: false, fileName: '' })
-                    }
-                  >
-                    重新选择图片
-                  </Button>
-                )}
               </Flex>
 
               <ScrollArea style={{ maxHeight: '50vh' }}>
@@ -832,7 +718,7 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
                     </button>
                     <button
                       onClick={() => {
-                        copy(state.processedFile.svgContent);
+                        copy(state.processedFile!.svgContent);
                         notify('SVG内容已复制到剪贴板');
                       }}
                       style={{
@@ -849,8 +735,8 @@ const ImageVectorizer: React.FC<IProps> = (props) => {
                     <button
                       onClick={() =>
                         downloadSvg(
-                          state.processedFile.svgContent,
-                          state.processedFile.name
+                          state.processedFile!.svgContent,
+                          state.processedFile!.name
                         )
                       }
                       style={{

@@ -2,12 +2,11 @@ import React, { Suspense } from 'react';
 import type { AppEntity } from '@/entities/app';
 
 // 重量级组件 lazy load，减少主包体积
-// ImageVectorizer 带 vtracer WASM，HarmonyIcon* 带 JSZip
+// HarmonyIcon* 带 JSZip
 const AppDetail = React.lazy(() => import('@/components/AppDetail'));
 const TypeManage = React.lazy(() => import('@/components/TypeManage'));
 const HarmonyIconSingle = React.lazy(() => import('@/components/HarmonyIconSingle'));
 const HarmonyIconFolder = React.lazy(() => import('@/components/HarmonyIconFolder'));
-const ImageVectorizer = React.lazy(() => import('@/components/ImageVectorizer'));
 const HuaweiIconChecker = React.lazy(() => import('@/components/HuaweiIconChecker'));
 const ImportJson = React.lazy(() => import('@/components/ImportJson'));
 const AndroidToHarmony = React.lazy(() => import('@/components/AndroidToHarmony'));
@@ -31,9 +30,6 @@ type ToolDialogsProps = {
   // HarmonyIconFolder
   harmonyIconFolderOpen: boolean;
   onCloseHarmonyIconFolder: () => void;
-  // ImageVectorizer
-  pngVectorizerOpen: boolean;
-  onClosePngVectorizer: () => void;
   // HuaweiIconChecker
   huaweiIconCheckerOpen: boolean;
   onCloseHuaweiIconChecker: () => void;
@@ -60,8 +56,6 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
   onCloseHarmonyIconSingle,
   harmonyIconFolderOpen,
   onCloseHarmonyIconFolder,
-  pngVectorizerOpen,
-  onClosePngVectorizer,
   huaweiIconCheckerOpen,
   onCloseHuaweiIconChecker,
   importJsonOpen,
@@ -97,10 +91,6 @@ const ToolDialogs: React.FC<ToolDialogsProps> = ({
 
       {harmonyIconFolderOpen && (
         <HarmonyIconFolder open={harmonyIconFolderOpen} onClose={onCloseHarmonyIconFolder} />
-      )}
-
-      {pngVectorizerOpen && (
-        <ImageVectorizer open={pngVectorizerOpen} onClose={onClosePngVectorizer} />
       )}
 
       {huaweiIconCheckerOpen && (

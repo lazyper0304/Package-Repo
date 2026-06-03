@@ -1,0 +1,40 @@
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  border: 2px dashed var(--text-muted);
+  border-radius: var(--radius-md);
+  min-height: 320px;
+  transition: all var(--transition);
+  cursor: pointer;
+  background: rgba(241, 245, 249, 0.5);
+}
+
+.uploadArea:hover {
+  border-color: var(--accent);
+  background: rgba(6, 182, 212, 0.04);
+}
+
+.dragOver {
+  border-color: var(--accent);
+  background: rgba(6, 182, 212, 0.08);
+  transform: scale(1.01);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  transition: transform var(--transition);
+}
+
+.uploadArea:hover .icon {
+  transform: scale(1.05);
+  color: var(--accent);
+}

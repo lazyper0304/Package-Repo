@@ -64,14 +64,12 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
   // 稳定的弹窗打开/关闭回调，避免内联箭头函数导致子组件重渲染
   const openHarmonyIconSingle = useCallback(() => setState({ harmonyIconSingleOpen: true }), [setState]);
   const openHarmonyIconFolder = useCallback(() => setState({ harmonyIconFolderOpen: true }), [setState]);
-  const openPngVectorizer = useCallback(() => setState({ pngVectorizerOpen: true }), [setState]);
   const openHuaweiIconChecker = useCallback(() => setState({ huaweiIconCheckerOpen: true }), [setState]);
   const openType = useCallback(() => setState({ typeOpen: true }), [setState]);
   const openImportJson = useCallback(() => setState({ importJsonOpen: true }), [setState]);
   const closeType = useCallback(() => setState({ typeOpen: false }), [setState]);
   const closeHarmonyIconSingle = useCallback(() => setState({ harmonyIconSingleOpen: false }), [setState]);
   const closeHarmonyIconFolder = useCallback(() => setState({ harmonyIconFolderOpen: false }), [setState]);
-  const closePngVectorizer = useCallback(() => setState({ pngVectorizerOpen: false }), [setState]);
   const closeHuaweiIconChecker = useCallback(() => setState({ huaweiIconCheckerOpen: false }), [setState]);
   const closeImportJson = useCallback(() => setState({ importJsonOpen: false }), [setState]);
 
@@ -82,7 +80,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
       setThemeMode={setThemeMode}
       onOpenHarmonyIconSingle={openHarmonyIconSingle}
       onOpenHarmonyIconFolder={openHarmonyIconFolder}
-      onOpenPngVectorizer={openPngVectorizer}
       onOpenHuaweiIconChecker={openHuaweiIconChecker}
       onOpenType={openType}
       onOpenAndroidToHarmony={handleOpenAndroidToHarmony}
@@ -158,8 +155,6 @@ const Home: React.FC<IProps> = ({ isAdmin = false, themeMode, setThemeMode }) =>
         onCloseHarmonyIconSingle={closeHarmonyIconSingle}
         harmonyIconFolderOpen={state.harmonyIconFolderOpen}
         onCloseHarmonyIconFolder={closeHarmonyIconFolder}
-        pngVectorizerOpen={state.pngVectorizerOpen}
-        onClosePngVectorizer={closePngVectorizer}
         huaweiIconCheckerOpen={state.huaweiIconCheckerOpen}
         onCloseHuaweiIconChecker={closeHuaweiIconChecker}
         importJsonOpen={state.importJsonOpen}

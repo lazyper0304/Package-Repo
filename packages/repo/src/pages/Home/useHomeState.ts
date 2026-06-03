@@ -18,7 +18,6 @@ type IState = {
   typeOpen: boolean;
   harmonyIconSingleOpen: boolean;
   harmonyIconFolderOpen: boolean;
-  pngVectorizerOpen: boolean;
   huaweiIconCheckerOpen: boolean;
   androidToHarmonyOpen: boolean;
   edit: boolean;
@@ -63,7 +62,6 @@ export function useHomeState() {
     typeOpen: false,
     harmonyIconSingleOpen: false,
     harmonyIconFolderOpen: false,
-    pngVectorizerOpen: false,
     huaweiIconCheckerOpen: false,
     androidToHarmonyOpen: false,
     edit: false,
