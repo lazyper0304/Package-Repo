@@ -2,19 +2,18 @@
   position: relative;
   z-index: 1;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 68px;
 }
 
 .container {
-  flex: 1;
-  width: 100%;
-  max-width: 600px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 66vw;
+  max-width: 80vw;
+  max-height: 72vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
@@ -26,6 +25,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  width: 100%;
 }
 
 .scoreCard {
@@ -35,10 +35,9 @@
 .gameBoard {
   width: 100%;
   aspect-ratio: 1;
-  max-height: calc(100vh - 280px);
+  max-height: calc(72vh - 120px);
   border-radius: var(--card-radius);
   overflow: hidden;
-  box-shadow: var(--shadow-3);
 }
 
 .overlay {
@@ -57,10 +56,10 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translate(-50%, -50%) translateY(24px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, -50%) translateY(0);
   }
 }
