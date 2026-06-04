@@ -200,7 +200,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className={styles.footer}>
+          <div className={isMobile ? styles.footerMobile : styles.footer}>
             <Footer name='闲鱼水印工具' />
           </div>
         </div>
