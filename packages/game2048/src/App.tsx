@@ -175,7 +175,7 @@ function App() {
             </Text>
           </div>
         </div>
-        <div className={styles.footer}>
+        <div className={isMobile ? styles.footerMobile : styles.footer}>
           <Footer name="2048" />
         </div>
       </div>

@@ -146,7 +146,7 @@ function App() {
             </Card>
           </div>
         </div>
-        <div className={styles.footer}>
+        <div className={isMobile ? styles.footerMobile : styles.footer}>
           <Footer name="图片尺寸格式工具" />
         </div>
       </div>

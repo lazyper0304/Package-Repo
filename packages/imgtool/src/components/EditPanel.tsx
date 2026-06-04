@@ -27,7 +27,9 @@ export const EditPanel: React.FC<Props> = ({
   const [width, setWidth] = useState(originalWidth);
   const [height, setHeight] = useState(originalHeight);
   const [lockRatio, setLockRatio] = useState(true);
-  const [format, setFormat] = useState(originalFormat || 'png');
+  const [format, setFormat] = useState(
+    (originalFormat === 'jpg' ? 'jpeg' : originalFormat) || 'png'
+  );
 
   useEffect(() => {
     setWidth(originalWidth);
@@ -36,7 +38,7 @@ export const EditPanel: React.FC<Props> = ({
 
   useEffect(() => {
     if (originalFormat) {
-      setFormat(originalFormat);
+      setFormat(originalFormat === 'jpg' ? 'jpeg' : originalFormat);
     }
   }, [originalFormat]);
 

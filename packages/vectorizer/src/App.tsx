@@ -173,7 +173,7 @@ function App() {
             </Card>
           </div>
         </div>
-        <div className={styles.footer}>
+        <div className={isMobile ? styles.footerMobile : styles.footer}>
           <Footer name="图片矢量化" />
         </div>
       </div>

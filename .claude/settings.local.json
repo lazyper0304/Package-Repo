@@ -21,7 +21,9 @@
       "WebFetch(domain:test.ybxylazycats.dpdns.org)",
       "Bash(xargs grep -l \"visit/log\")",
       "WebFetch(domain:www.tooladd.com)",
-      "Bash(xargs grep -ln \"visit/log\")"
+      "Bash(xargs grep -ln \"visit/log\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

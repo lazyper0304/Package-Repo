@@ -5,9 +5,8 @@
 }
 
 .appWrapperMobile {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .container {
@@ -27,17 +26,21 @@
 
 .containerMobile {
   width: 100%;
-  padding: 68px 16px 16px;
+  padding: 80px 16px 16px;
   display: flex;
   flex-direction: column;
-  animation: fadeInUpMobile 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-  opacity: 0;
+  flex: 1;
 }
 
 .footer {
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 100%;
+}
+
+.footerMobile {
+  margin-top: auto;
   width: 100%;
 }
 
@@ -112,17 +115,6 @@
   to {
     opacity: 1;
     transform: translate(-50%, -50%) translateY(0);
-  }
-}
-
-@keyframes fadeInUpMobile {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
