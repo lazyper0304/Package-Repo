@@ -80,6 +80,9 @@ cd packages/rust && wasm-pack build --target web
     - 移动端：`min-height: 100vh`，`padding-top: 68px`，从顶部开始
     - 使用 `isMobile ? styles.appWrapperMobile : styles.appWrapper` 条件渲染
     - 移动端动画使用 `translateY` 而非 `translate(-50%, -50%)`
+    - 内容容器需要 `overflow-y: auto` 支持滚动
+    - Tab 等横向内容需要 `overflow-x: auto` 支持水平滚动
+    - 主内容区需要 `padding-top: 80px` 避免被 header 遮挡
 11. **上传卡片样式统一**：
     - 虚线边框 `border: 2px dashed var(--text-muted)`
     - 圆角 `border-radius: var(--radius-md)`
