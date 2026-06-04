@@ -135,6 +135,21 @@ h1 {
   min-height: 0;
 }
 
+@media (max-width: 768px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    flex: none;
+  }
+
+  .glass-card {
+    padding: 1.25rem;
+  }
+
+  .glass-card:hover {
+    transform: none;
+  }
+}
+
 .main-grid > .glass-card:first-child {
   position: sticky;
   top: 2rem;
