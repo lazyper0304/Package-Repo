@@ -2,26 +2,62 @@
   position: relative;
   z-index: 1;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 60px;
+}
+
+.appWrapperMobile {
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .container {
-  flex: 1;
-  width: 100%;
-  max-width: 1100px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 66vw;
+  max-width: 80vw;
+  max-height: 72vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   opacity: 0;
-  padding: 0 24px;
+  padding: 16px;
+}
+
+.containerMobile {
+  width: 100%;
+  padding: 80px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  animation: fadeInUpMobile 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.footerMobile {
+  margin-top: auto;
+  width: 100%;
 }
 
 @keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
+@keyframes fadeInUpMobile {
   from {
     opacity: 0;
     transform: translateY(24px);
@@ -40,10 +76,18 @@
 }
 
 .tierBoard {
+  width: 100%;
   margin-bottom: 24px;
 }
 
 .poolSection {
+  width: 100%;
   animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.2s forwards;
   opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .tierBoard {
+    margin-bottom: 16px;
+  }
 }

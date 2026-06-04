@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Theme, Button, IconButton } from '@radix-ui/themes';
 import { MdBrightness2, MdBrightnessAuto, MdBrightnessHigh, MdSettings, MdRefresh, MdDownload } from 'react-icons/md';
 import { useLocalStorageState } from 'ahooks';
+import { useMobile } from './hooks/useMobile';
 import { GradientBackground } from './components/GradientBackground';
 import { Footer } from './components/Footer';
 import { TierBoard } from './components/TierBoard';
@@ -12,6 +13,7 @@ import { useImageExport } from './hooks/useImageExport';
 import styles from './App.module.less';
 
 function AppContent() {
+  const isMobile = useMobile();
   const { state, dispatch } = useTierList();
   const { ref: exportRef, exportImage } = useImageExport();
   const [configOpen, setConfigOpen] = useState(false);
@@ -91,8 +93,8 @@ function AppContent() {
             )}
           </IconButton>
         </header>
-        <div className={styles.appWrapper}>
-          <div className={styles.container}>
+        <div className={isMobile ? styles.appWrapperMobile : styles.appWrapper}>
+          <div className={isMobile ? styles.containerMobile : styles.container}>
             <div className={styles.toolbar}>
               <Button variant="soft" onClick={() => setConfigOpen(true)}><MdSettings /> 配置</Button>
               <Button variant="soft" color="red" onClick={() => dispatch({ type: 'RESET_ALL' })}><MdRefresh /> 重置</Button>
@@ -107,7 +109,9 @@ function AppContent() {
               <ItemPool />
             </div>
           </div>
-          <Footer name="从夯到拉" />
+          <div className={isMobile ? styles.footerMobile : styles.footer}>
+            <Footer name="从夯到拉" />
+          </div>
         </div>
 
         <ConfigDialog open={configOpen} onClose={() => setConfigOpen(false)} />

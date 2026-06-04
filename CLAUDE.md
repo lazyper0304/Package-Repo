@@ -77,10 +77,10 @@ cd packages/rust && wasm-pack build --target web
 10. **移动端布局**：
     - 使用 `useMobile` hook（断点 768px）
     - 桌面端：绝对定位居中 `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%)`
-    - 移动端：`min-height: 100vh`，`padding-top: 68px`，从顶部开始
-    - 使用 `isMobile ? styles.appWrapperMobile : styles.appWrapper` 条件渲染
-    - 移动端动画使用 `translateY` 而非 `translate(-50%, -50%)`
-    - 内容容器需要 `overflow-y: auto` 支持滚动
+    - 移动端容器：`height: 100vh; overflow-y: auto`（参考 site 项目）
+    - 移动端内容区：`flex: 1` 让内容撑开
+    - 移动端 footer：使用 `margin-top: auto` 而非绝对定位
+    - 使用 `isMobile ? styles.xxxMobile : styles.xxx` 条件渲染
     - Tab 等横向内容需要 `overflow-x: auto` 支持水平滚动
     - 主内容区需要 `padding-top: 80px` 避免被 header 遮挡
 11. **上传卡片样式统一**：
