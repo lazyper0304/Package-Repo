@@ -58,6 +58,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3008/game2048/" : "/game2048/",
     tags: ["休闲娱乐"],
   },
+  {
+    id: "sudoku",
+    name: "数独",
+    description: "经典数独游戏，支持多种难度和提示功能",
+    icon: `${import.meta.env.BASE_URL}sudoku.png`,
+    externalUrl: isDev ? "http://localhost:3009/sudoku/" : "/sudoku/",
+    tags: ["休闲娱乐"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];

@@ -1,0 +1,162 @@
+.appWrapper {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+}
+
+.appWrapperMobile {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 72vw;
+  max-width: 900px;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+  padding: 16px;
+}
+
+.containerMobile {
+  width: 100%;
+  padding: 80px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.footerMobile {
+  margin-top: auto;
+  width: 100%;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.mainGridMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.boardCard {
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.controlCard {
+  border-radius: var(--card-radius);
+  padding: 16px;
+}
+
+.padCard {
+  border-radius: var(--card-radius);
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.winContent {
+  text-align: center;
+  padding: 40px;
+  border-radius: var(--card-radius);
+  background: var(--color-panel-solid);
+  box-shadow: var(--shadow-4);
+}
+
+.winIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.winTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  margin-bottom: 8px;
+}
+
+.winStats {
+  font-size: 16px;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 24px;
+}
+
+.winButton {
+  padding: 12px 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent, #06b6d4);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}
