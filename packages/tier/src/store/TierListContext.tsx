@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, type ReactNode } from 'react';
-import type { TierListState, TierListAction, TierRow } from '../types';
+import type { TierListState, TierListAction, TierRow, TierItem } from '../types';
 import { DEFAULT_TIERS } from '../constants';
 
 function createDefaultState(): TierListState {
@@ -100,6 +100,19 @@ function reducer(state: TierListState, action: TierListAction): TierListState {
           r.id === action.rowId ? { ...r, ...action.changes } : r
         ),
       };
+
+    case 'UPDATE_ITEM': {
+      const updateItem = (item: TierItem) =>
+        item.id === action.itemId ? { ...item, ...action.changes } : item;
+      return {
+        ...state,
+        rows: state.rows.map((r) => ({
+          ...r,
+          items: r.items.map(updateItem),
+        })),
+        poolItems: state.poolItems.map(updateItem),
+      };
+    }
 
     case 'ADD_ROW':
       return { ...state, rows: [...state.rows, action.row] };

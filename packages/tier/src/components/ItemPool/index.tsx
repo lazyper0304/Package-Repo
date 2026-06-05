@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Card } from '@radix-ui/themes';
 import { TierItem, draggedItem } from '../TierItem';
 import { TextCardInput } from '../TextCardInput';
 import { ImageImporter } from '../ImageImporter';
@@ -34,7 +35,7 @@ export const ItemPool: React.FC = () => {
   };
 
   return (
-    <div className={styles.pool}>
+    <Card className={styles.pool}>
       <div className={styles.poolHeader}>
         <span className={styles.poolTitle}>素材库</span>
         <TextCardInput />
@@ -54,6 +55,6 @@ export const ItemPool: React.FC = () => {
           <span className={styles.emptyHint}>添加文字或图片素材，然后拖拽到上方等级行</span>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

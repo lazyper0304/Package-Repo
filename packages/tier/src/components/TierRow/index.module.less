@@ -2,9 +2,15 @@
   display: flex;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  background: var(--glass-bg);
+  background: rgba(241, 245, 249, 0.5);
   backdrop-filter: blur(8px);
   min-height: 96px;
+  transition: box-shadow var(--transition), background var(--transition);
+}
+
+.row:hover {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+  background: rgba(241, 245, 249, 0.6);
 }
 
 .row:last-child {
@@ -42,11 +48,6 @@
 .itemsDropOver {
   background: rgba(6, 182, 212, 0.08);
   outline: none;
-}
-
-.emptyHint {
-  font-size: 13px;
-  user-select: none;
 }
 
 [data-export-exclude] {

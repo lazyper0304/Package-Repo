@@ -2,6 +2,8 @@ export interface TierItem {
   id: string;
   type: 'text' | 'image';
   content: string;
+  textColor?: string;
+  backgroundColor?: string;
 }
 
 export interface TierRow {
@@ -24,6 +26,7 @@ export type TierListAction =
   | { type: 'REORDER_IN_ROW'; rowId: string; oldIndex: number; newIndex: number }
   | { type: 'REORDER_IN_POOL'; oldIndex: number; newIndex: number }
   | { type: 'UPDATE_ROW'; rowId: string; changes: Partial<Pick<TierRow, 'label' | 'color'>> }
+  | { type: 'UPDATE_ITEM'; itemId: string; changes: Partial<Pick<TierItem, 'textColor' | 'backgroundColor'>> }
   | { type: 'ADD_ROW'; row: TierRow }
   | { type: 'REMOVE_ROW'; rowId: string }
   | { type: 'RESET_ALL' }

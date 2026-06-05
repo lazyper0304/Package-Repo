@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { MdClose } from 'react-icons/md';
+import { MdClose, MdSettings } from 'react-icons/md';
 import type { TierItem as TierItemType } from '../../types';
 import { useTierList } from '../../store/TierListContext';
+import { ItemConfigDialog } from '../ItemConfigDialog';
 import styles from './index.module.less';
 
 interface Props {
@@ -15,6 +16,7 @@ let draggedItem: { item: TierItemType; sourceContainer: string } | null = null;
 export const TierItem: React.FC<Props> = ({ item, containerId }) => {
   const { dispatch } = useTierList();
   const [isDragging, setIsDragging] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {
     draggedItem = { item, sourceContainer: containerId };
@@ -43,26 +45,91 @@ export const TierItem: React.FC<Props> = ({ item, containerId }) => {
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setConfigOpen(true);
+  };
+
+  const handleSave = (changes: { textColor?: string; backgroundColor?: string }) => {
+    dispatch({ type: 'UPDATE_ITEM', itemId: item.id, changes });
+  };
+
+  const cardStyle: React.CSSProperties = {
+    ...(item.textColor && { color: item.textColor }),
+    ...(item.backgroundColor && { background: item.backgroundColor }),
+  };
+
+  if (item.type === 'image') {
+    return (
+      <>
+        <div
+          className={`${styles.imageItem} ${isDragging ? styles.dragging : ''}`}
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <img src={item.content} alt="" className={styles.image} draggable={false} />
+          <div className={styles.actions}>
+            <button
+              className={styles.configBtn}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={handleClick}
+            >
+              <MdSettings size={12} />
+            </button>
+            <button
+              className={styles.removeBtn}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={handleRemove}
+            >
+              <MdClose size={12} />
+            </button>
+          </div>
+        </div>
+        <ItemConfigDialog
+          open={configOpen}
+          onClose={() => setConfigOpen(false)}
+          item={item}
+          onSave={handleSave}
+        />
+      </>
+    );
+  }
+
   return (
-    <div
-      className={`${styles.item} ${isDragging ? styles.dragging : ''}`}
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      {item.type === 'text' ? (
-        <span className={styles.text}>{item.content}</span>
-      ) : (
-        <img src={item.content} alt="" className={styles.image} draggable={false} />
-      )}
-      <button
-        className={styles.removeBtn}
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={handleRemove}
+    <>
+      <div
+        className={`${styles.item} ${isDragging ? styles.dragging : ''}`}
+        style={cardStyle}
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
-        <MdClose size={12} />
-      </button>
-    </div>
+        <span className={styles.text}>{item.content}</span>
+        <div className={styles.actions}>
+          <button
+            className={styles.configBtn}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={handleClick}
+          >
+            <MdSettings size={12} />
+          </button>
+          <button
+            className={styles.removeBtn}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={handleRemove}
+          >
+            <MdClose size={12} />
+          </button>
+        </div>
+      </div>
+      <ItemConfigDialog
+        open={configOpen}
+        onClose={() => setConfigOpen(false)}
+        item={item}
+        onSave={handleSave}
+      />
+    </>
   );
 };
 

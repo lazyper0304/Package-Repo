@@ -69,6 +69,7 @@ cd packages/rust && wasm-pack build --target web
 6. **根目录 package.json**：添加 `dev:xxx`、`build:xxx`，更新 concurrently
 7. **site/tools.ts**：添加工具配置，开发环境 URL 不带路径前缀
 8. **组件风格**：统一使用 Radix UI，不要自定义背景/卡片样式
+   - 卡片类容器使用 Radix `Card` 组件，不要手写 `background`/`border`/`border-radius`，参考 fish 项目的 `<Card className={styles.glassCard}>` 用法
 9. **Header 样式统一**：
    - 固定定位 `position: fixed`，`z-index: 999`
    - 左侧：Logo（42x42）+ 标题（fontSize: 22, fontWeight: 500）
@@ -98,3 +99,4 @@ cd packages/rust && wasm-pack build --target web
 - UI 语言为中文
 - site 的 `src/data/tools.ts` 控制工具导航，区分开发/正式环境 URL
 - 构建产物在 `dist/` 目录
+- **文字颜色**：需要跟随深浅色变化的文字不要设置颜色，Radix 会自行更换文字颜色；如果要指定颜色，必须自己判断深浅色来处理

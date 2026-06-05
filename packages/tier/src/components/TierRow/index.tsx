@@ -32,7 +32,7 @@ export const TierRow: React.FC<Props> = ({ row }) => {
 
     if (sourceContainer === row.id) return;
 
-    // MOVE_TO_ROW 内部会自动从当前位置移除 item
+    // MOVE_TO_ROW 会自动处理从源位置移除
     dispatch({ type: 'MOVE_TO_ROW', itemId: item.id, rowId: row.id });
   };
 
@@ -47,12 +47,10 @@ export const TierRow: React.FC<Props> = ({ row }) => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {row.items.length > 0 ? (
+        {row.items.length > 0 && (
           row.items.map((item) => (
             <TierItem key={item.id} item={item} containerId={row.id} />
           ))
-        ) : (
-          <span className={styles.emptyHint}>拖拽素材到此处</span>
         )}
       </div>
     </div>
