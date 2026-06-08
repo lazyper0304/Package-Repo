@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "鸿蒙版应用包名查询工具"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "鸿蒙版应用包名查询工具"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Repo 鸿蒙版"
+    }
+  ]
+}

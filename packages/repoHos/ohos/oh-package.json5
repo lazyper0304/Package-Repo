@@ -1,0 +1,18 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "repo_hos",
+  "version": "1.0.0",
+  "description": "鸿蒙版应用包名查询工具",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har"
+  },
+  "devDependencies": {
+    "@ohos/hypium": "1.0.6"
+  },
+  "overrides": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har"
+  }
+}

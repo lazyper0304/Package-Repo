@@ -1,0 +1,52 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BD5FCB57CDEC6C498234E754108438A9ED1A2AEFEB189C35A34581128E7D544736CEDACCA3823A7",
+          "profile": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p12",
+          "storePassword": "0000001B01290798BCEC98621479A9CE5DBED4044EF724AA163318815999F6BD71E1CCE95AB6D5059A1FEF"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS"
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug"
+      },
+      {
+        "name": "profile"
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}
