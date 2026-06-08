@@ -33,9 +33,12 @@ cd packages/rust && wasm-pack build --target web
 ### 包结构
 - **site** — 主入口/工具导航站（`/`）
 - **repo** — 应用包名查询工具（`/repo/`），最复杂的前端
+- **repoHos** — 鸿蒙版应用包名查询工具（Flutter），对接 `https://shenjack.top:10003` API
 - **fish** — 闲鱼水印工具（`/fish/`）
 - **tier** — 排名生成器（`/tier/`）
 - **vectorizer** — 图片矢量化（`/vectorizer/`），使用 Rust/WASM
+- **imgtool** — 图片尺寸格式工具（`/imgtool/`）
+- **game2048** — 2048 游戏（`/game2048/`）
 - **server** — Express 后端（MySQL + JWT）
 - **rust** — vtracer WASM 库，被 repo 和 vectorizer 通过 `file:../rust/pkg` 引用
 
@@ -100,3 +103,4 @@ cd packages/rust && wasm-pack build --target web
 - site 的 `src/data/tools.ts` 控制工具导航，区分开发/正式环境 URL
 - 构建产物在 `dist/` 目录
 - **文字颜色**：需要跟随深浅色变化的文字不要设置颜色，Radix 会自行更换文字颜色；如果要指定颜色，必须自己判断深浅色来处理
+- **repoHos** 是 Flutter 鸿蒙项目，使用 FVM 管理 Flutter 版本（`3.35.8-ohos-1.0.1`），开发时使用 `fvm flutter` 命令
