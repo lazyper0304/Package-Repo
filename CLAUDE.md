@@ -104,3 +104,9 @@ cd packages/rust && wasm-pack build --target web
 - 构建产物在 `dist/` 目录
 - **文字颜色**：需要跟随深浅色变化的文字不要设置颜色，Radix 会自行更换文字颜色；如果要指定颜色，必须自己判断深浅色来处理
 - **repoHos** 是 Flutter 鸿蒙项目，使用 FVM 管理 Flutter 版本（`3.35.8-ohos-1.0.1`），开发时使用 `fvm flutter` 命令
+- **repoHos 签名**：release 签名文件在 `packages/repoHos/ohos/signing/`（已 gitignore），debug 签名由 DevEco Studio 自动生成在 `~/.ohos/config/`
+- **repoHos 构建脚本**（在 `packages/repoHos/` 下）：
+  - `build_hap_debug.bat` — debug 构建（x64 模拟器）
+  - `build_hap_release.bat` — release 构建（自动切换签名，构建后恢复）
+  - `run_debug.bat` — debug 运行
+  - `run_release.bat` — release 运行

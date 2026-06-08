@@ -47,6 +47,7 @@ app.*.map.json
 /ohos/.hvigor/
 /ohos/oh_modules/
 /ohos/build/
+/ohos/signing/
 
 # FVM Version Cache
 .fvm/
