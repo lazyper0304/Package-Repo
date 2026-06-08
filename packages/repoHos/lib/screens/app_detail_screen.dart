@@ -57,58 +57,67 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
       title: _app.value?.name ?? '应用详情',
       onBack: () => Navigator.pop(context),
       builder: () => [
-        Watch((context) {
-          if (_isLoading.value) {
-            return const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
+        SliverToBoxAdapter(
+          child: Watch((context) {
+            if (_isLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.only(top: 200),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-          final app = _app.value;
-          if (app == null) {
-            return SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    const Text('应用不存在'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('返回'),
-                    ),
-                  ],
+            final app = _app.value;
+            if (app == null) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 200),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      const Text('应用不存在'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('返回'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return _buildContent(theme, app);
-        }),
+            return _buildContent(theme, app);
+          }),
+        ),
       ],
     );
   }
 
   Widget _buildContent(ThemeData theme, AppInfo app) {
-    return SliverList(
-      delegate: SliverChildListDelegate([
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 16),
+        Center(child: _buildAppIcon(theme, app)),
+        const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Center(child: _buildAppIcon(theme, app)),
-              const SizedBox(height: 16),
-              _buildAppHeader(theme, app),
-              const SizedBox(height: 16),
-              _buildInfoSection(theme, app),
-              const SizedBox(height: 16),
-              _buildMetricsSection(theme),
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _buildAppHeader(theme, app),
         ),
-      ]),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _buildInfoSection(theme, app),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _buildMetricsSection(theme),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -268,7 +277,9 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
           const SizedBox(height: 16),
           SizedBox(
             height: 200,
-            child: _buildChart(theme, metrics.records),
+            child: ClipRect(
+              child: _buildChart(theme, metrics.records),
+            ),
           ),
         ],
       ),

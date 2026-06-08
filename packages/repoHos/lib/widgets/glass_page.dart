@@ -25,6 +25,8 @@ class GlassPage extends StatelessWidget {
   final VoidCallback? onTap;
   final double edgeSize;
   final ScrollController? scrollController;
+  final Widget? bottomBar;
+  final bool extendBody;
 
   const GlassPage({
     super.key,
@@ -37,6 +39,8 @@ class GlassPage extends StatelessWidget {
     this.onTap,
     this.edgeSize = 120,
     this.scrollController,
+    this.bottomBar,
+    this.extendBody = false,
   });
 
   @override
@@ -66,11 +70,13 @@ class GlassPage extends StatelessWidget {
           style: theme.textTheme.titleLarge,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
         ),
       ),
       actions: action
           ?.map(
-            (e) => e.widget ??
+            (e) =>
+                e.widget ??
                 IconButton(
                   onPressed: e.onTap,
                   icon: Icon(e.icon, size: 20),
@@ -88,6 +94,8 @@ class GlassPage extends StatelessWidget {
       bottomEdgeFadeExtent: edgeSize,
       edgeFade: true,
       edgeStyle: GlassScrollEdgeStyle.hard,
+      bottomBar: bottomBar,
+      extendBody: extendBody,
       body: CustomScrollView(
         controller: scrollController,
         slivers: [

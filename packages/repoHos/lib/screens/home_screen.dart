@@ -14,7 +14,9 @@ import '../widgets/stat_card.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final StatefulNavigationShell navigationShell;
+
+  const HomeScreen({super.key, required this.navigationShell});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -30,17 +32,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final _currentPage = signal(1);
   final _totalCount = signal(0);
   final _hasMore = signal(true);
-  final _currentTab = signal(0); // 0: 搜索, 1: 排行, 2: 设置
 
   // 排行榜数据缓存
   late Future<List<DownloadIncrement>> _downloadRankingFuture;
   late Future<List<AppRating>> _ratingRankingFuture;
   late Future<List<AppInfo>> _recentRankingFuture;
 
+  int get _currentTab => widget.navigationShell.currentIndex;
+
   @override
   void initState() {
     super.initState();
     _loadMarketInfo();
+    _loadDefaultApps();
     _downloadRankingFuture = _api.getDownloadIncreaseRanking(limit: 50);
     _ratingRankingFuture = _api.getRatingRanking(limit: 50);
     _recentRankingFuture = _api.getRecentUpdateRanking(limit: 50);
@@ -55,6 +59,25 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadMarketInfo() async {
     final info = await _api.getMarketInfo();
     _marketInfo.value = info;
+  }
+
+  Future<void> _loadDefaultApps() async {
+    _isLoading.value = true;
+    try {
+      final result = await _api.searchApps(
+        page: 1,
+        detail: true,
+        sort: 'download_count',
+        desc: true,
+      );
+      _apps.value = result.data;
+      _totalCount.value = result.totalCount;
+      _hasMore.value = _apps.value.length < result.totalCount;
+    } catch (e) {
+      // 静默失败
+    } finally {
+      _isLoading.value = false;
+    }
   }
 
   Future<void> _searchApps(String keyword, {bool loadMore = false}) async {
@@ -101,6 +124,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _onTabSelected(int index) {
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -114,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
         colors: isDark
             ? const [Color(0xFF0A0A0A), Color(0xFF1A1A2E), Color(0xFF16213E)]
             : const [Color(0xFFF2F2F7), Color(0xFFE8E0F0), Color(0xFFD4E4F7)],
-        child: Scaffold(
+        child: GlassScaffold(
           backgroundColor: Colors.transparent,
           extendBody: true,
           body: SafeArea(
@@ -122,28 +152,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 _buildHeader(theme),
-                if (_currentTab.value != 2) _buildMarketStats(theme),
+                if (_currentTab != 2) _buildMarketStats(theme),
                 Expanded(
-                  child: Watch((context) {
-                    switch (_currentTab.value) {
-                      case 0:
-                        return _buildSearchTab(theme);
-                      case 1:
-                        return _buildRankingTab(theme);
-                      case 2:
-                        return SettingsScreen(
-                          themeType: themeScope.themeType,
-                          onThemeChanged: themeScope.onThemeChanged,
-                        );
-                      default:
-                        return const SizedBox.shrink();
-                    }
-                  }),
+                  child: _buildCurrentTab(theme, themeScope),
                 ),
               ],
             ),
           ),
-          bottomNavigationBar: Watch((context) => GlassBottomBar(
+          bottomBar: GlassBottomBar(
             tabs: [
               GlassBottomBarTab(
                 label: '搜索',
@@ -161,40 +177,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 glowColor: theme.colorScheme.tertiary,
               ),
             ],
-            selectedIndex: _currentTab.value,
-            onTabSelected: (index) => _currentTab.value = index,
+            selectedIndex: _currentTab,
+            onTabSelected: _onTabSelected,
             selectedIconColor: theme.colorScheme.primary,
             unselectedIconColor: theme.colorScheme.onSurface.withOpacity(0.6),
-          )),
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildCurrentTab(ThemeData theme, ThemeScope themeScope) {
+    switch (_currentTab) {
+      case 0:
+        return _buildSearchTab(theme);
+      case 1:
+        return _buildRankingTab(theme);
+      case 2:
+        return SettingsScreen(
+          themeType: themeScope.themeType,
+          onThemeChanged: themeScope.onThemeChanged,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
   Widget _buildHeader(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset('assets/icon.png', fit: BoxFit.cover),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Package Repo',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      child: Text(
+        'Package Repo',
+        style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -431,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
               iconUrl: item.iconUrl,
               name: item.name,
               subtitle: item.pkgName ?? '',
-              trailing: item.updatedTime ?? '',
+              trailing: _formatTime(item.updatedTime),
               trailingColor: theme.colorScheme.onSurface.withOpacity(0.5),
             );
           }).toList(),
@@ -493,10 +509,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       iconUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.apps, size: 24),
+                          _buildLetterAvatar(theme, name),
                     ),
                   )
-                : const Icon(Icons.apps, size: 24),
+                : _buildLetterAvatar(theme, name),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -535,5 +551,58 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildLetterAvatar(ThemeData theme, String name) {
+    final letter = name.isNotEmpty ? name.characters.first : '?';
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primary.withOpacity(0.7),
+            theme.colorScheme.primary,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        letter,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return '';
+    try {
+      final time = DateTime.parse(timeStr);
+      final now = DateTime.now();
+      final diff = now.difference(time);
+
+      if (diff.inDays > 365) {
+        return '${(diff.inDays / 365).floor()}年前';
+      } else if (diff.inDays > 30) {
+        return '${(diff.inDays / 30).floor()}个月前';
+      } else if (diff.inDays > 0) {
+        return '${diff.inDays}天前';
+      } else if (diff.inHours > 0) {
+        return '${diff.inHours}小时前';
+      } else if (diff.inMinutes > 0) {
+        return '${diff.inMinutes}分钟前';
+      } else {
+        return '刚刚';
+      }
+    } catch (e) {
+      return timeStr;
+    }
   }
 }
