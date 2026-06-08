@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
@@ -6,7 +7,14 @@ import 'screens/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await LiquidGlassWidgets.initialize();
+  runApp(
+    LiquidGlassWidgets.wrap(
+      child: const MyApp(),
+      respectSystemAccessibility: false,
+      adaptiveQuality: true,
+    ),
+  );
 }
 
 class ThemeScope extends InheritedWidget {

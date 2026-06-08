@@ -47,6 +47,7 @@ class GlassCard extends StatelessWidget {
   final lg.LiquidGlassSettings? settings;
   final double borderRadius;
   final Color? color;
+  final VoidCallback? onTap;
 
   const GlassCard({
     super.key,
@@ -56,11 +57,12 @@ class GlassCard extends StatelessWidget {
     this.settings,
     this.borderRadius = 16,
     this.color,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    Widget card = Container(
       margin: margin,
       decoration: color != null
           ? BoxDecoration(
@@ -76,5 +78,15 @@ class GlassCard extends StatelessWidget {
         child: child,
       ),
     );
+
+    if (onTap != null) {
+      card = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: card,
+      );
+    }
+
+    return card;
   }
 }

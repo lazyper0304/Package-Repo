@@ -3,24 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' hide GlassCard;
 
+class HeaderAppBarAction {
+  final IconData? icon;
+  final VoidCallback? onTap;
+  final Widget? widget;
+
+  const HeaderAppBarAction({this.icon, this.onTap, this.widget})
+      : assert(
+          widget != null || (icon != null && onTap != null),
+          'Either widget or icon+onTap must be provided',
+        );
+}
+
 class GlassPage extends StatelessWidget {
   final String title;
   final bool centerTitle;
-  final Widget Function(double appbarHeight) builder;
-  final List<Widget>? actions;
+  final List<Widget> Function() builder;
+  final List<HeaderAppBarAction>? action;
   final VoidCallback? onBack;
   final Color? backgroundColor;
+  final VoidCallback? onTap;
   final double edgeSize;
+  final ScrollController? scrollController;
 
   const GlassPage({
     super.key,
     required this.title,
     this.centerTitle = true,
     required this.builder,
-    this.actions,
+    this.action,
     this.onBack,
     this.backgroundColor,
+    this.onTap,
     this.edgeSize = 120,
+    this.scrollController,
   });
 
   @override
@@ -42,13 +58,26 @@ class GlassPage extends StatelessWidget {
                   onPressed: () => context.pop(),
                 )
               : null),
-      title: Text(
-        title,
-        style: theme.textTheme.titleLarge,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      title: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Text(
+          title,
+          style: theme.textTheme.titleLarge,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-      actions: actions,
+      actions: action
+          ?.map(
+            (e) => e.widget ??
+                IconButton(
+                  onPressed: e.onTap,
+                  icon: Icon(e.icon, size: 20),
+                  color: theme.textTheme.titleLarge?.color,
+                ),
+          )
+          .toList(),
     );
 
     return GlassScaffold(
@@ -59,7 +88,13 @@ class GlassPage extends StatelessWidget {
       bottomEdgeFadeExtent: edgeSize,
       edgeFade: true,
       edgeStyle: GlassScrollEdgeStyle.hard,
-      body: Builder(builder: (context) => builder(appbarHeight)),
+      body: CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: appbarHeight)),
+          ...builder(),
+        ],
+      ),
     );
   }
 }

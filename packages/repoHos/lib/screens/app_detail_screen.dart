@@ -3,7 +3,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 import '../services/api.dart';
 import '../models/app.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/glass_page_layout.dart';
+import '../widgets/glass_page.dart';
 
 class AppDetailScreen extends StatefulWidget {
   final String appId;
@@ -53,50 +53,62 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return GlassPageLayout(
+    return GlassPage(
       title: _app.value?.name ?? '应用详情',
       onBack: () => Navigator.pop(context),
-      child: Watch((context) {
-        if (_isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      builder: () => [
+        Watch((context) {
+          if (_isLoading.value) {
+            return const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-        final app = _app.value;
-        if (app == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text('应用不存在'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('返回'),
+          final app = _app.value;
+          if (app == null) {
+            return SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    const Text('应用不存在'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('返回'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }
+              ),
+            );
+          }
 
-        return _buildContent(theme, app);
-      }),
+          return _buildContent(theme, app);
+        }),
+      ],
     );
   }
 
   Widget _buildContent(ThemeData theme, AppInfo app) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Center(child: _buildAppIcon(theme, app)),
-        const SizedBox(height: 16),
-        _buildAppHeader(theme, app),
-        const SizedBox(height: 16),
-        _buildInfoSection(theme, app),
-        const SizedBox(height: 16),
-        _buildMetricsSection(theme),
-      ],
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Center(child: _buildAppIcon(theme, app)),
+              const SizedBox(height: 16),
+              _buildAppHeader(theme, app),
+              const SizedBox(height: 16),
+              _buildInfoSection(theme, app),
+              const SizedBox(height: 16),
+              _buildMetricsSection(theme),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 

@@ -361,6 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return _buildRankingItem(
               theme,
               rank: rank,
+              appId: item.appId,
               iconUrl: item.iconUrl,
               name: item.name,
               subtitle: item.pkgName ?? '',
@@ -393,6 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return _buildRankingItem(
               theme,
               rank: rank,
+              appId: item.appId,
               iconUrl: item.iconUrl,
               name: item.name,
               subtitle: item.pkgName ?? '',
@@ -425,6 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return _buildRankingItem(
               theme,
               rank: rank,
+              appId: item.appId,
               iconUrl: item.iconUrl,
               name: item.name,
               subtitle: item.pkgName ?? '',
@@ -448,6 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildRankingItem(
     ThemeData theme, {
     required int rank,
+    required String appId,
     String? iconUrl,
     required String name,
     required String subtitle,
@@ -457,6 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
+      onTap: () => context.push('/app/$appId'),
       child: Row(
         children: [
           SizedBox(
