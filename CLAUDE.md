@@ -106,7 +106,11 @@ cd packages/rust && wasm-pack build --target web
 - **repoHos** 是 Flutter 鸿蒙项目，使用 FVM 管理 Flutter 版本（`3.35.8-ohos-1.0.1`），开发时使用 `fvm flutter` 命令
 - **repoHos 签名**：release 签名文件在 `packages/repoHos/ohos/signing/`（已 gitignore），debug 签名由 DevEco Studio 自动生成在 `~/.ohos/config/`
 - **repoHos 构建脚本**（在 `packages/repoHos/` 下）：
-  - `build_hap_debug.bat` — debug 构建（x64 模拟器）
-  - `build_hap_release.bat` — release 构建（自动切换签名，构建后恢复）
-  - `run_debug.bat` — debug 运行
-  - `run_release.bat` — release 运行
+  - `build_hap_debug.bat` — HAP debug 构建（x64 模拟器）
+  - `build_hap_release.bat` — HAP release 构建（自动切换签名，构建后恢复）
+  - `run_debug.bat` — HAP debug 运行（模拟器）
+  - `run_release.bat` — HAP release 运行（模拟器）
+  - `build_apk_debug.bat` — APK debug 构建
+  - `build_apk_release.bat` — APK release 构建
+  - `run_apk_debug.bat` — Android debug 运行
+  - `run_apk_release.bat` — Android release 运行

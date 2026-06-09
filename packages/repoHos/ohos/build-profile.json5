@@ -1,4 +1,4 @@
-﻿{
+{
   "app": {
     "signingConfigs": [
       {
@@ -18,13 +18,13 @@
         "name": "release",
         "type": "HarmonyOS",
         "material": {
-          "storeFile": "./signing/repohos_release.p12",
+          "storeFile": "D:/Code/Android Key/repohos_release.p12",
           "storePassword": "hexuloving-1",
           "keyAlias": "debugKey",
           "keyPassword": "hexuloving-1",
           "signAlg": "SHA256withECDSA",
-          "profile": "./signing/repoHos Release.p7b",
-          "certpath": "./signing/repohos_release.cer"
+          "profile": "D:/Code/Android Key/repoHos Release.p7b",
+          "certpath": "D:/Code/Android Key/repohos_release.cer"
         }
       }
     ],

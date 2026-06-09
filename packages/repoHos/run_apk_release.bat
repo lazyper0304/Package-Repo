@@ -7,7 +7,6 @@ cd /d "%REPO_DIR%"
 
 set PATH=%JAVA_HOME%\bin;%PATH%;E:\flutter_pub_cache\bin
 
-echo [repoHos] Building APK (release)...
-fvm.bat flutter build apk --release
-echo [repoHos] Build complete!
+echo [repoHos] Running on Android (release)...
+fvm.bat flutter run --release
 pause
