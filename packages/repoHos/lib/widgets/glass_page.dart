@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' hide GlassCard;
+import 'package:animated_gradient/animated_gradient.dart';
 
 class HeaderAppBarAction {
   final IconData? icon;
@@ -46,6 +47,7 @@ class GlassPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final paddingTop = MediaQuery.of(context).viewPadding.top;
     final double appbarHeight = max(91, kToolbarHeight + paddingTop + 16);
 
@@ -86,22 +88,28 @@ class GlassPage extends StatelessWidget {
           .toList(),
     );
 
-    return GlassScaffold(
-      appBar: appBar,
-      appBarHeight: 44.0,
-      backgroundColor: backgroundColor,
-      topEdgeFadeExtent: edgeSize,
-      bottomEdgeFadeExtent: edgeSize,
-      edgeFade: true,
-      edgeStyle: GlassScrollEdgeStyle.hard,
-      bottomBar: bottomBar,
-      extendBody: extendBody,
-      body: CustomScrollView(
-        controller: scrollController,
-        slivers: [
-          SliverToBoxAdapter(child: SizedBox(height: appbarHeight)),
-          ...builder(),
-        ],
+    return AnimatedGradient(
+      key: ValueKey(isDark),
+      colors: isDark
+          ? const [Color(0xFF0A0A0A), Color(0xFF1A1A2E), Color(0xFF16213E)]
+          : const [Color(0xFFF2F2F7), Color(0xFFE8E0F0), Color(0xFFD4E4F7)],
+      child: GlassScaffold(
+        appBar: appBar,
+        appBarHeight: 44.0,
+        backgroundColor: Colors.transparent,
+        topEdgeFadeExtent: edgeSize,
+        bottomEdgeFadeExtent: edgeSize,
+        edgeFade: true,
+        edgeStyle: GlassScrollEdgeStyle.hard,
+        bottomBar: bottomBar,
+        extendBody: extendBody,
+        body: CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            SliverToBoxAdapter(child: SizedBox(height: appbarHeight)),
+            ...builder(),
+          ],
+        ),
       ),
     );
   }

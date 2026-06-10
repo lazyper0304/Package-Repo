@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../services/api.dart';
 import '../models/ranking.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/glass_page.dart';
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -31,31 +32,14 @@ class _RankingScreenState extends State<RankingScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F172A),
-                    const Color(0xFF1E293B),
-                    const Color(0xFF0F172A),
-                  ]
-                : [
-                    const Color(0xFFF0F9FF),
-                    const Color(0xFFE0F2FE),
-                    const Color(0xFFF0F9FF),
-                  ],
-          ),
-        ),
-        child: SafeArea(
+    return GlassPage(
+      title: '排行榜',
+      onBack: () => context.pop(),
+      builder: () => [
+        SliverToBoxAdapter(
           child: Column(
             children: [
-              _buildHeader(theme),
               TabBar(
                 controller: _tabController,
                 tabs: const [
@@ -64,41 +48,21 @@ class _RankingScreenState extends State<RankingScreen>
                   Tab(text: '最近更新'),
                 ],
               ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildDownloadRanking(theme),
-                    _buildRatingRanking(theme),
-                    _buildRecentRanking(theme),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
+        SliverFillRemaining(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildDownloadRanking(theme),
+              _buildRatingRanking(theme),
+              _buildRecentRanking(theme),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            '排行榜',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -203,7 +167,7 @@ class _RankingScreenState extends State<RankingScreen>
 
   Widget _buildRankingList(ThemeData theme, List<Widget> items) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
       itemCount: items.length,
       itemBuilder: (context, index) => items[index],
     );
@@ -219,83 +183,81 @@ class _RankingScreenState extends State<RankingScreen>
     required Color trailingColor,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return GlassCard(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
       onTap: onTap,
-      child: GlassCard(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 32,
-              child: Text(
-                '$rank',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: rank <= 3
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withOpacity(0.5),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: theme.colorScheme.surfaceVariant,
-              ),
-              child: iconUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        iconUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.apps, size: 24),
-                      ),
-                    )
-                  : const Icon(Icons.apps, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              trailing,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 32,
+            child: Text(
+              '$rank',
               style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: trailingColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: rank <= 3
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.5),
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: theme.colorScheme.surfaceVariant,
+            ),
+            child: iconUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      iconUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.apps, size: 24),
+                    ),
+                  )
+                : const Icon(Icons.apps, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            trailing,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: trailingColor,
+            ),
+          ),
+        ],
       ),
     );
   }

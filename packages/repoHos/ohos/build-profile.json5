@@ -5,26 +5,26 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\Vince\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.cer",
+          "certpath": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BD8BF9D0CAE29B4C60CC609D81965EE528613EB05D1B358821BDA4E7ED28C57B846AB5F6FE6A803",
-          "profile": "C:\\Users\\Vince\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p7b",
+          "keyPassword": "0000001A9F252357BB5DCAED67D294E8C4FD56BCE032F0A8A18DD72DDB82D790F76B156969F0C6E74061",
+          "profile": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\Vince\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p12",
-          "storePassword": "0000001B86DABE5069018E32CDB7B02C69310B9970C133B2DCB77875993EF968F2E3FFBD3ADF91F3039612"
+          "storeFile": "C:\\Users\\hexu\\.ohos\\config\\default_ohos_lkse1mKe8MZf6gU69m_SodnAST5_6VZS0Tc6jxe2UyE=.p12",
+          "storePassword": "0000001A14EDB0E3304D0BB3B9D1A52837907ACA54C970E1AE2C3D5BD305F2F15465C1BCFE748016B481"
         }
       },
       {
         "name": "release",
         "type": "HarmonyOS",
         "material": {
-          "storeFile": "D:/Code/Android Key/repohos_release.p12",
+          "storeFile": "signing/repohos_release.p12",
           "storePassword": "hexuloving-1",
           "keyAlias": "debugKey",
           "keyPassword": "hexuloving-1",
           "signAlg": "SHA256withECDSA",
-          "profile": "D:/Code/Android Key/repoHos Release.p7b",
-          "certpath": "D:/Code/Android Key/repohos_release.cer"
+          "profile": "signing/repoHos Release.p7b",
+          "certpath": "signing/repohos_release.cer"
         }
       }
     ],

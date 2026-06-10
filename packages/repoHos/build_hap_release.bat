@@ -9,7 +9,7 @@ set PATH=%JAVA_HOME%\bin;%PATH%;E:\flutter_pub_cache\bin;C:\Program Files\Huawei
 set DEVECO_SDK_HOME=C:\Program Files\Huawei\DevEco Studio\sdk
 
 :: 确保签名文件存在
-set SIGN_DIR=D:\Code\Android Key
+set SIGN_DIR=%REPO_DIR%\ohos\signing
 if not exist "%SIGN_DIR%\repohos_release.p12" (
     echo [repoHos] 签名文件不存在，请将签名文件放到 %SIGN_DIR%
     pause

@@ -12,5 +12,5 @@ set DEVECO_SDK_HOME=C:\Program Files\Huawei\DevEco Studio\sdk
 powershell -Command "$f='ohos\build-profile.json5'; $c=[System.IO.File]::ReadAllText($f); $c=$c -replace '\"signingConfig\":\s*\"release\"', '\"signingConfig\": \"default\"'; [System.IO.File]::WriteAllText($f, $c, [System.Text.UTF8Encoding]::new($false))"
 
 echo [repoHos] Running on emulator (debug)...
-fvm.bat flutter run -d 127.0.0.1:5555
+fvm.bat flutter run -d 127.0.0.1:5555 --target-platform ohos-x64
 pause
