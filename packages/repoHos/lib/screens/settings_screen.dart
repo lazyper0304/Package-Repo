@@ -27,33 +27,35 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ListView(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      children: [
-        _buildSectionHeader(theme, '外观'),
-        const SizedBox(height: 12),
-        Watch((context) => Row(
-          children: ThemeType.values.map((type) {
-            final isActive = themeType.value == type;
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: type != ThemeType.values.last ? 8 : 0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(theme, '外观'),
+          const SizedBox(height: 12),
+          Watch((context) => Row(
+            children: ThemeType.values.map((type) {
+              final isActive = themeType.value == type;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: type != ThemeType.values.last ? 8 : 0,
+                  ),
+                  child: ThemeCard(
+                    label: type.label,
+                    icon: type.icon,
+                    active: isActive,
+                    onTap: () => onThemeChanged(type),
+                  ),
                 ),
-                child: _ThemeCard(
-                  label: type.label,
-                  icon: type.icon,
-                  active: isActive,
-                  onTap: () => onThemeChanged(type),
-                ),
-              ),
-            );
-          }).toList(),
-        )),
-        const SizedBox(height: 24),
-        _buildSectionHeader(theme, '关于'),
-        const SizedBox(height: 12),
-        GlassCard(
+              );
+            }).toList(),
+          )),
+          const SizedBox(height: 24),
+          _buildSectionHeader(theme, '关于'),
+          const SizedBox(height: 12),
+          GlassCard(
           padding: EdgeInsets.zero,
           child: Column(
             children: [
@@ -75,12 +77,13 @@ class SettingsScreen extends StatelessWidget {
                 theme,
                 icon: Icons.dns_outlined,
                 title: '数据来源',
-                subtitle: 'shenjack.top:10003',
+                subtitle: 'shenjack',
               ),
             ],
           ),
         ),
       ],
+    ),
     );
   }
 
@@ -105,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return ListTile(
-      leading: _SettingIcon(icon: icon),
+      leading: SettingIcon(icon: icon),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle) : null,
       onTap: onTap,
@@ -120,11 +123,11 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _SettingIcon extends StatelessWidget {
+class SettingIcon extends StatelessWidget {
   final IconData icon;
   final double size;
 
-  const _SettingIcon({
+  const SettingIcon({
     required this.icon,
     this.size = 32,
   });
@@ -149,13 +152,13 @@ class _SettingIcon extends StatelessWidget {
   }
 }
 
-class _ThemeCard extends StatelessWidget {
+class ThemeCard extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool active;
   final VoidCallback onTap;
 
-  const _ThemeCard({
+  const ThemeCard({
     required this.label,
     required this.icon,
     required this.active,

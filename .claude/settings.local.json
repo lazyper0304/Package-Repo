@@ -99,7 +99,31 @@
       "Bash(python3 -c ' *)",
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{let j=JSON.parse\\(d\\);let i=j.data[0];['app_id','name','pkg_name','icon_url','updated_at','developer_name'].forEach\\(k=>console.log\\(k+':',i[k]\\)\\)}\\)\")",
       "Bash(curl -s \"https://shenjack.top:10003/api/v0/apps/search?limit=3&detail=true\")",
-      "Bash(curl -s \"https://shenjack.top:10003/api/v0/apps/list/1?page_size=3&detail=true\")"
+      "Bash(curl -s \"https://shenjack.top:10003/api/v0/apps/list/1?page_size=3&detail=true\")",
+      "Read(//e/code/**)",
+      "Bash(mv run_android_debug.bat run_apk_debug.bat)",
+      "Bash(mv run_android_release.bat run_apk_release.bat)",
+      "Bash(cmd //c run_debug.bat)",
+      "Bash(cmd *)",
+      "Bash(\"C:/Program Files/Huawei/DevEco Studio/tools/ohpm/bin/ohpm.cmd\" install)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/Huawei/DevEco Studio/tools/ohpm/bin\")",
+      "Bash(ohpm install *)",
+      "Bash(cmd //c \"set JAVA_HOME=C:\\\\Program Files\\\\Java\\\\jdk-17 && set PATH=%JAVA_HOME%\\\\bin;%PATH% && hvigorw.bat assembleHap -p product=default -p buildMode=debug --stacktrace 2>&1\")",
+      "Read(//tmp/**)",
+      "Bash(flutter analyze *)",
+      "WebSearch",
+      "Bash(dart pub *)",
+      "Bash(dart doc *)",
+      "Bash(dart analyze *)",
+      "Bash(dart run *)",
+      "Bash(xargs grep -l \"ThemeMode\\\\|themeMode\\\\|hive\\\\|Hive\")",
+      "Bash(flutter pub *)",
+      "Bash(flutter run *)",
+      "Bash(xargs grep -l \"getFilesDir\\\\|storage\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/android/app/src/main/res/drawable-xxxhdpi/ic_launcher_foreground.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/background.png\" \"E:/code/Package-Repo/packages/repoHos/android/app/src/main/res/drawable-xxxhdpi/ic_launcher_background.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/ohos/entry/src/main/resources/base/media/icon.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/assets/icon.png\")"
     ]
   }
 }

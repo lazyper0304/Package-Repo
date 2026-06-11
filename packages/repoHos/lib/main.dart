@@ -1,12 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 import 'screens/settings_screen.dart';
+import 'services/theme_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ThemeStorage.init();
   await LiquidGlassWidgets.initialize();
   runApp(
     LiquidGlassWidgets.wrap(
@@ -48,6 +51,26 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _themeType = signal(ThemeType.system);
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedTheme();
+  }
+
+  void _loadSavedTheme() {
+    final saved = ThemeStorage.getThemeMode();
+    switch (saved) {
+      case 'light':
+        _themeType.value = ThemeType.light;
+        break;
+      case 'dark':
+        _themeType.value = ThemeType.dark;
+        break;
+      default:
+        _themeType.value = ThemeType.system;
+    }
+  }
+
   ThemeMode get _themeMode {
     switch (_themeType.value) {
       case ThemeType.light:
@@ -63,6 +86,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _themeType.value = type;
     });
+    ThemeStorage.setThemeMode(type.name);
   }
 
   @override
@@ -70,13 +94,16 @@ class _MyAppState extends State<MyApp> {
     return ThemeScope(
       themeType: _themeType,
       onThemeChanged: _onThemeChanged,
-      child: MaterialApp.router(
-        title: 'Package Repo',
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        themeMode: _themeMode,
-        routerConfig: router,
-      ),
+      child: ScrollConfiguration(
+          behavior: const CupertinoScrollBehavior(),
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Package Repo',
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: _themeMode,
+            routerConfig: router,
+          )),
     );
   }
 }
