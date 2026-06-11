@@ -528,7 +528,28 @@ export function PinballGame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // mouse / touch / keyboard control
+  const resumeGame = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    stateRef.current = 'running';
+    setGameState('running');
+    gameLoop(canvas, ctx);
+  }, [gameLoop]);
+
+  // 窗口最小化 / 切标签页时自动暂停
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden && stateRef.current === 'running') {
+        cancelAnimationFrame(rafRef.current);
+        stateRef.current = 'paused';
+        setGameState('paused');
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -638,7 +659,45 @@ export function PinballGame({
           </div>
         </div>
       )}
-      {gameState !== 'running' && gameState !== 'levelUp' && gameState !== 'lifeLost' && (
+      {gameState === 'paused' && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: 'var(--radius-3)',
+          }}
+        >
+          <span style={{ fontSize: 22, fontWeight: 600, color: '#f8fafc' }}>
+            已暂停
+          </span>
+          <span style={{ fontSize: 14, color: '#94a3b8' }}>
+            第 {levelRef.current} 关 · 得分 {scoreRef.current}
+          </span>
+          <button
+            onClick={resumeGame}
+            style={{
+              padding: '10px 28px',
+              borderRadius: 8,
+              border: 'none',
+              background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginTop: 4,
+            }}
+          >
+            继续游戏
+          </button>
+        </div>
+      )}
+      {gameState !== 'running' && gameState !== 'levelUp' && gameState !== 'lifeLost' && gameState !== 'paused' && (
         <div
           style={{
             position: 'absolute',
