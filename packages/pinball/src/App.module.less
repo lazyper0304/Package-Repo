@@ -1,0 +1,175 @@
+.appWrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  padding-top: 66px; /* 为 fixed header 留出空间 */
+}
+
+.appWrapperMobile {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 66px;
+}
+
+/* ── 桌面布局：游戏区左侧 + 状态栏右侧 ── */
+.container {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  padding: 16px 24px 8px;
+  min-height: 0; /* 关键：允许 flex 子项收缩 */
+  animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+}
+
+/* ── 移动布局：上下堆叠 ── */
+.containerMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.footer {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.footerMobile {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* ── 游戏区 ── */
+.gameArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.scoreCard {
+  flex-shrink: 0;
+}
+
+.gameBoard {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--radius-3);
+  overflow: hidden;
+}
+
+/* ── 右侧状态面板 ── */
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.statusCard {
+  padding: 16px;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.hearts {
+  display: flex;
+  gap: 2px;
+}
+
+.heart {
+  color: #f43f5e;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.powerUpSection {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-a5);
+}
+
+.powerUpList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.powerUpBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--gray-a3);
+}
+
+.powerUpDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── 响应式：小屏幕时状态栏移到下方 ── */
+@media (max-width: 800px) {
+  .container {
+    flex-direction: column;
+    padding: 8px 12px 4px;
+    gap: 12px;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-shrink: unset;
+  }
+
+  .statusCard {
+    padding: 12px;
+  }
+
+  .statusRow {
+    margin-bottom: 6px;
+  }
+
+  .powerUpSection {
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+
+  .powerUpList {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .gameArea {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .gameBoard {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

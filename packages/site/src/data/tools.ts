@@ -66,6 +66,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3009/sudoku/" : "/sudoku/",
     tags: ["休闲娱乐"],
   },
+  {
+    id: "pinball",
+    name: "弹球",
+    description: "经典弹球消砖游戏，控制挡板反弹小球消除砖块",
+    icon: `${import.meta.env.BASE_URL}pinball.png`,
+    externalUrl: isDev ? "http://localhost:3010/pinball/" : "/pinball/",
+    tags: ["休闲娱乐"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];
