@@ -7,6 +7,7 @@ cd /d "%REPO_DIR%"
 
 set PATH=%JAVA_HOME%\bin;%PATH%;E:\flutter_pub_cache\bin;C:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\toolchains;C:\Program Files\Huawei\DevEco Studio\tools\ohpm\bin
 set DEVECO_SDK_HOME=C:\Program Files\Huawei\DevEco Studio\sdk
+set HOS_SDK_HOME=C:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony
 
 :: 确保签名文件存在
 set SIGN_DIR=%REPO_DIR%\ohos\signing
