@@ -21,7 +21,7 @@ if not exist "%SIGN_DIR%\repohos_release.p12" (
 powershell -Command "$f='ohos\build-profile.json5'; $c=[System.IO.File]::ReadAllText($f); $c=$c -replace '\"signingConfig\":\s*\"default\"', '\"signingConfig\": \"release\"'; [System.IO.File]::WriteAllText($f, $c, [System.Text.UTF8Encoding]::new($false))"
 
 echo [repoHos] Running on emulator (release)...
-C:\Users\hexu\fvm\versions\3.35.8-ohos-1.0.1\bin\flutter run -d 127.0.0.1:5555 --release
+C:\Users\Vince\fvm\versions\3.35.8-ohos-1.0.1\bin\flutter run -d 127.0.0.1:5555 --release
 
 :: 恢复为 debug 签名配置
 powershell -Command "$f='ohos\build-profile.json5'; $c=[System.IO.File]::ReadAllText($f); $c=$c -replace '\"signingConfig\":\s*\"release\"', '\"signingConfig\": \"default\"'; [System.IO.File]::WriteAllText($f, $c, [System.Text.UTF8Encoding]::new($false))"
