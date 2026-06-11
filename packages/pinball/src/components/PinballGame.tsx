@@ -300,7 +300,7 @@ export function PinballGame({
       const speedScale = w / 800;
 
       // 键盘 AD 控制挡板
-      const step = 8;
+      const step = Math.max(4, w * 0.01);
       if (keys.has('a') || keys.has('A')) paddle.x = Math.max(0, paddle.x - step);
       if (keys.has('d') || keys.has('D')) paddle.x = Math.min(w - paddle.w, paddle.x + step);
 
@@ -537,7 +537,7 @@ export function PinballGame({
       const rect = canvas.getBoundingClientRect();
       const x = clientX - rect.left;
       const paddle = paddleRef.current;
-      paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, x - paddle.w / 2));
+      paddle.x = Math.max(0, Math.min(rect.width - paddle.w, x - paddle.w / 2));
     };
 
     const onMouseMove = (e: MouseEvent) => movePaddle(e.clientX);
