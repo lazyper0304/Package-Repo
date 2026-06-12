@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"yarn dev:server\" \"yarn dev:repo\" \"yarn dev:site\" \"yarn dev:fish\" \"yarn dev:tier\" \"yarn dev:vectorizer\" \"yarn dev:imgtool\" \"yarn dev:game2048\" \"yarn dev:sudoku\"",
+    "dev": "concurrently \"yarn dev:server\" \"yarn dev:repo\" \"yarn dev:site\" \"yarn dev:fish\" \"yarn dev:tier\" \"yarn dev:vectorizer\" \"yarn dev:imgtool\" \"yarn dev:game2048\" \"yarn dev:sudoku\" \"yarn dev:zombie-shooter\"",
     "dev:repo": "yarn workspace repo dev",
     "dev:site": "yarn workspace site dev",
     "dev:fish": "yarn workspace fish dev",
@@ -13,8 +13,9 @@
     "dev:imgtool": "yarn workspace imgtool dev",
     "dev:game2048": "yarn workspace game2048 dev",
     "dev:sudoku": "yarn workspace sudoku dev",
+    "dev:zombie-shooter": "yarn workspace zombie-shooter dev",
     "dev:server": "yarn workspace server dev",
-    "build": "rimraf dist && yarn build:repo && yarn build:fish && yarn build:tier && yarn build:vectorizer && yarn build:imgtool && yarn build:game2048 && yarn build:sudoku && yarn build:site",
+    "build": "rimraf dist && yarn build:repo && yarn build:fish && yarn build:tier && yarn build:vectorizer && yarn build:imgtool && yarn build:game2048 && yarn build:sudoku && yarn build:zombie-shooter && yarn build:site",
     "build:repo": "yarn workspace repo build",
     "build:site": "yarn workspace site build",
     "build:fish": "yarn workspace fish build",
@@ -23,6 +24,7 @@
     "build:imgtool": "yarn workspace imgtool build",
     "build:game2048": "yarn workspace game2048 build",
     "build:sudoku": "yarn workspace sudoku build",
+    "build:zombie-shooter": "yarn workspace zombie-shooter build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

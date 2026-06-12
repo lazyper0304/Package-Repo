@@ -54,7 +54,7 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
     final theme = Theme.of(context);
 
     return GlassPage(
-      title: _app.value?.name ?? '应用详情',
+      title: _app.value?.name ?? '应用详情2',
       onBack: () => Navigator.pop(context),
       builder: () => [
         SliverToBoxAdapter(

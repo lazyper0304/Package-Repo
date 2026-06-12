@@ -1,0 +1,24 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.gameCanvas {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  max-height: 920px;
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+}

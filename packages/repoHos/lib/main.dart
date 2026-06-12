@@ -12,7 +12,6 @@ void main() async {
     LiquidGlassWidgets.wrap(
       child: const MyApp(),
       respectSystemAccessibility: false,
-      adaptiveQuality: true,
     ),
   );
 }

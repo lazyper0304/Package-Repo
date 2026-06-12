@@ -132,8 +132,11 @@ const AppItem: React.FC<IProps> = ({
     <Card
       key={app.id}
       className={styles.app}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
     >
+      {app.desc && app.desc !== 'null' && (
+        <div className={styles.remarkBanner}>有备注</div>
+      )}
       <ContextMenu.Root>
         {isAdmin ? (
           <ContextMenu.Trigger>{appItem(app)}</ContextMenu.Trigger>

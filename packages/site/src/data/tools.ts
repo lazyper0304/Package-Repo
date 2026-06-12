@@ -66,6 +66,14 @@ export const tools: Tool[] = [
     externalUrl: isDev ? "http://localhost:3009/sudoku/" : "/sudoku/",
     tags: ["休闲娱乐"],
   },
+  {
+    id: "zombie-shooter",
+    name: "向僵尸开炮",
+    description: "肉鸽射击游戏，自动射击击杀僵尸，每波结束后选择升级",
+    icon: `${import.meta.env.BASE_URL}zombie-shooter.png`,
+    externalUrl: isDev ? "http://localhost:3010/zombie-shooter/" : "/zombie-shooter/",
+    tags: ["休闲娱乐"],
+  },
 ];
 
 export const allTags = ["开发辅助", "图像处理", "办公效率", "设计创作", "休闲娱乐"];
