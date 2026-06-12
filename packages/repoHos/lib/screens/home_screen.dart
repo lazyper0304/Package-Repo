@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' hide GlassCard;
@@ -7,10 +8,9 @@ import '../main.dart';
 import '../services/api.dart';
 import '../models/app.dart';
 import '../models/ranking.dart';
-import '../widgets/app_card.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/glass_card.dart';
-import '../widgets/stat_card.dart';
+import '../widgets/page_wrapper.dart';
+import 'search_page.dart';
+import 'ranking_page.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,15 +25,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _api = ApiService();
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
 
   final _apps = signal<List<AppInfo>>([]);
-  final _marketInfo = signal<MarketInfo?>(null);
   final _isLoading = signal(false);
   final _currentPage = signal(1);
   final _totalCount = signal(0);
   final _hasMore = signal(true);
+  final _selectedRankingTab = signal(0);
+  final _isSearching = signal(false);
 
-  // 排行榜数据缓存
   late Future<List<DownloadIncrement>> _downloadRankingFuture;
   late Future<List<AppRating>> _ratingRankingFuture;
   late Future<List<AppInfo>> _recentRankingFuture;
@@ -43,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMarketInfo();
     _loadDefaultApps();
     _downloadRankingFuture = _api.getDownloadIncreaseRanking(limit: 50);
     _ratingRankingFuture = _api.getRatingRanking(limit: 50);
@@ -53,12 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadMarketInfo() async {
-    final info = await _api.getMarketInfo();
-    _marketInfo.value = info;
   }
 
   Future<void> _loadDefaultApps() async {
@@ -131,478 +127,184 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildBottomBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final tabs = [
+      GlassBottomBarTab(
+        label: '首页',
+        icon: const SFIcon(SFIcons.sf_house),
+        activeIcon: const SFIcon(SFIcons.sf_house_fill),
+        glowColor: theme.colorScheme.primary,
+      ),
+      GlassBottomBarTab(
+        label: '排行榜',
+        icon: const SFIcon(SFIcons.sf_chart_bar),
+        activeIcon: const SFIcon(SFIcons.sf_chart_bar_fill),
+        glowColor: theme.colorScheme.secondary,
+      ),
+      GlassBottomBarTab(
+        label: '设置',
+        icon: const SFIcon(SFIcons.sf_gearshape),
+        activeIcon: const SFIcon(SFIcons.sf_gearshape_fill),
+        glowColor: theme.colorScheme.tertiary,
+      ),
+    ];
+
+    return GlassSearchableBottomBar(
+      isSearchActive: _isSearching.value,
+      selectedIndex: _currentTab,
+      onTabSelected: (index) {
+        // 点击收缩的导航按钮 → 退出搜索模式
+        if (_isSearching.value) {
+          _isSearching.value = false;
+          _searchController.clear();
+          _searchFocusNode.unfocus();
+          _loadDefaultApps();
+          return;
+        }
+        _onTabSelected(index);
+      },
+      barHeight: 64,
+      searchBarHeight: 50,
+      horizontalPadding: 20,
+      verticalPadding: 16,
+      spacing: 8,
+      selectedIconColor: theme.colorScheme.primary,
+      unselectedIconColor: theme.colorScheme.onSurface.withOpacity(0.6),
+      indicatorColor: theme.textTheme.bodyMedium?.color?.withAlpha(52) ??
+          Colors.transparent,
+      labelFontSize: 10,
+      iconSize: 28,
+      iconLabelSpacing: 2,
+      quality: GlassQuality.premium,
+      interactionBehavior: GlassInteractionBehavior.full,
+      settings: LiquidGlassSettings(
+        glassColor: isDark
+            ? const Color(0xCC1C1C1E)
+            : const Color.fromRGBO(255, 255, 255, 0.08),
+        thickness: 30,
+        blur: 2,
+        chromaticAberration: 0.01,
+        lightIntensity: 0.5,
+        ambientStrength: 0,
+        refractiveIndex: 1.2,
+        saturation: 1.2,
+        specularSharpness: GlassSpecularSharpness.medium,
+      ),
+      searchConfig: GlassSearchBarConfig(
+        searchIcon: const SFIcon(SFIcons.sf_magnifyingglass),
+        controller: _searchController,
+        focusNode: _searchFocusNode,
+        autoFocusOnExpand: false,
+        showsCancelButton: false,
+        expandWhenActive: _isSearching.value,
+        hintText: '搜索应用...',
+        searchIconColor: theme.colorScheme.onSurface.withOpacity(0.6),
+        textColor: theme.textTheme.bodyLarge?.color,
+        hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        onSearchToggle: (active) {
+          if (active) {
+            // 先跳转首页，再展开搜索框
+            _onTabSelected(0);
+            _isSearching.value = true;
+          } else {
+            // 退出搜索模式，清空内容
+            _isSearching.value = false;
+            _searchController.clear();
+            _searchFocusNode.unfocus();
+            _loadDefaultApps();
+          }
+        },
+        onSearchFocusChanged: (focused) {
+          if (focused) {
+            _onTabSelected(0);
+            _isSearching.value = true;
+          } else {
+            _isSearching.value = false;
+          }
+        },
+        textInputAction: TextInputAction.search,
+        onSubmitted: (value) {
+          _searchFocusNode.unfocus();
+          if (value.isNotEmpty) {
+            _searchApps(value);
+          }
+        },
+        collapsedLogoBuilder: (context) {
+          final tab = tabs[_currentTab];
+
+          return Center(
+            child: IconTheme(
+              data: IconThemeData(color: theme.colorScheme.primary, size: 28),
+              child: tab.activeIcon ?? tab.icon,
+            ),
+          );
+        },
+      ),
+      tabs: tabs,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final themeScope = ThemeScope.of(context);
 
-    return AdaptiveLiquidGlassLayer(
-      settings: AppGlassSettings.standard,
-      child: AnimatedGradient(
-        key: ValueKey(isDark),
-        colors: isDark
-            ? const [Color(0xFF0A0A0A), Color(0xFF1A1A2E), Color(0xFF16213E)]
-            : const [Color(0xFFF2F2F7), Color(0xFFE8E0F0), Color(0xFFD4E4F7)],
-        child: GlassScaffold(
-          backgroundColor: Colors.transparent,
-          extendBody: true,
-          body: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                _buildHeader(theme),
-                if (_currentTab != 2) _buildMarketStats(theme),
-                Expanded(
-                  child: _buildCurrentTab(theme, themeScope),
-                ),
-              ],
-            ),
-          ),
-          bottomBar: GlassBottomBar(
-            tabs: [
-              GlassBottomBarTab(
-                label: '搜索',
-                icon: const Icon(Icons.search),
-                glowColor: theme.colorScheme.primary,
-              ),
-              GlassBottomBarTab(
-                label: '排行榜',
-                icon: const Icon(Icons.leaderboard),
-                glowColor: theme.colorScheme.secondary,
-              ),
-              GlassBottomBarTab(
-                label: '设置',
-                icon: const Icon(Icons.settings),
-                glowColor: theme.colorScheme.tertiary,
-              ),
-            ],
-            selectedIndex: _currentTab,
-            onTabSelected: _onTabSelected,
-            selectedIconColor: theme.colorScheme.primary,
-            unselectedIconColor: theme.colorScheme.onSurface.withOpacity(0.6),
-          ),
+    return AnimatedGradient(
+      key: ValueKey(isDark),
+      colors: isDark
+          ? const [Color(0xFF000000), Color(0xFF1A1A1A), Color(0xFF000000)]
+          : const [Color(0xFFF2F3F5), Color(0xFFE8E8EA), Color(0xFFF2F3F5)],
+      child: PageWrapper(
+        centerTitle: false,
+        titleWidget: Text(
+          'Package Repo',
+          style: theme.textTheme.titleLarge,
         ),
+        showBackButton: false,
+        backgroundColor: Colors.transparent,
+        edgeSize: 120,
+        extendBody: true,
+        builder: () => _buildCurrentTab(theme, themeScope),
+        bottomBar: Watch((context) => _buildBottomBar(theme)),
       ),
     );
   }
 
-  Widget _buildCurrentTab(ThemeData theme, ThemeScope themeScope) {
-    switch (_currentTab) {
-      case 0:
-        return _buildSearchTab(theme);
-      case 1:
-        return _buildRankingTab(theme);
-      case 2:
-        return SettingsScreen(
-          themeType: themeScope.themeType,
-          onThemeChanged: themeScope.onThemeChanged,
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        'Package Repo',
-        style: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMarketStats(ThemeData theme) {
-    return Watch((context) {
-      final info = _marketInfo.value;
-      if (info == null) return const SizedBox.shrink();
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                icon: Icons.apps,
-                label: '应用总数',
-                value: '${info.appCount}',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                icon: Icons.developer_mode,
-                label: '开发者',
-                value: '${info.developerCount}',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                icon: Icons.layers,
-                label: '专题',
-                value: '${info.substanceCount}',
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildSearchTab(ThemeData theme) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SearchBarWidget(
-            controller: _searchController,
-            onSearch: (keyword) => _searchApps(keyword),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: Watch((context) {
-            if (_isLoading.value && _apps.value.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (_apps.value.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.search,
-                      size: 64,
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '搜索鸿蒙应用',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification is ScrollEndNotification &&
-                    notification.metrics.extentAfter < 200) {
-                  _loadMore();
-                }
-                return false;
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                itemCount: _apps.value.length + (_hasMore.value ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _apps.value.length) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  final app = _apps.value[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: AppCard(
-                      app: app,
-                      onTap: () => context.push('/app/${app.appId}'),
-                    ),
-                  );
-                },
+  List<Widget> _buildCurrentTab(ThemeData theme, ThemeScope themeScope) {
+    return [
+      Watch((context) {
+        switch (_currentTab) {
+          case 0:
+            return SliverToBoxAdapter(
+              child: SearchPage(
+                apps: _apps.value,
+                isLoading: _isLoading.value,
+                hasMore: _hasMore.value,
+                onLoadMore: _loadMore,
               ),
             );
-          }),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRankingTab(ThemeData theme) {
-    return DefaultTabController(
-      length: 3,
-      child: Column(
-        children: [
-          const TabBar(
-            tabs: [
-              Tab(text: '下载增长'),
-              Tab(text: '评分排行'),
-              Tab(text: '最近更新'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildDownloadRanking(theme),
-                _buildRatingRanking(theme),
-                _buildRecentRanking(theme),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDownloadRanking(ThemeData theme) {
-    return FutureBuilder<List<DownloadIncrement>>(
-      future: _downloadRankingFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('暂无数据'));
-        }
-
-        return _buildRankingList(
-          theme,
-          snapshot.data!.asMap().entries.map((entry) {
-            final rank = entry.key + 1;
-            final item = entry.value;
-            return _buildRankingItem(
-              theme,
-              rank: rank,
-              appId: item.appId,
-              iconUrl: item.iconUrl,
-              name: item.name,
-              subtitle: item.pkgName ?? '',
-              trailing: '+${item.increment}',
-              trailingColor: Colors.green,
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildRatingRanking(ThemeData theme) {
-    return FutureBuilder<List<AppRating>>(
-      future: _ratingRankingFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('暂无数据'));
-        }
-
-        return _buildRankingList(
-          theme,
-          snapshot.data!.asMap().entries.map((entry) {
-            final rank = entry.key + 1;
-            final item = entry.value;
-            return _buildRankingItem(
-              theme,
-              rank: rank,
-              appId: item.appId,
-              iconUrl: item.iconUrl,
-              name: item.name,
-              subtitle: item.pkgName ?? '',
-              trailing: '${item.averageRating} ★',
-              trailingColor: Colors.amber,
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecentRanking(ThemeData theme) {
-    return FutureBuilder<List<AppInfo>>(
-      future: _recentRankingFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('暂无数据'));
-        }
-
-        return _buildRankingList(
-          theme,
-          snapshot.data!.asMap().entries.map((entry) {
-            final rank = entry.key + 1;
-            final item = entry.value;
-            return _buildRankingItem(
-              theme,
-              rank: rank,
-              appId: item.appId,
-              iconUrl: item.iconUrl,
-              name: item.name,
-              subtitle: item.pkgName ?? '',
-              trailing: _formatTime(item.updatedTime),
-              trailingColor: theme.colorScheme.onSurface.withOpacity(0.5),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildRankingList(ThemeData theme, List<Widget> items) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      itemCount: items.length,
-      itemBuilder: (context, index) => items[index],
-    );
-  }
-
-  Widget _buildRankingItem(
-    ThemeData theme, {
-    required int rank,
-    required String appId,
-    String? iconUrl,
-    required String name,
-    required String subtitle,
-    required String trailing,
-    required Color trailingColor,
-  }) {
-    return GlassCard(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      onTap: () => context.push('/app/$appId'),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              '$rank',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: rank <= 3
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.5),
+          case 1:
+            return SliverToBoxAdapter(
+              child: RankingPage(
+                selectedTab: _selectedRankingTab,
+                downloadFuture: _downloadRankingFuture,
+                ratingFuture: _ratingRankingFuture,
+                recentFuture: _recentRankingFuture,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: theme.colorScheme.surfaceVariant,
-            ),
-            child: iconUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      iconUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          _buildLetterAvatar(theme, name),
-                    ),
-                  )
-                : _buildLetterAvatar(theme, name),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Text(
-            trailing,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: trailingColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLetterAvatar(ThemeData theme, String name) {
-    final letter = name.isNotEmpty ? name.characters.first : '?';
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary.withOpacity(0.7),
-            theme.colorScheme.primary,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        letter,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(String? timeStr) {
-    if (timeStr == null || timeStr.isEmpty) return '';
-    try {
-      final time = DateTime.parse(timeStr);
-      final now = DateTime.now();
-      final diff = now.difference(time);
-
-      if (diff.inDays > 365) {
-        return '${(diff.inDays / 365).floor()}年前';
-      } else if (diff.inDays > 30) {
-        return '${(diff.inDays / 30).floor()}个月前';
-      } else if (diff.inDays > 0) {
-        return '${diff.inDays}天前';
-      } else if (diff.inHours > 0) {
-        return '${diff.inHours}小时前';
-      } else if (diff.inMinutes > 0) {
-        return '${diff.inMinutes}分钟前';
-      } else {
-        return '刚刚';
-      }
-    } catch (e) {
-      return timeStr;
-    }
+            );
+          case 2:
+            return SliverToBoxAdapter(
+              child: SettingsScreen(
+                themeType: themeScope.themeType,
+                onThemeChanged: themeScope.onThemeChanged,
+              ),
+            );
+          default:
+            return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+      }),
+    ];
   }
 }

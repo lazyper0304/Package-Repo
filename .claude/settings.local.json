@@ -129,6 +129,30 @@
       "Bash(HOS_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony' DEVECO_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk' PATH='__CMDSUB_OUTPUT__/bin:__TRACKED_VAR__:/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains:/c/Program Files/Huawei/DevEco Studio/tools/ohpm/bin' /c/Users/hexu/fvm/versions/3.35.8-ohos-1.0.1/bin/flutter run -d 127.0.0.1:5555)",
       "Bash(HOS_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony' DEVECO_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk' PATH='__CMDSUB_OUTPUT__/bin:__TRACKED_VAR__:/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains:/c/Program Files/Huawei/DevEco Studio/tools/ohpm/bin' /c/Users/hexu/fvm/versions/3.35.8-ohos-1.0.1/bin/flutter clean)",
       "Bash(JAVA_HOME='/c/Program Files/Java/jdk-17' HOS_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony' DEVECO_SDK_HOME='C:/Program Files/Huawei/DevEco Studio/sdk' PATH='__CMDSUB_OUTPUT__/bin:/c/Program Files/Java/jdk-17/bin:__TRACKED_VAR__:/e/flutter_pub_cache/bin:/c/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains:/c/Program Files/Huawei/DevEco Studio/tools/ohpm/bin' /c/Users/hexu/fvm/versions/3.35.8-ohos-1.0.1/bin/flutter run -d 127.0.0.1:5555)"
+      "Read(//e/code/**)",
+      "Bash(mv run_android_debug.bat run_apk_debug.bat)",
+      "Bash(mv run_android_release.bat run_apk_release.bat)",
+      "Bash(cmd //c run_debug.bat)",
+      "Bash(cmd *)",
+      "Bash(\"C:/Program Files/Huawei/DevEco Studio/tools/ohpm/bin/ohpm.cmd\" install)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/Huawei/DevEco Studio/tools/ohpm/bin\")",
+      "Bash(ohpm install *)",
+      "Bash(cmd //c \"set JAVA_HOME=C:\\\\Program Files\\\\Java\\\\jdk-17 && set PATH=%JAVA_HOME%\\\\bin;%PATH% && hvigorw.bat assembleHap -p product=default -p buildMode=debug --stacktrace 2>&1\")",
+      "Read(//tmp/**)",
+      "Bash(flutter analyze *)",
+      "WebSearch",
+      "Bash(dart pub *)",
+      "Bash(dart doc *)",
+      "Bash(dart analyze *)",
+      "Bash(dart run *)",
+      "Bash(xargs grep -l \"ThemeMode\\\\|themeMode\\\\|hive\\\\|Hive\")",
+      "Bash(flutter pub *)",
+      "Bash(flutter run *)",
+      "Bash(xargs grep -l \"getFilesDir\\\\|storage\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/android/app/src/main/res/drawable-xxxhdpi/ic_launcher_foreground.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/background.png\" \"E:/code/Package-Repo/packages/repoHos/android/app/src/main/res/drawable-xxxhdpi/ic_launcher_background.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/ohos/entry/src/main/resources/base/media/icon.png\")",
+      "Bash(cp \"C:/Users/Vince/Downloads/foreground.png\" \"E:/code/Package-Repo/packages/repoHos/assets/icon.png\")"
     ]
   }
 }

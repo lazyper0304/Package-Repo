@@ -3,12 +3,13 @@ import 'package:signals_flutter/signals_flutter.dart';
 import '../services/api.dart';
 import '../models/app.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/glass_page.dart';
+import '../widgets/page_wrapper.dart';
 
 class AppDetailScreen extends StatefulWidget {
   final String appId;
+  final String? iconUrl;
 
-  const AppDetailScreen({super.key, required this.appId});
+  const AppDetailScreen({super.key, required this.appId, this.iconUrl});
 
   @override
   State<AppDetailScreen> createState() => _AppDetailScreenState();
@@ -57,11 +58,23 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
       title: _app.value?.name ?? '应用详情2',
       onBack: () => Navigator.pop(context),
       builder: () => [
+        // 图标始终可见，保证 Hero 动画
+        SliverToBoxAdapter(
+          child: Watch((context) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: _buildAppIcon(theme, _app.value),
+              ),
+            );
+          }),
+        ),
+        // 图标下方：加载态 / 错误态 / 内容
         SliverToBoxAdapter(
           child: Watch((context) {
             if (_isLoading.value) {
               return const Padding(
-                padding: EdgeInsets.only(top: 200),
+                padding: EdgeInsets.only(top: 40),
                 child: Center(child: CircularProgressIndicator()),
               );
             }
@@ -69,12 +82,13 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
             final app = _app.value;
             if (app == null) {
               return Padding(
-                padding: const EdgeInsets.only(top: 200),
+                padding: const EdgeInsets.only(top: 40),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+                      const Icon(Icons.error_outline,
+                          size: 64, color: Colors.grey),
                       const SizedBox(height: 16),
                       const Text('应用不存在'),
                       const SizedBox(height: 16),
@@ -100,8 +114,6 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 16),
-        Center(child: _buildAppIcon(theme, app)),
-        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _buildAppHeader(theme, app),
@@ -121,32 +133,32 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
     );
   }
 
-  Widget _buildAppIcon(ThemeData theme, AppInfo app) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: theme.colorScheme.surfaceVariant,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: app.iconUrl != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                app.iconUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.apps, size: 40),
-              ),
+  Widget _buildAppIcon(ThemeData theme, AppInfo? app) {
+    final url = widget.iconUrl ?? app?.iconUrl;
+
+    final icon = SizedBox(
+      width: 100,
+      height: 100,
+      child: url != null
+          ? Image.network(
+              url,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Icon(Icons.apps, size: 40),
             )
-          : const Icon(Icons.apps, size: 40),
+          : Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorScheme.surfaceVariant,
+              ),
+              child: const Icon(Icons.apps, size: 40),
+            ),
+    );
+
+    if (url == null) return icon;
+
+    return Hero(
+      tag: 'app-icon-${widget.appId}',
+      child: icon,
     );
   }
 
@@ -217,10 +229,10 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
           ),
           const SizedBox(height: 12),
           _buildInfoRow(theme, '应用ID', app.appId),
-          if (app.pkgName != null)
-            _buildInfoRow(theme, '包名', app.pkgName!),
+          if (app.pkgName != null) _buildInfoRow(theme, '包名', app.pkgName!),
           if (app.versionName != null)
-            _buildInfoRow(theme, '版本', '${app.versionName} (${app.versionCode})'),
+            _buildInfoRow(
+                theme, '版本', '${app.versionName} (${app.versionCode})'),
           if (app.totalDownloadCount != null)
             _buildInfoRow(theme, '下载量', _formatNumber(app.totalDownloadCount!)),
           if (app.updatedTime != null)
@@ -289,15 +301,16 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
   Widget _buildChart(ThemeData theme, List<DownloadRecord> records) {
     if (records.isEmpty) return const SizedBox.shrink();
 
-    final maxCount = records.map((r) => r.count).reduce((a, b) => a > b ? a : b);
+    final maxCount =
+        records.map((r) => r.count).reduce((a, b) => a > b ? a : b);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: records.take(7).map((record) {
+      children: records.take(5).map((record) {
         final height = maxCount > 0 ? (record.count / maxCount) * 180 : 0.0;
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -325,7 +338,7 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  record.date.substring(5),
+                  _formatDate(record.date),
                   style: TextStyle(
                     fontSize: 10,
                     color: theme.colorScheme.onSurface.withOpacity(0.5),
@@ -346,6 +359,15 @@ class _AppDetailScreenState extends State<AppDetailScreen> {
       return '${(number / 10000).toStringAsFixed(1)}万';
     } else {
       return number.toString();
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.month}月${date.day}日';
+    } catch (e) {
+      return dateStr;
     }
   }
 

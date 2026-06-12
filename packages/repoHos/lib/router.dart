@@ -45,7 +45,8 @@ final router = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final appId = state.pathParameters['appId']!;
-        return AppDetailScreen(appId: appId);
+        final iconUrl = state.uri.queryParameters['icon'];
+        return AppDetailScreen(appId: appId, iconUrl: iconUrl);
       },
     ),
   ],

@@ -32,24 +32,29 @@ class AppCard extends StatelessWidget {
   }
 
   Widget _buildIcon(ThemeData theme) {
-    return Container(
+    final icon = Container(
       width: 48,
       height: 48,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: theme.colorScheme.surfaceVariant,
-      ),
-      child: app.iconUrl != null
-          ? ClipRRect(
+      decoration: app.iconUrl == null
+          ? BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                app.iconUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.apps, size: 28),
-              ),
+              color: theme.colorScheme.surfaceVariant,
+            )
+          : null,
+      child: app.iconUrl != null
+          ? Image.network(
+              app.iconUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Icon(Icons.apps, size: 28),
             )
           : const Icon(Icons.apps, size: 28),
+    );
+
+    if (app.iconUrl == null) return icon;
+
+    return Hero(
+      tag: 'app-icon-${app.appId}',
+      child: icon,
     );
   }
 
