@@ -8,55 +8,164 @@
 /* 角色主视觉区 */
 .characterMain {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
-.characterDisplay {
-  flex: 1;
+.topSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.characterRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.characterCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
-.characterModel {
-  width: 80px;
-  height: 100px;
+/* 装备展示区 - 竖向 */
+.equipSlotsVertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.equipSlotV {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.characterStats {
+  display: flex;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .characterBody {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
+  line-height: 0.8;
 }
 
 .characterHead {
-  font-size: 32px;
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: -6px;
 }
 
 .characterTorso {
-  font-size: 28px;
+  font-size: 40px;
+  line-height: 1;
+  margin-top: -4px;
 }
 
 .characterLegs {
-  font-size: 24px;
+  font-size: 36px;
+  line-height: 1;
+  margin-top: -2px;
 }
 
-/* 装备展示区 - 右侧竖排 */
+/* 装备展示区 - 横向 */
+.equipSlotsHorizontal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.equipSlotH {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-sizing: border-box;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 装备展示区 - 右侧竖排（保留兼容） */
 .equipSlots {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: 140px;
+  width: 48px;
+}
+
+.playerStatsCard {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .equipSlot {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   padding: 8px;
   background: rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -76,14 +185,14 @@
 }
 
 .slotIcon {
-  font-size: 20px;
-  width: 32px;
-  height: 32px;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
@@ -92,7 +201,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  overflow: hidden;
 }
 
 .equippedInfo {
@@ -108,8 +218,8 @@
   padding: 12px;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  max-height: 300px;
+  min-height: 120px;
+  flex: 1;
 }
 
 .inventoryHeader {
@@ -117,6 +227,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  min-height: 32px;
 }
 
 /* 分类标签 */
@@ -124,6 +235,15 @@
   display: flex;
   gap: 4px;
   margin-bottom: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 28px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .tab {
@@ -132,7 +252,9 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s;
 
   &:hover {
@@ -150,12 +272,60 @@
   }
 }
 
+/* 部位筛选标签 */
+.slotFilterTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 28px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.slotTab {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.slotTabActive {
+  background: #f59e0b;
+  color: #000;
+  font-weight: bold;
+
+  &:hover {
+    background: #d97706;
+  }
+}
+
 /* 物品网格 */
 .inventoryGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .inventoryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .itemCard {
@@ -163,13 +333,13 @@
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid;
   border-radius: 8px;
-  padding: 6px;
+  padding: 4px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   position: relative;
   transition: background 0.2s;
 
@@ -188,6 +358,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  font-size: 12px;
 }
 
 .itemBadge {
@@ -204,4 +375,101 @@
   padding: 40px;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.itemTooltip {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  white-space: pre-line;
+  max-width: 200px;
+}
+
+.itemActions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.affixRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.equipTooltip {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gemSlots {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gemSlotsGrid {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.gemSlot {
+  width: 24px;
+  height: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enchantedGems {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.elementAffixes {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.affixRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.enchantedGemItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin-bottom: 4px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }

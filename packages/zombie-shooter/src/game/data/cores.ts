@@ -2,54 +2,20 @@
 
 import { type Element, type SkillLevel, SKILLS, getSkillChain } from './skills';
 import { type Quality } from './gems';
+import coresConfig from '@/config/cores.json';
 
 export interface CoreDefinition {
   id: string;
   name: string;
   quality: Quality;
   element: Element;
-  skillLevel: SkillLevel; // 提供的技能等级
+  skillLevel: SkillLevel;
   description: string;
 }
 
-// 核心名称
-export const CORE_NAMES: Record<Element, Record<SkillLevel, string>> = {
-  wind: {
-    basic: '风之核心',
-    advanced1: '旋风核心',
-    advanced2: '风暴核心',
-  },
-  thunder: {
-    basic: '雷之核心',
-    advanced1: '惊雷核心',
-    advanced2: '天雷核心',
-  },
-  water: {
-    basic: '水之核心',
-    advanced1: '寒冰核心',
-    advanced2: '洪水核心',
-  },
-  fire: {
-    basic: '火之核心',
-    advanced1: '爆炎核心',
-    advanced2: '真火核心',
-  },
-  earth: {
-    basic: '土之核心',
-    advanced1: '飞岩核心',
-    advanced2: '泰山核心',
-  },
-};
-
-// 核心品质对应技能等级
-export const CORE_QUALITY_SKILL_LEVEL: Record<Quality, SkillLevel> = {
-  common: 'basic',
-  excellent: 'basic',
-  elite: 'advanced1',
-  perfect: 'advanced1',
-  legendary: 'advanced2',
-  mythic: 'advanced2',
-};
+// 从 JSON 配置导出
+export const CORE_NAMES = coresConfig.names as Record<Element, Record<SkillLevel, string>>;
+export const CORE_QUALITY_SKILL_LEVEL = coresConfig.qualitySkillLevel as Record<Quality, SkillLevel>;
 
 // 生成随机核心
 export function generateRandomCore(element: Element, quality: Quality): CoreDefinition {

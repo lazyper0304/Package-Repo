@@ -6,6 +6,7 @@ import { generateRandomEquipment, type EquipmentDefinition, type EquipmentSlot }
 import { generateRandomCore, type CoreDefinition } from './cores';
 import { generateRandomArmor, type ArmorDefinition } from './armors';
 import { type Element } from './skills';
+import stagesConfig from '@/config/stages.json';
 
 export type RewardType = 'gem' | 'equipment' | 'core' | 'armor';
 
@@ -27,39 +28,21 @@ export function getQualityName(quality: Quality): string {
   return QUALITY_CONFIG[quality]?.name || '未知';
 }
 
-// 品质掉落权重
-const QUALITY_WEIGHTS: Record<string, Record<Quality, number>> = {
-  normal: {
-    common: 50,
-    excellent: 30,
-    elite: 15,
-    perfect: 4,
-    legendary: 0.9,
-    mythic: 0.1,
-  },
-  elite: {
-    common: 35,
-    excellent: 30,
-    elite: 25,
-    perfect: 8,
-    legendary: 1.8,
-    mythic: 0.2,
-  },
-  hell: {
-    common: 20,
-    excellent: 25,
-    elite: 30,
-    perfect: 18,
-    legendary: 5,
-    mythic: 2,
-  },
-};
+// 获取关卡掉落概率
+export function getStageDropRates(stageNumber: number, difficulty: 'normal' | 'elite'): Record<Quality, number> {
+  const stageKey = String(stageNumber);
+  const stage = (stagesConfig.stages as any)[stageKey];
+  if (stage?.dropRates?.[difficulty]) {
+    return stage.dropRates[difficulty];
+  }
+  // 默认概率
+  return stagesConfig.stages['1'].dropRates[difficulty];
+}
 
 // 随机选择品质
-function rollQuality(difficulty: 'normal' | 'elite' | 'hell'): Quality {
-  const weights = QUALITY_WEIGHTS[difficulty];
-  const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0);
-  let random = Math.random() * totalWeight;
+function rollQuality(difficulty: 'normal' | 'elite', stageNumber: number): Quality {
+  const weights = getStageDropRates(stageNumber, difficulty);
+  let random = Math.random() * 100;
 
   for (const [quality, weight] of Object.entries(weights)) {
     random -= weight;
@@ -73,16 +56,19 @@ function rollQuality(difficulty: 'normal' | 'elite' | 'hell'): Quality {
 
 // 生成随机奖励
 export function generateRewards(
-  difficulty: 'normal' | 'elite' | 'hell',
+  difficulty: 'normal' | 'elite',
   progressPercent: number,
   stageNumber: number
 ): RewardItem[] {
   const rewards: RewardItem[] = [];
 
-  // 基础奖励数量
-  const baseCount = difficulty === 'normal' ? 1 : difficulty === 'elite' ? 2 : 3;
-  const bonusCount = Math.floor(progressPercent / 30);
-  const totalRewards = baseCount + bonusCount;
+  // 进度为0不给奖励
+  if (progressPercent <= 0) return rewards;
+
+  // 关卡基础奖励数量
+  const baseRewardCount = difficulty === 'elite' ? 3 : 2;
+  // 实际奖励 = 基础奖励数 * 进度百分比，向下取整
+  const totalRewards = Math.floor(baseRewardCount * progressPercent / 100);
 
   for (let i = 0; i < totalRewards; i++) {
     const item = generateRandomReward(difficulty, stageNumber);
@@ -92,8 +78,8 @@ export function generateRewards(
   return rewards;
 }
 
-function generateRandomReward(difficulty: 'normal' | 'elite' | 'hell', stageNumber: number): RewardItem {
-  const quality = rollQuality(difficulty);
+function generateRandomReward(difficulty: 'normal' | 'elite', stageNumber: number): RewardItem {
+  const quality = rollQuality(difficulty, stageNumber);
 
   // 随机选择奖励类型（局内只掉落宝石和装备）
   const types: RewardType[] = ['gem', 'equipment'];
@@ -118,12 +104,18 @@ function generateRandomReward(difficulty: 'normal' | 'elite' | 'hell', stageNumb
       data = generateRandomGem('helmet', quality);
   }
 
+  const qualityConfig = QUALITY_CONFIG[quality];
+  const typeNames: Record<string, string> = {
+    gem: '宝石',
+    equipment: '装备',
+  };
+
   return {
     id: `reward_${type}_${quality}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     type,
     quality,
-    name: `未知${type === 'gem' ? '宝石' : '装备'}`,
-    identified: false,
+    name: `${qualityConfig.name}${typeNames[type]}`,
+    identified: true,
     data,
   };
 }

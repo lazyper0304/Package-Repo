@@ -1,18 +1,4 @@
-import { IconButton } from '@radix-ui/themes';
-import {
-  MdBrightness2,
-  MdBrightnessAuto,
-  MdBrightnessHigh,
-} from 'react-icons/md';
-
-type ThemeMode = 'light' | 'dark' | 'system';
-
-type HeaderProps = {
-  themeMode: ThemeMode;
-  onCycleTheme: () => void;
-};
-
-export function Header({ themeMode, onCycleTheme }: HeaderProps) {
+export function Header() {
   return (
     <header
       style={{
@@ -37,21 +23,6 @@ export function Header({ themeMode, onCycleTheme }: HeaderProps) {
           向僵尸开炮
         </h1>
       </div>
-      <IconButton
-        variant="soft"
-        size="3"
-        radius="full"
-        onClick={onCycleTheme}
-        title={`当前: ${{ light: '浅色', dark: '深色', system: '跟随系统' }[themeMode]}，点击切换`}
-      >
-        {themeMode === 'light' ? (
-          <MdBrightnessHigh size={20} />
-        ) : themeMode === 'dark' ? (
-          <MdBrightness2 size={20} />
-        ) : (
-          <MdBrightnessAuto size={20} />
-        )}
-      </IconButton>
     </header>
   );
 }

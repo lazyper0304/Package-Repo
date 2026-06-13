@@ -1,0 +1,79 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: rgba(30, 30, 50, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 280px;
+  width: 90%;
+  text-align: center;
+}
+
+.elementDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 80px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.damageBarWrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.damageBar {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.damageBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border-radius: 6px;
+  transition: width 0.03s linear;
+}
+
+.cursor {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  transition: left 0.03s linear;
+}
+
+.damageBarLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}

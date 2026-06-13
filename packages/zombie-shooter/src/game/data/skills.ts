@@ -1,5 +1,7 @@
 // 技能系统 - 风雷水火土五系
 
+import skillsConfig from '@/config/skills.json';
+
 export type Element = 'wind' | 'thunder' | 'water' | 'fire' | 'earth';
 export type SkillLevel = 'basic' | 'advanced1' | 'advanced2';
 
@@ -9,210 +11,54 @@ export interface SkillDefinition {
   element: Element;
   level: SkillLevel;
   description: string;
-  cooldown: number; // 毫秒
+  cooldown: number;
   damage: (attack: number, elementDamage: number) => number;
   effect: SkillEffect;
 }
 
 export interface SkillEffect {
   type: 'damage' | 'dot' | 'freeze' | 'slow' | 'knockback' | 'stun';
-  duration?: number; // 持续时间（毫秒）
-  value?: number; // 效果值
-  range?: number; // 范围
-  count?: number; // 数量
+  duration?: number;
+  value?: number;
+  range?: number;
+  count?: number;
 }
 
-// 相克关系：水克火，火克雷，雷克风，风克土，土克水
-export const ELEMENT_WEAKNESS: Record<Element, Element> = {
-  water: 'fire',
-  fire: 'thunder',
-  thunder: 'wind',
-  wind: 'earth',
-  earth: 'water',
-};
+// 从 JSON 配置导出
+export const ELEMENT_WEAKNESS = skillsConfig.elementWeakness as Record<Element, Element>;
+export const ELEMENT_COLORS = skillsConfig.elementColors as Record<Element, string>;
+export const ELEMENT_NAMES = skillsConfig.elementNames as Record<Element, string>;
+export const ELEMENT_BASE_DAMAGE = skillsConfig.elementBaseDamage as Record<Element, number>;
 
-// 元素颜色
-export const ELEMENT_COLORS: Record<Element, string> = {
-  wind: '#22c55e',
-  thunder: '#f59e0b',
-  water: '#3b82f6',
-  fire: '#ef4444',
-  earth: '#8b5cf6',
-};
+const damageMultiplier = skillsConfig.damageFormulaMultiplier;
 
-// 元素中文名
-export const ELEMENT_NAMES: Record<Element, string> = {
-  wind: '风',
-  thunder: '雷',
-  water: '水',
-  fire: '火',
-  earth: '土',
-};
+// 从 JSON 构建技能定义
+const rawSkills = skillsConfig.skills as Record<string, {
+  id: string;
+  name: string;
+  element: string;
+  level: string;
+  description: string;
+  cooldown: number;
+  effect: SkillEffect;
+}>;
 
-// 技能定义
-export const SKILLS: Record<string, SkillDefinition> = {
-  // 风系
-  wind_basic: {
-    id: 'wind_basic',
-    name: '风咒',
-    element: 'wind',
-    level: 'basic',
-    description: '场上刮起一阵持续5s的旋风，碰到的敌人造成相应伤害',
-    cooldown: 5000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage', duration: 5000, range: 100 },
-  },
-  wind_advanced1: {
-    id: 'wind_advanced1',
-    name: '旋风斩',
-    element: 'wind',
-    level: 'advanced1',
-    description: '场上刮起的旋风碰到敌人后，分裂出两个风刃，风刃继承50%的伤害',
-    cooldown: 5000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage', duration: 5000, range: 100, count: 2 },
-  },
-  wind_advanced2: {
-    id: 'wind_advanced2',
-    name: '风卷残云',
-    element: 'wind',
-    level: 'advanced2',
-    description: '旋风每碰到五个敌人，就再次分裂出一个旋风，最多分裂三个',
-    cooldown: 5000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage', duration: 5000, range: 100, count: 3 },
-  },
+export const SKILLS: Record<string, SkillDefinition> = {};
 
-  // 雷系
-  thunder_basic: {
-    id: 'thunder_basic',
-    name: '雷咒',
-    element: 'thunder',
-    level: 'basic',
-    description: '对场上随机一名敌人落下雷罚，造成相应伤害',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage' },
-  },
-  thunder_advanced1: {
-    id: 'thunder_advanced1',
-    name: '惊雷术',
-    element: 'thunder',
-    level: 'advanced1',
-    description: '雷罚命中敌人后，再次分裂出两道雷罚，随机命中另外两名敌人',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage', count: 2 },
-  },
-  thunder_advanced2: {
-    id: 'thunder_advanced2',
-    name: '天雷空破',
-    element: 'thunder',
-    level: 'advanced2',
-    description: '雷罚命中敌人后，再次连续落下三记雷罚，追加的雷罚不能分裂，分裂的雷罚最多只能追加一记',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'damage', count: 3 },
-  },
+for (const [key, raw] of Object.entries(rawSkills)) {
+  SKILLS[key] = {
+    id: raw.id,
+    name: raw.name,
+    element: raw.element as Element,
+    level: raw.level as SkillLevel,
+    description: raw.description,
+    cooldown: raw.cooldown,
+    damage: (attack: number, elementDamage: number) => attack * damageMultiplier + elementDamage,
+    effect: raw.effect,
+  };
+}
 
-  // 水系
-  water_basic: {
-    id: 'water_basic',
-    name: '冰咒',
-    element: 'water',
-    level: 'basic',
-    description: '随机冰冻场上一名敌人，造成相应伤害',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'freeze', duration: 1000 },
-  },
-  water_advanced1: {
-    id: 'water_advanced1',
-    name: '寒冰破',
-    element: 'water',
-    level: 'advanced1',
-    description: '冰冻敌人解除冰冻后，会造成一次冰暴的伤害，爆炸会波及临近敌人',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'freeze', duration: 1000, range: 80 },
-  },
-  water_advanced2: {
-    id: 'water_advanced2',
-    name: '水漫金山',
-    element: 'water',
-    level: 'advanced2',
-    description: '敌人受到伤害的同时，后退3个单位距离',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'knockback', value: 3 },
-  },
-
-  // 火系
-  fire_basic: {
-    id: 'fire_basic',
-    name: '炎咒',
-    element: 'fire',
-    level: 'basic',
-    description: '随机点燃场上一名敌人，造成相应伤害',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'dot', duration: 3000, value: 0.3 },
-  },
-  fire_advanced1: {
-    id: 'fire_advanced1',
-    name: '爆炎弹',
-    element: 'fire',
-    level: 'advanced1',
-    description: '点燃敌人的同时，击退其1个单位距离',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'knockback', value: 1 },
-  },
-  fire_advanced2: {
-    id: 'fire_advanced2',
-    name: '三味真火',
-    element: 'fire',
-    level: 'advanced2',
-    description: '给敌人附加3s的燃烧时间',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'dot', duration: 3000, value: 0.3 },
-  },
-
-  // 土系
-  earth_basic: {
-    id: 'earth_basic',
-    name: '土咒',
-    element: 'earth',
-    level: 'basic',
-    description: '随机击退场上一名敌人1个单位距离，造成相应伤害',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'knockback', value: 1 },
-  },
-  earth_advanced1: {
-    id: 'earth_advanced1',
-    name: '飞岩术',
-    element: 'earth',
-    level: 'advanced1',
-    description: '击退的同时造成1s眩晕',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'stun', duration: 1000 },
-  },
-  earth_advanced2: {
-    id: 'earth_advanced2',
-    name: '泰山压顶',
-    element: 'earth',
-    level: 'advanced2',
-    description: '眩晕时间增加到3s',
-    cooldown: 3000,
-    damage: (attack, elementDamage) => attack * 2 + elementDamage,
-    effect: { type: 'stun', duration: 3000 },
-  },
-};
-
-// 获取技能链（初始 -> 进阶1 -> 进阶2）
+// 获取技能链
 export function getSkillChain(element: Element): SkillDefinition[] {
   return [
     SKILLS[`${element}_basic`],

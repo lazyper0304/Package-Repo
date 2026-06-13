@@ -16,7 +16,7 @@
   --bg-secondary: #f1f5f9;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
@@ -32,6 +32,9 @@
   padding: 0;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
+  outline: none;
 }
 
 body {
@@ -43,9 +46,12 @@ body {
   transition: background-color 0.3s ease;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   overflow: hidden;
+  user-select: none;
 }
 
 /* 美化滚动条 */
@@ -69,11 +75,11 @@ html, body, #root {
   }
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-track {
+[data-theme='dark'] ::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
 
   &:hover {

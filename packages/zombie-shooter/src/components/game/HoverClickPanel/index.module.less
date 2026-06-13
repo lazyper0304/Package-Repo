@@ -1,0 +1,37 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  min-width: 120px;
+}
+
+.panel-left {
+  right: 100%;
+  top: 0;
+  margin-right: 8px;
+}
+
+.panel-right {
+  left: 100%;
+  top: 0;
+  margin-left: 8px;
+}
+
+.panel-top {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+}
+
+.panel-bottom {
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+}

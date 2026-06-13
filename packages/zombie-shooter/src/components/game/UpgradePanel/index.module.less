@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 20;
   padding: 16px;
 }
@@ -15,11 +15,11 @@
 .panel {
   width: 100%;
   max-width: 420px;
-  background: rgba(30, 30, 50, 0.35);
+  background: rgba(30, 30, 50, 0.85);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
 }
 
 .header {
@@ -40,7 +40,7 @@
   transition:
     background 0.2s,
     border-color 0.2s;
-  padding: 16px !important;
+  padding: 16px 12px !important;
   background: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(12px);
   border: 2px solid rgba(255, 255, 255, 0.15);
@@ -52,6 +52,43 @@
   &:hover {
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 移动端样式 */
+.optionsMobile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.optionsMobileGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.optionCardMobile {
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 14px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .optionHeader {
+    align-items: flex-start;
   }
 }
 

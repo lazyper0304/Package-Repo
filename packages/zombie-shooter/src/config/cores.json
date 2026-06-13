@@ -1,0 +1,17 @@
+{
+  "names": {
+    "wind": { "basic": "风之核心", "advanced1": "旋风核心", "advanced2": "风暴核心" },
+    "thunder": { "basic": "雷之核心", "advanced1": "惊雷核心", "advanced2": "天雷核心" },
+    "water": { "basic": "水之核心", "advanced1": "寒冰核心", "advanced2": "洪水核心" },
+    "fire": { "basic": "火之核心", "advanced1": "爆炎核心", "advanced2": "真火核心" },
+    "earth": { "basic": "土之核心", "advanced1": "飞岩核心", "advanced2": "泰山核心" }
+  },
+  "qualitySkillLevel": {
+    "common": "basic",
+    "excellent": "basic",
+    "elite": "advanced1",
+    "perfect": "advanced1",
+    "legendary": "advanced2",
+    "mythic": "advanced2"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "enemies": {
+    "walker": {
+      "name": "行尸",
+      "texture": "enemy-walker",
+      "type": "normal",
+      "baseHp": 1,
+      "speed": 36,
+      "damage": 10,
+      "xpValue": 1,
+      "scale": 1,
+      "attackCooldown": 3000,
+      "defense": 0,
+      "dodgeRate": 0
+    },
+    "runner": {
+      "name": "疾尸",
+      "texture": "enemy-runner",
+      "type": "normal",
+      "baseHp": 0.5,
+      "speed": 48,
+      "damage": 5,
+      "xpValue": 1,
+      "scale": 0.8,
+      "attackCooldown": 3000,
+      "defense": 0,
+      "dodgeRate": 0.1,
+      "zigzag": true
+    },
+    "splitter": {
+      "name": "分裂尸",
+      "texture": "enemy-splitter",
+      "type": "normal",
+      "baseHp": 1.5,
+      "speed": 30,
+      "damage": 8,
+      "xpValue": 2,
+      "scale": 1,
+      "attackCooldown": 3000,
+      "defense": 0,
+      "dodgeRate": 0
+    },
+    "tank": {
+      "name": "坦克尸",
+      "texture": "enemy-tank",
+      "type": "elite",
+      "baseHp": 5,
+      "speed": 18,
+      "damage": 20,
+      "xpValue": 5,
+      "scale": 1.2,
+      "attackCooldown": 3000,
+      "defense": 5,
+      "dodgeRate": 0.05
+    },
+    "armored": {
+      "name": "装甲尸",
+      "texture": "enemy-armored",
+      "type": "elite",
+      "baseHp": 8,
+      "speed": 15,
+      "damage": 15,
+      "xpValue": 8,
+      "scale": 1.3,
+      "attackCooldown": 3000,
+      "defense": 10,
+      "dodgeRate": 0.1
+    },
+    "boss": {
+      "name": "僵尸王",
+      "texture": "boss",
+      "type": "boss",
+      "baseHp": 50,
+      "speed": 12,
+      "damage": 30,
+      "xpValue": 20,
+      "scale": 1.5,
+      "attackCooldown": 3000,
+      "defense": 10,
+      "dodgeRate": 0.15,
+      "isBoss": true
+    }
+  },
+  "waveTiers": [
+    {
+      "condition": { "type": "exact", "wave": 14 },
+      "totalEnemiesFormula": "15 + wave * 2",
+      "enemyTypes": [
+        { "type": "walker", "weight": 30 },
+        { "type": "runner", "weight": 25 },
+        { "type": "tank", "weight": 20 },
+        { "type": "splitter", "weight": 15 },
+        { "type": "boss", "weight": 10 }
+      ]
+    },
+    {
+      "condition": { "type": "exact", "waves": [5, 10] },
+      "totalEnemiesFormula": "10 + wave * 2",
+      "enemyTypes": [
+        { "type": "walker", "weight": 40 },
+        { "type": "runner", "weight": 30 },
+        { "type": "tank", "weight": 20 },
+        { "type": "splitter", "weight": 10 }
+      ]
+    },
+    {
+      "condition": { "type": "range", "max": 4 },
+      "totalEnemiesFormula": "8 + wave * 2",
+      "enemyTypes": [
+        { "type": "walker", "weight": 70 },
+        { "type": "runner", "weight": 30 }
+      ]
+    },
+    {
+      "condition": { "type": "range", "max": 13 },
+      "totalEnemiesFormula": "12 + wave * 2",
+      "enemyTypes": [
+        { "type": "walker", "weight": 40 },
+        { "type": "runner", "weight": 30 },
+        { "type": "splitter", "weight": 20 },
+        { "type": "tank", "weight": 10 }
+      ]
+    },
+    {
+      "condition": { "type": "range", "min": 15 },
+      "totalEnemiesFormula": "15 + wave * 2",
+      "enemyTypes": [
+        { "type": "walker", "weight": 35 },
+        { "type": "runner", "weight": 25 },
+        { "type": "splitter", "weight": 25 },
+        { "type": "tank", "weight": 15 }
+      ]
+    }
+  ]
+}

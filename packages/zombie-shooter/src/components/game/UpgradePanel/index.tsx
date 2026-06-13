@@ -1,5 +1,6 @@
 import { Card, Text, Badge } from '@radix-ui/themes';
-import type { UpgradeOption } from '../../../game/bridge';
+import type { UpgradeOption } from '@/game/bridge';
+import { useMobile } from '@/hooks/useMobile';
 import styles from './index.module.less';
 
 interface UpgradePanelProps {
@@ -22,37 +23,38 @@ const categoryNames: Record<string, string> = {
 };
 
 export function UpgradePanel({ options, onSelect }: UpgradePanelProps) {
+  const isMobile = useMobile();
+
   return (
     <div className={styles.overlay}>
-      <div className={styles.panel}>
-        <div className={styles.header}>
-          <Text size="5" weight="bold">选择技能</Text>
-        </div>
-        <div className={styles.options}>
+      <div className={isMobile ? styles.optionsMobile : styles.panel}>
+        {!isMobile && (
+          <div className={styles.header}>
+            <Text size="5" weight="bold">选择技能</Text>
+          </div>
+        )}
+        <div className={isMobile ? styles.optionsMobileGrid : styles.options}>
           {options.map((option) => (
             <Card
               key={option.id}
-              className={styles.optionCard}
+              className={isMobile ? styles.optionCardMobile : styles.optionCard}
               onClick={() => onSelect(option.id)}
             >
               <div className={styles.iconWrapper}>
-                <Text size="6">{option.icon}</Text>
+                <Text size={isMobile ? "4" : "6"}>{option.icon}</Text>
               </div>
               <div className={styles.optionContent}>
                 <div className={styles.optionHeader}>
-                  <Text size="3" weight="bold">{option.name}</Text>
-                  <Badge color={categoryColors[option.category] as 'blue' | 'purple' | 'green' | 'orange'} size="1">
-                    {categoryNames[option.category]}
-                  </Badge>
+                  <Text size={isMobile ? "2" : "3"} weight="bold" style={{ textAlign: 'left' }}>{option.name}</Text>
+                  {!isMobile && (
+                    <Badge color={categoryColors[option.category] as 'blue' | 'purple' | 'green' | 'orange'} size="1">
+                      {categoryNames[option.category]}
+                    </Badge>
+                  )}
                 </div>
-                <Text size="2" color="gray" style={{ marginTop: 4 }}>
+                <Text size={isMobile ? "1" : "2"} color="gray" style={{ marginTop: isMobile ? 2 : 4, textAlign: 'left' }}>
                   {option.description}
                 </Text>
-                {option.category !== 'skill' && (
-                  <Text size="1" color="gray" style={{ marginTop: 2 }}>
-                    Lv.{option.currentLevel} → Lv.{option.currentLevel + 1}
-                  </Text>
-                )}
               </div>
             </Card>
           ))}

@@ -5,7 +5,9 @@ import { BALANCE } from '../data/balance';
 import { ENEMY_TYPES } from '../data/enemies';
 import { getRandomUpgradeOptions, type UpgradeId } from '../data/upgrades';
 import { getWaveConfig, getTotalEnemiesFor20Waves } from '../data/waves';
+import { ELEMENT_BASE_DAMAGE } from '../data/skills';
 import { buffManager, type BuffType } from '../systems/BuffSystem';
+import { getAndClearPendingGameData } from '../PhaserGame';
 
 interface PlayerSprite extends Phaser.Physics.Arcade.Sprite {
   hp: number;
@@ -77,6 +79,7 @@ export class GameScene extends Phaser.Scene {
   private waveNumber = 0;
   private killCount = 0;
   private score = 0;
+  private currentStage = 1;
 
   // 技能系统
   private skillCooldowns: Record<string, number> = {};
@@ -106,6 +109,15 @@ export class GameScene extends Phaser.Scene {
   // 自动射击开关
   private autoShootEnabled = true;
 
+  // 装备词条效果
+  private affixEffects: Record<string, number> = {};
+  private wallInvincibleTimer = 0;
+  private wallInvincibleUsed = false;
+  private wallShieldRegenTimer = 0;
+  private elementDamageByType: Record<string, number> = {};
+  private playerDodgeRate = 0;
+  private hitRateBonus = 0;
+
   // 伤害统计
   private damageStats: Record<string, number> = {
     gun: 0,
@@ -115,11 +127,16 @@ export class GameScene extends Phaser.Scene {
     fire: 0,
     earth: 0,
     burn: 0,
+    explosion: 0,
     split: 0,
   };
 
   constructor() {
     super({ key: 'GameScene' });
+  }
+
+  init(): void {
+    this.setupBridgeListeners();
   }
 
   create(): void {
@@ -129,16 +146,194 @@ export class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.createGroups();
     this.setupCollisions();
-    this.setupBridgeListeners();
 
-    // 设置世界边界 - 不阻挡子弹
+    // 设置世界边界
     this.physics.world.setBoundsCollision(false, false, false, false);
     this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    // Start the game
+    // 读取启动数据并应用装备效果
+    this.applyPendingData();
+
+    // 通知 React 场景已准备好
+    gameBridge.emit('scene:ready', {});
+  }
+
+  private applyPendingData(): void {
+    const data = getAndClearPendingGameData();
+    if (!data) return;
+
+    this.currentStage = data.startWave;
+
+    // 应用装备属性加成
+    if (data.bonusHp) {
+      this.player.hp += data.bonusHp;
+      this.player.maxHp += data.bonusHp;
+    }
+    if (data.bonusAttack || data.playerAttackBonus) {
+      const atkBonus = (data.bonusAttack || 0) + (data.playerAttackBonus || 0);
+      this.player.damage += atkBonus;
+      this.player.baseDamage += atkBonus;
+    }
+
+    // 应用暴击率加成
+    if (data.playerCritChanceBonus) {
+      this.player.critChance += data.playerCritChanceBonus;
+    }
+
+    // 应用暴击伤害加成
+    if (data.playerCritDamageBonus) {
+      this.player.critMultiplier += data.playerCritDamageBonus;
+    }
+
+    // 应用闪避率
+    this.playerDodgeRate = data.playerDodgeRate || 0;
+
+    // 应用命中率
+    this.hitRateBonus = data.hitRateBonus || 0;
+
+    // 保存词条效果
+    this.affixEffects = data.affixEffects || {};
+    this.elementDamageByType = data.elementDamageByType || {};
+
+    // 应用预计算的城墙属性
+    this.wall.maxHp = data.wallMaxHp;
+    this.wall.hp = data.wallMaxHp;
+    this.wall.maxShield = data.wallShield;
+    this.wall.shield = data.wallShield;
+
+    // 重置无敌和护盾回复计时器
+    this.wallInvincibleTimer = 0;
+    this.wallInvincibleUsed = false;
+    this.wallShieldRegenTimer = 0;
+
+    // 发送更新后的城墙和玩家属性
+    gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
+    gameBridge.emit('wall:shield-changed', { shield: this.wall.shield, maxShield: this.wall.maxShield });
+    gameBridge.emit('player:hp-changed', { hp: this.player.hp, maxHp: this.player.maxHp });
+
+    // 延迟再次发送，确保 React 监听已注册
     this.time.delayedCall(100, () => {
-      this.startNextWave();
+      gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
+      gameBridge.emit('wall:shield-changed', { shield: this.wall.shield, maxShield: this.wall.maxShield });
     });
+
+    // 发送生效词条信息
+    this.emitAffixesInfo();
+
+    // 开始第一波
+    this.startNextWave();
+  }
+
+  private emitAffixesInfo(): void {
+    const affixNames: Record<string, { name: string; desc: string; source: string }> = {
+      'hit_rate_5': { name: '命中率+5%', desc: '命中率增加5%（转化为暴击率）', source: '宝石' },
+      'hit_rate_10': { name: '命中率+10%', desc: '命中率增加10%', source: '宝石' },
+      'hit_rate_15': { name: '命中率+15%', desc: '命中率增加15%', source: '宝石' },
+      'hit_rate_20': { name: '命中率+20%', desc: '命中率增加20%', source: '宝石' },
+      'hit_rate_25': { name: '命中率+25%', desc: '命中率增加25%', source: '宝石' },
+      'hit_rate_30': { name: '命中率+30%', desc: '命中率增加30%', source: '宝石' },
+      'attack_20': { name: '攻击+20', desc: '攻击力增加20', source: '宝石' },
+      'attack_40': { name: '攻击+40', desc: '攻击力增加40', source: '宝石' },
+      'attack_60': { name: '攻击+60', desc: '攻击力增加60', source: '宝石' },
+      'attack_80': { name: '攻击+80', desc: '攻击力增加80', source: '宝石' },
+      'attack_100': { name: '攻击+100', desc: '攻击力增加100', source: '宝石' },
+      'attack_120': { name: '攻击+120', desc: '攻击力增加120', source: '宝石' },
+      'attack_random': { name: '随机增幅', desc: '攻击随机增幅-20%~+30%', source: '宝石' },
+      'attack_random_40': { name: '随机增幅', desc: '攻击随机增幅-20%~+40%', source: '宝石' },
+      'attack_random_50': { name: '随机增幅', desc: '攻击随机增幅-20%~+50%', source: '宝石' },
+      'attack_random_60': { name: '随机增幅', desc: '攻击随机增幅-20%~+60%', source: '宝石' },
+      'attack_random_70': { name: '随机增幅', desc: '攻击随机增幅-20%~+70%', source: '宝石' },
+      'crit_rate_5': { name: '暴击率+5%', desc: '暴击率增加5%', source: '宝石' },
+      'crit_rate_10': { name: '暴击率+10%', desc: '暴击率增加10%', source: '宝石' },
+      'crit_rate_15': { name: '暴击率+15%', desc: '暴击率增加15%', source: '宝石' },
+      'crit_rate_20': { name: '暴击率+20%', desc: '暴击率增加20%', source: '宝石' },
+      'crit_rate_30': { name: '暴击率+30%', desc: '暴击率增加30%', source: '宝石' },
+      'crit_rate_40': { name: '暴击率+40%', desc: '暴击率增加40%', source: '宝石' },
+      'crit_damage_10': { name: '暴伤+10%', desc: '暴击伤害增加10%', source: '宝石' },
+      'crit_damage_20': { name: '暴伤+20%', desc: '暴击伤害增加20%', source: '宝石' },
+      'crit_damage_30': { name: '暴伤+30%', desc: '暴击伤害增加30%', source: '宝石' },
+      'crit_damage_40': { name: '暴伤+40%', desc: '暴击伤害增加40%', source: '宝石' },
+      'crit_damage_50': { name: '暴伤+50%', desc: '暴击伤害增加50%', source: '宝石' },
+      'crit_damage_60': { name: '暴伤+60%', desc: '暴击伤害增加60%', source: '宝石' },
+      'dodge_5': { name: '闪避+5%', desc: '闪避率增加5%', source: '宝石' },
+      'dodge_10': { name: '闪避+10%', desc: '闪避率增加10%', source: '宝石' },
+      'dodge_15': { name: '闪避+15%', desc: '闪避率增加15%', source: '宝石' },
+      'dodge_20': { name: '闪避+20%', desc: '闪避率增加20%', source: '宝石' },
+      'dodge_30': { name: '闪避+30%', desc: '闪避率增加30%', source: '宝石' },
+      'dodge_40': { name: '闪避+40%', desc: '闪避率增加40%', source: '宝石' },
+      'slow_1': { name: '减速1%', desc: '攻击1%概率减速50%', source: '宝石' },
+      'slow_2': { name: '减速2%', desc: '攻击2%概率减速50%', source: '宝石' },
+      'slow_3': { name: '减速3%', desc: '攻击3%概率减速50%', source: '宝石' },
+      'slow_4': { name: '减速4%', desc: '攻击4%概率减速50%', source: '宝石' },
+      'slow_5': { name: '减速5%', desc: '攻击5%概率减速60%', source: '宝石' },
+      'slow_6': { name: '减速6%', desc: '攻击6%概率减速70%', source: '宝石' },
+      'stun_1': { name: '眩晕1%', desc: '暴击1%概率眩晕', source: '宝石' },
+      'stun_2': { name: '眩晕2%', desc: '暴击2%概率眩晕', source: '宝石' },
+      'stun_3': { name: '眩晕3%', desc: '暴击3%概率眩晕', source: '宝石' },
+      'stun_4': { name: '眩晕4%', desc: '暴击4%概率眩晕', source: '宝石' },
+      'stun_5': { name: '眩晕5%', desc: '暴击5%概率眩晕', source: '宝石' },
+      'stun_6': { name: '眩晕6%', desc: '暴击6%概率眩晕', source: '宝石' },
+      'bleed_1': { name: '流血1%', desc: '攻击1%概率流血', source: '宝石' },
+      'bleed_2': { name: '流血2%', desc: '攻击2%概率流血', source: '宝石' },
+      'bleed_3': { name: '流血3%', desc: '攻击3%概率流血', source: '宝石' },
+      'bleed_4': { name: '流血4%', desc: '攻击4%概率流血', source: '宝石' },
+      'bleed_5': { name: '流血5%', desc: '攻击5%概率流血', source: '宝石' },
+      'bleed_6': { name: '流血6%', desc: '攻击6%概率流血', source: '宝石' },
+      'teleport_1': { name: '传送1%', desc: '攻击1%概率传送敌人回起点', source: '宝石' },
+      'teleport_2': { name: '传送2%', desc: '攻击2%概率传送敌人', source: '宝石' },
+      'teleport_3': { name: '传送3%', desc: '攻击3%概率传送敌人', source: '宝石' },
+      'teleport_4': { name: '传送4%', desc: '攻击4%概率传送敌人', source: '宝石' },
+      'teleport_5': { name: '传送5%', desc: '攻击5%概率传送敌人', source: '宝石' },
+      'teleport_6': { name: '传送6%', desc: '攻击6%概率传送敌人', source: '宝石' },
+      'instant_kill_1': { name: '秒杀1%', desc: '攻击1%概率秒杀', source: '宝石' },
+      'instant_kill_2': { name: '秒杀2%', desc: '攻击2%概率秒杀', source: '宝石' },
+      'no_ammo_5': { name: '省弹5%', desc: '5%概率不消耗弹药', source: '宝石' },
+      'no_ammo_10': { name: '省弹10%', desc: '10%概率不消耗弹药', source: '宝石' },
+      'no_ammo_15': { name: '省弹15%', desc: '15%概率不消耗弹药', source: '宝石' },
+      'no_ammo_20': { name: '省弹20%', desc: '20%概率不消耗弹药', source: '宝石' },
+      'no_ammo_25': { name: '省弹25%', desc: '25%概率不消耗弹药', source: '宝石' },
+      'no_ammo_30': { name: '省弹30%', desc: '30%概率不消耗弹药', source: '宝石' },
+      'invincible_1s': { name: '低血无敌1s', desc: '血量<30%时无敌1秒（一局一次）', source: '宝石' },
+      'invincible_1s_40': { name: '低血无敌1s', desc: '血量<40%时无敌1秒', source: '宝石' },
+      'invincible_2s': { name: '低血无敌2s', desc: '血量<40%时无敌2秒', source: '宝石' },
+      'invincible_3s': { name: '低血无敌3s', desc: '血量<40%时无敌3秒', source: '宝石' },
+      'invincible_4s': { name: '低血无敌4s', desc: '血量<40%时无敌4秒', source: '宝石' },
+      'invincible_5s': { name: '低血无敌5s', desc: '血量<40%时无敌5秒', source: '宝石' },
+      'wall_hp_200': { name: '城墙+200', desc: '城墙血量+200', source: '宝石' },
+      'wall_hp_400': { name: '城墙+400', desc: '城墙血量+400', source: '宝石' },
+      'wall_hp_600': { name: '城墙+600', desc: '城墙血量+600', source: '宝石' },
+      'wall_hp_800': { name: '城墙+800', desc: '城墙血量+800', source: '宝石' },
+      'wall_hp_1000': { name: '城墙+1000', desc: '城墙血量+1000', source: '宝石' },
+      'wall_hp_1200': { name: '城墙+1200', desc: '城墙血量+1200', source: '宝石' },
+      'wall_shield_100': { name: '护盾+100', desc: '城墙护盾+100', source: '宝石' },
+      'wall_shield_200': { name: '护盾+200', desc: '城墙护盾+200', source: '宝石' },
+      'wall_shield_300': { name: '护盾+300', desc: '城墙护盾+300', source: '宝石' },
+      'wall_shield_400': { name: '护盾+400', desc: '城墙护盾+400', source: '宝石' },
+      'wall_shield_500': { name: '护盾+500', desc: '城墙护盾+500', source: '宝石' },
+      'wall_shield_600': { name: '护盾+600', desc: '城墙护盾+600', source: '宝石' },
+      'wall_counter_10': { name: '反击10%', desc: '受击10%概率反击2倍', source: '宝石' },
+      'wall_counter_20': { name: '反击20%', desc: '受击20%概率反击2倍', source: '宝石' },
+      'wall_counter_30': { name: '反击30%', desc: '受击30%概率反击2倍', source: '宝石' },
+      'wall_counter_40': { name: '反击40%', desc: '受击40%概率反击2倍', source: '宝石' },
+      'wall_counter_50': { name: '反击50%', desc: '受击50%概率反击3倍', source: '宝石' },
+      'wall_counter_60': { name: '反击60%', desc: '受击60%概率反击4倍', source: '宝石' },
+      'wall_regen_shield': { name: '护盾回复', desc: '每30s回复10%最大护盾', source: '宝石' },
+      'lifesteal_wall': { name: '吸血城墙', desc: '攻击2%概率吸血40%恢复城墙', source: '宝石' },
+      'burn_extra_damage': { name: '灼烧增伤', desc: '对燃烧敌人额外0.01%最大生命伤害', source: '宝石' },
+      'freeze_extra_damage': { name: '冰冻增伤', desc: '对冰冻敌人额外0.01%最大生命伤害', source: '宝石' },
+      'paralyze_extra_damage': { name: '麻痹增伤', desc: '对麻痹敌人额外0.01%最大生命伤害', source: '宝石' },
+    };
+
+    const affixes = Object.keys(this.affixEffects)
+      .filter(id => this.affixEffects[id] > 0)
+      .map(id => {
+        const info = affixNames[id];
+        return info
+          ? { name: info.name, description: info.desc, source: info.source }
+          : { name: id, description: `${id}: ${this.affixEffects[id]}`, source: '未知' };
+      });
+
+    gameBridge.emit('affixes:updated', { affixes });
   }
 
   private resetGameState(): void {
@@ -159,6 +354,11 @@ export class GameScene extends Phaser.Scene {
 
     this.gameTime = 0;
 
+    // 重置词条相关计时器
+    this.wallInvincibleTimer = 0;
+    this.wallInvincibleUsed = false;
+    this.wallShieldRegenTimer = 0;
+
     // 重置技能状态
     this.activeSkillElements = [];
     this.skillLevels = {};
@@ -174,28 +374,27 @@ export class GameScene extends Phaser.Scene {
       fire: 0,
       earth: 0,
       burn: 0,
+      explosion: 0,
       split: 0,
     };
   }
 
   private createBackground(): void {
-    // 使用加载的背景图片
-    if (this.textures.exists('background')) {
-      const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'background');
-      bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-      bg.setDepth(0);
-    } else {
-      // 备用：程序化生成背景
-      const g = this.add.graphics();
-      g.fillGradientStyle(0x1a3a0a, 0x1a3a0a, 0x2d5016, 0x2d5016, 1);
-      g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    // 使用关卡背景图片，等比拉伸填满屏幕（10张图循环使用）
+    const stageNum = ((this.currentStage - 1) % 10) + 1;
+    const stageKey = `stage-${stageNum}`;
+    if (this.textures.exists(stageKey)) {
+      const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, stageKey);
+      const bgTexture = this.textures.get(stageKey);
+      const bgWidth = bgTexture.getSourceImage().width;
+      const bgHeight = bgTexture.getSourceImage().height;
 
-      for (let i = 0; i < 50; i++) {
-        const x = Phaser.Math.Between(0, GAME_WIDTH);
-        const y = Phaser.Math.Between(0, GAME_HEIGHT);
-        g.fillStyle(0x3a6b1e, 0.3);
-        g.fillCircle(x, y, Phaser.Math.Between(1, 3));
-      }
+      const scaleX = GAME_WIDTH / bgWidth;
+      const scaleY = GAME_HEIGHT / bgHeight;
+      const scale = Math.max(scaleX, scaleY);
+
+      bg.setScale(scale);
+      bg.setDepth(0);
     }
   }
 
@@ -221,9 +420,9 @@ export class GameScene extends Phaser.Scene {
 
     this.wall.setDepth(5);
 
-    // 在城墙下方渲染网格状城墙填充
+    // 在城墙下方渲染网格状城墙填充（层级比城墙高）
     const wallFill = this.add.graphics();
-    wallFill.setDepth(5);
+    wallFill.setDepth(6);
 
     // 基础砖块颜色（与城堡素材一致）
     const brickColor = 0x735435; // 主砖色 #735435
@@ -231,8 +430,8 @@ export class GameScene extends Phaser.Scene {
     const mortarColor = 0x4a3a28; // 灰缝颜色
 
     // 绘制网格状城墙
-    const fillTop = GAME_HEIGHT - 40;
-    const fillHeight = 40;
+    const fillTop = GAME_HEIGHT - 38; // 下移2px
+    const fillHeight = 38;
 
     // 背景色（灰缝）
     wallFill.fillStyle(mortarColor, 1);
@@ -266,7 +465,7 @@ export class GameScene extends Phaser.Scene {
     this.wall.shield = 0;
     this.wall.maxShield = 0;
     this.wall.x = GAME_WIDTH / 2;
-    this.wall.y = GAME_HEIGHT - 100;
+    this.wall.y = GAME_HEIGHT - 90; // 下移10px
 
     gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
   }
@@ -368,14 +567,11 @@ export class GameScene extends Phaser.Scene {
   private setupBridgeListeners(): void {
     gameBridge.on('upgrade:selected', (data: { upgradeId: string }) => {
       this.applyUpgrade(data.upgradeId);
-      // 安全恢复场景
       try {
         if (this.scene && this.scene.isPaused()) {
           this.scene.resume();
         }
-      } catch (e) {
-        // 场景可能已销毁
-      }
+      } catch (e) {}
     });
 
     gameBridge.on('game:restart', () => {
@@ -434,15 +630,36 @@ export class GameScene extends Phaser.Scene {
     const damageBonus = ((this.upgradeLevels['gun_damage'] || 0) * 60) + ((this.upgradeLevels['gun_all_damage'] || 0) * 100);
     const splitDamage = Math.round(this.player.damage * 0.5);
 
+    // 装备附加攻击 = 总攻击 - 基础攻击 - 升级增幅
+    const baseDamage = BALANCE.player.baseDamage;
+    const upgradeDamage = Math.round(baseDamage * damageBonus / 100);
+    const equipDamage = Math.max(0, this.player.damage - baseDamage - upgradeDamage);
+
+    // 随机增幅范围
+    let randomBoostMin = 0;
+    let randomBoostMax = 0;
+    if (this.affixEffects['attack_random']) { randomBoostMin = -20; randomBoostMax = 30; }
+    else if (this.affixEffects['attack_random_40']) { randomBoostMin = -20; randomBoostMax = 40; }
+    else if (this.affixEffects['attack_random_50']) { randomBoostMin = -20; randomBoostMax = 50; }
+    else if (this.affixEffects['attack_random_60']) { randomBoostMin = -20; randomBoostMax = 60; }
+    else if (this.affixEffects['attack_random_70']) { randomBoostMin = -20; randomBoostMax = 70; }
+
     gameBridge.emit('gun:stats', {
       damage: this.player.damage,
+      baseDamage,
+      equipDamage,
       damageBonus,
+      randomBoostMin,
+      randomBoostMax,
       burstCount: 1 + burstLevel,
       rapidCount: 1 + rapidLevel,
       splitCount: splitLevel,
       splitDamage,
       critChance: this.player.critChance,
       critMultiplier: this.player.critMultiplier,
+      hasExplosive: (this.upgradeLevels['gun_explosive'] || 0) > 0,
+      explosiveDamage: Math.round(this.player.damage * 0.3),
+      hitRate: this.hitRateBonus || 0,
     });
   }
 
@@ -458,6 +675,7 @@ export class GameScene extends Phaser.Scene {
       fire: '火系',
       earth: '土系',
       burn: '燃烧',
+      explosion: '爆炸',
       split: '分裂',
     };
 
@@ -475,31 +693,75 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updateSkillCooldownInfo(): void {
-    const skillNames: Record<string, string[]> = {
-      wind: ['风咒', '旋风斩', '风卷残云'],
-      thunder: ['雷咒', '惊雷术', '天雷空破'],
-      water: ['冰咒', '寒冰破', '水漫金山'],
-      fire: ['炎咒', '爆炎弹', '三味真火'],
-      earth: ['土咒', '飞岩术', '泰山压顶'],
-    };
-
     const skillInfo = this.activeSkillElements.map(element => {
       const skillId = `${element}_basic`;
       const cooldown = this.skillCooldowns[element] || 3000;
       const remaining = Math.max(0, this.skillTimers[skillId] || 0);
       const progress = cooldown > 0 ? (remaining / cooldown) * 100 : 0;
       const level = this.skillLevels[element] || 1;
+      const skillNames: Record<string, string[]> = {
+        wind: ['风咒', '旋风斩', '风卷残云'],
+        thunder: ['雷咒', '惊雷术', '天雷空破'],
+        water: ['冰咒', '寒冰破', '水漫金山'],
+        fire: ['炎咒', '爆炎弹', '三味真火'],
+        earth: ['土咒', '飞岩术', '泰山压顶'],
+      };
+      const skillEmojis: Record<string, string> = {
+        wind: '🌪️',
+        thunder: '⚡',
+        water: '💧',
+        fire: '🔥',
+        earth: '🪨',
+      };
       const name = skillNames[element]?.[level - 1] || element;
+      const icon = skillEmojis[element] || '✨';
       const elementDamage = this.getElementDamage(element);
+      const skillBaseDamage = ELEMENT_BASE_DAMAGE[element] || 300;
+      // 元素增幅倍率
+      const elementUpgradeId = `element_${element}` as UpgradeId;
+      const elementUpgradeLevel = this.upgradeLevels[elementUpgradeId] || 0;
+      const elementMultiplier = 1 + (elementUpgradeLevel * 0.6);
+      // 最终伤害 = (基础伤害 + 元素加成) * 元素增幅
+      const totalDamage = Math.round((skillBaseDamage + (elementDamage || 0)) * elementMultiplier);
+
+      // 技能效果描述
+      const effects: string[] = [];
+      // 基础效果
+      if (element === 'wind') effects.push('持续5秒旋风');
+      if (element === 'thunder') effects.push('雷罚单体敌人');
+      if (element === 'water') effects.push('冰冻单体敌人');
+      if (element === 'fire') effects.push('点燃单体敌人');
+      if (element === 'earth') effects.push('击退单体敌人');
+      // 进阶1效果
+      if (level >= 2) {
+        if (element === 'wind') effects.push('命中分裂2个风刃');
+        if (element === 'thunder') effects.push('命中分裂2道雷罚');
+        if (element === 'water') effects.push('冰冻结束冰暴伤害');
+        if (element === 'fire') effects.push('命中击退1单位');
+        if (element === 'earth') effects.push('命中击退+眩晕');
+      }
+      // 进阶2效果
+      if (level >= 3) {
+        if (element === 'wind') effects.push('每5次命中分裂新旋风');
+        if (element === 'thunder') effects.push('连续3记雷罚');
+        if (element === 'water') effects.push('击退3单位');
+        if (element === 'fire') effects.push('附加3秒燃烧');
+        if (element === 'earth') effects.push('眩晕增加到3秒');
+      }
 
       return {
         name,
         element,
         level,
+        icon,
         cooldown,
         remaining,
         progress,
         elementDamage,
+        baseDamage: skillBaseDamage,
+        totalDamage,
+        elementUpgradeLevel,
+        effects,
       };
     });
     gameBridge.emit('skills:updated', { skills: skillInfo });
@@ -583,7 +845,7 @@ export class GameScene extends Phaser.Scene {
     const rapidLevel = this.upgradeLevels['gun_rapid'] || 0;
     const rapidCount = 1 + rapidLevel; // 连射数量
     const bulletSpeed = this.player.bulletSpeed;
-    const verticalOffset = 12; // 连射子弹垂直间距
+    const verticalOffset = 64; // 连射子弹垂直间距
 
     // 齐射角度：1级15度，2级25度
     const burstAngles = [0, 15, 25];
@@ -592,21 +854,21 @@ export class GameScene extends Phaser.Scene {
     // 计算基础角度（从人物到敌人）
     const baseAngle = Phaser.Math.Angle.Between(this.player.x, this.player.y, targetEnemy.x, targetEnemy.y);
 
-    // 连射：垂直方向发射多排子弹（轨迹相同，只是起始位置不同）
-    for (let r = 0; r < rapidCount; r++) {
-      this.time.delayedCall(r * 80, () => { // 每排间隔80ms
-        if (!this.player.active || this.player.isReloading) return;
+    // 齐射+连射：每条线发射rapidCount颗子弹，沿同一角度飞行
+    for (let i = 0; i < burstCount; i++) {
+      // 计算这条线的角度偏移
+      let angleOffset = 0;
+      if (burstCount > 1 && totalSpreadAngle > 0) {
+        angleOffset = (i - (burstCount - 1) / 2) * (totalSpreadAngle / (burstCount - 1));
+      }
+      const angle = baseAngle + Phaser.Math.DegToRad(angleOffset);
 
-        // 齐射：每排发射多颗子弹（以基础角度为中心，扇形展开）
-        for (let i = 0; i < burstCount; i++) {
-          // 计算角度偏移（以基础角度为中心，左右展开）
-          let angleOffset = 0;
-          if (burstCount > 1 && totalSpreadAngle > 0) {
-            angleOffset = (i - (burstCount - 1) / 2) * (totalSpreadAngle / (burstCount - 1));
-          }
-          const angle = baseAngle + Phaser.Math.DegToRad(angleOffset);
+      // 沿这条线发射rapidCount颗子弹
+      for (let r = 0; r < rapidCount; r++) {
+        this.time.delayedCall(r * 80, () => { // 每颗间隔80ms
+          if (!this.player.active || this.player.isReloading) return;
 
-          // 子弹从人物顶部射出
+          // 子弹从人物顶部射出，连射偏移垂直位置
           const startX = this.player.x;
           const startY = this.player.y - 26 - r * verticalOffset;
 
@@ -629,7 +891,7 @@ export class GameScene extends Phaser.Scene {
             bullet = this.bullets.create(startX, startY, 'bullet') as BulletSprite;
           }
 
-          if (!bullet) continue;
+          if (!bullet) return;
 
           // 根据元素子弹类型设置纹理
           if (this.upgradeLevels['gun_fire'] && this.textures.exists('bullet-fire')) {
@@ -672,13 +934,19 @@ export class GameScene extends Phaser.Scene {
           const vy = Math.sin(angle) * bulletSpeed;
           bullet.setVelocity(vx, vy);
           bullet.setRotation(angle + Math.PI / 2); // 旋转子弹头部朝向飞行方向
-        }
-      });
+        });
+      }
     }
 
-    // 扣除弹药
-    this.player.ammo -= 1;
-    gameBridge.emit('ammo:changed', { ammo: this.player.ammo, maxAmmo: this.player.maxAmmo, isReloading: false });
+    // 扣除弹药（no_ammo词条有概率不消耗）
+    const noAmmoChance = (this.affixEffects['no_ammo_5'] || 0) + (this.affixEffects['no_ammo_10'] || 0) +
+      (this.affixEffects['no_ammo_15'] || 0) + (this.affixEffects['no_ammo_20'] || 0) +
+      (this.affixEffects['no_ammo_25'] || 0) + (this.affixEffects['no_ammo_30'] || 0);
+    const skipAmmo = noAmmoChance > 0 && Math.random() * 100 < noAmmoChance;
+    if (!skipAmmo) {
+      this.player.ammo -= 1;
+      gameBridge.emit('ammo:changed', { ammo: this.player.ammo, maxAmmo: this.player.maxAmmo, isReloading: false });
+    }
 
     // 弹药用完开始换弹
     if (this.player.ammo <= 0) {
@@ -855,7 +1123,68 @@ export class GameScene extends Phaser.Scene {
 
           if (currentTime - lastAttack >= enemy.attackCooldown) {
             enemy.setData('lastWallAttack', currentTime);
-            this.wall.hp = Math.max(0, this.wall.hp - enemy.damage);
+
+            // === 城墙无敌词条 ===
+            if (this.wallInvincibleTimer > 0) {
+              this.showDamageNumber(this.wall.x, this.wall.y - 30, 0, false, '#3b82f6');
+              return;
+            }
+
+            // === 闪避词条 ===
+            if (this.playerDodgeRate > 0 && Math.random() < this.playerDodgeRate) {
+              this.showDamageNumber(this.wall.x, this.wall.y - 30, 0, false, '#22c55e');
+              return;
+            }
+
+            // 先扣护盾
+            if (this.wall.shield > 0) {
+              const shieldDamage = Math.min(this.wall.shield, enemy.damage);
+              this.wall.shield -= shieldDamage;
+              const remainDamage = enemy.damage - shieldDamage;
+              if (remainDamage > 0) {
+                this.wall.hp = Math.max(0, this.wall.hp - remainDamage);
+              }
+              gameBridge.emit('wall:shield-changed', { shield: this.wall.shield, maxShield: this.wall.maxShield });
+            } else {
+              this.wall.hp = Math.max(0, this.wall.hp - enemy.damage);
+            }
+
+            // 检查无敌词条触发（血量低于阈值时，一局只能触发一次）
+            const hpPercent = (this.wall.hp / this.wall.maxHp) * 100;
+            if (!this.wallInvincibleUsed && this.wallInvincibleTimer <= 0) {
+              const invincibleThresholds = [
+                { id: 'invincible_1s', hpPercent: 30, duration: 1000 },
+                { id: 'invincible_1s_40', hpPercent: 40, duration: 1000 },
+                { id: 'invincible_2s', hpPercent: 40, duration: 2000 },
+                { id: 'invincible_3s', hpPercent: 40, duration: 3000 },
+                { id: 'invincible_4s', hpPercent: 40, duration: 4000 },
+                { id: 'invincible_5s', hpPercent: 40, duration: 5000 },
+              ];
+              for (const threshold of invincibleThresholds) {
+                if (this.affixEffects[threshold.id] && hpPercent < threshold.hpPercent) {
+                  this.wallInvincibleTimer = threshold.duration;
+                  this.wallInvincibleUsed = true;
+                  this.showDamageNumber(this.wall.x, this.wall.y - 50, 0, false, '#3b82f6');
+                  break;
+                }
+              }
+            }
+
+            // === 城墙反击词条 ===
+            const counterChance = (this.affixEffects['wall_counter_10'] || 0) + (this.affixEffects['wall_counter_20'] || 0) +
+              (this.affixEffects['wall_counter_30'] || 0) + (this.affixEffects['wall_counter_40'] || 0) +
+              (this.affixEffects['wall_counter_50'] || 0) + (this.affixEffects['wall_counter_60'] || 0);
+            if (counterChance > 0 && Math.random() * 100 < counterChance) {
+              // 反击倍率：legendary=3倍, mythic=4倍, 其他=2倍
+              const counterMultiplier = this.affixEffects['wall_counter_60'] ? 4 : this.affixEffects['wall_counter_50'] ? 3 : 2;
+              const counterDamage = Math.round(this.player.damage * counterMultiplier);
+              enemy.hp -= counterDamage;
+              this.showDamageNumber(enemy.x, enemy.y - 20, counterDamage, false, '#f59e0b');
+              if (enemy.hp <= 0) {
+                this.killEnemy(enemy);
+                return;
+              }
+            }
 
             // 更新城墙血量显示
             this.updateWallHpDisplay();
@@ -894,11 +1223,17 @@ export class GameScene extends Phaser.Scene {
     const buffIcon = enemy.getData('buffIcon') as Phaser.GameObjects.Text;
     if (buffIcon) buffIcon.destroy();
 
+    // 销毁元素图标
+    const elementIcon = enemy.getData('elementIcon') as Phaser.GameObjects.Text;
+    if (elementIcon) elementIcon.destroy();
+
     // 清除所有数据
     enemy.setData('hpBar', null);
     enemy.setData('nameText', null);
     enemy.setData('hpText', null);
     enemy.setData('buffIcon', null);
+    enemy.setData('elementIcon', null);
+    enemy.setData('element', null);
     enemy.setData('wallArriveTime', null);
     enemy.setData('lastWallAttack', null);
     enemy.setData('uniqueId', null); // 清除唯一ID
@@ -948,8 +1283,24 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updateWaveTimers(delta: number): void {
+    // 更新城墙无敌计时器
+    if (this.wallInvincibleTimer > 0) {
+      this.wallInvincibleTimer -= delta;
+    }
+
+    // 更新城墙护盾回复
+    if (this.affixEffects['wall_regen_shield']) {
+      this.wallShieldRegenTimer += delta;
+      if (this.wallShieldRegenTimer >= 30000) { // 每30秒
+        this.wallShieldRegenTimer = 0;
+        const regenAmount = Math.round(this.wall.maxShield * (this.affixEffects['wall_regen_shield'] / 100));
+        this.wall.shield = Math.min(this.wall.shield + regenAmount, this.wall.maxShield);
+        gameBridge.emit('wall:shield-changed', { shield: this.wall.shield, maxShield: this.wall.maxShield });
+      }
+    }
+
     this.waveTimer += delta;
-    if (this.waveTimer >= this.waveInterval) {
+    if (this.waveTimer >= this.waveInterval && this.waveNumber < 20) {
       this.waveTimer -= this.waveInterval;
       this.startNextWave();
     }
@@ -974,6 +1325,28 @@ export class GameScene extends Phaser.Scene {
         this.spawnTimers.splice(i, 1);
       }
     }
+
+    // 检查第20波是否通关（所有波次完成且没有活跃敌人）
+    if (this.waveNumber >= 20 && this.spawnTimers.length === 0) {
+      const activeEnemies = this.enemies.getChildren().filter(e => e.active).length;
+      if (activeEnemies === 0) {
+        this.gameWin();
+      }
+    }
+  }
+
+  private gameWin(): void {
+    // 通关成功，先发送最终城墙血量
+    gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
+    gameBridge.emit('player:died', {
+      waveNumber: this.waveNumber,
+      killCount: this.killCount,
+      totalEnemies: this.totalEnemies,
+      cleared: true,
+      wallHp: this.wall.hp,
+      wallMaxHp: this.wall.maxHp,
+    });
+    this.scene.pause();
   }
 
   private updateSkillCooldowns(delta: number): void {
@@ -1030,17 +1403,24 @@ export class GameScene extends Phaser.Scene {
 
     const target = enemies[Math.floor(Math.random() * enemies.length)];
 
-    // 在敌人上方50px创建技能效果
-    const skillEffect = this.add.text(target.x, target.y - 50, emoji, {
-      fontSize: '32px',
+    // 在敌人上方创建技能效果，限制在屏幕范围内
+    const iconSize = 80;
+    const clampedX = Math.max(iconSize / 2, Math.min(GAME_WIDTH - iconSize / 2, target.x));
+    const clampedY = Math.max(iconSize / 2, Math.min(GAME_HEIGHT - iconSize / 2, target.y - 50));
+    const skillEffect = this.add.text(clampedX, clampedY, emoji, {
+      fontSize: `${iconSize}px`,
+      padding: { x: 10, y: 10 },
     });
     skillEffect.setOrigin(0.5);
     skillEffect.setDepth(20);
 
-    // 计算技能伤害（基础2倍 + 元素伤害加成）
+    // 计算技能伤害（元素初始伤害 + 元素伤害加成）* 元素增幅
     const elementDamageBonus = this.getElementDamage(element);
-    const baseDamage = this.player.damage * 2;
-    const totalDamage = baseDamage + elementDamageBonus;
+    const skillBaseDamage = ELEMENT_BASE_DAMAGE[element] || 300;
+    const elementUpgradeId = `element_${element}` as UpgradeId;
+    const elementUpgradeLevel = this.upgradeLevels[elementUpgradeId] || 0;
+    const elementMultiplier = 1 + (elementUpgradeLevel * 0.6);
+    const totalDamage = Math.round((skillBaseDamage + (elementDamageBonus || 0)) * elementMultiplier);
 
     // 风系技能有持续时间
     if (element === 'wind') {
@@ -1065,6 +1445,19 @@ export class GameScene extends Phaser.Scene {
         const buffResult = buffManager.update(enemyId, 0, this.time.now);
         const damageMultiplier = buffResult.damageMultiplier;
 
+        // === 敌人元素免疫检查 ===
+        const enemyElement = target.getData('element') as string | null;
+        if (enemyElement) {
+          // 克制关系：水克火，火克雷，雷克风，风克土，土克水
+          const weakness: Record<string, string> = { water: 'fire', fire: 'thunder', thunder: 'wind', wind: 'earth', earth: 'water' };
+          if (weakness[element] !== enemyElement) {
+            // 不克制，免疫
+            this.showDamageNumber(target.x, target.y - 20, 0, false, '#9ca3af', '免疫');
+            skillEffect.destroy();
+            return;
+          }
+        }
+
         // 计算实际伤害（考虑流血增伤）
         const actualDamage = Math.round(totalDamage * damageMultiplier);
         target.hp -= actualDamage;
@@ -1077,18 +1470,41 @@ export class GameScene extends Phaser.Scene {
         const skillLevel = this.skillLevels[element] || 1;
         switch (element) {
           case 'fire':
-            // 火系默认燃烧1秒，三味真火(skill_fire_3)延长到3秒
-            const burnDuration = skillLevel >= 3 ? 3000 : 1000;
-            buffManager.addBuff(enemyId, 'burn', burnDuration);
+            buffManager.addBuff(enemyId, 'burn', skillLevel >= 3 ? 3000 : 1000);
+            // 火进阶1: 击退
+            if (skillLevel >= 2) {
+              this.knockbackEnemy(target, 5);
+            }
             break;
           case 'water':
             buffManager.addBuff(enemyId, 'freeze');
+            // 水进阶1: 冰冻结束冰暴伤害
+            if (skillLevel >= 2) {
+              this.time.delayedCall(1000, () => {
+                this.createFreezeExplosion(target.x, target.y, totalDamage * 0.5);
+              });
+            }
+            // 水进阶2: 击退
+            if (skillLevel >= 3) {
+              this.knockbackEnemy(target, 15);
+            }
             break;
           case 'thunder':
             buffManager.addBuff(enemyId, 'paralyze');
+            // 雷进阶1: 命中后分裂2道雷罚
+            if (skillLevel >= 2) {
+              this.createChainThunder(target, totalDamage * 0.5, 2);
+            }
+            // 雷进阶2: 命中后连续3记雷罚
+            if (skillLevel >= 3) {
+              this.createChainThunder(target, totalDamage * 0.3, 3);
+            }
             break;
           case 'earth':
             buffManager.addBuff(enemyId, 'stun');
+            // 土系击退: 初始1单位(50px)，进阶2增加到3单位(150px)
+            const knockbackDist = skillLevel >= 3 ? 15 : 5;
+            this.knockbackEnemy(target, knockbackDist);
             break;
         }
 
@@ -1104,41 +1520,154 @@ export class GameScene extends Phaser.Scene {
   private getElementDamage(element: string): number {
     const elementUpgradeId = `element_${element}` as UpgradeId;
     const elementLevel = this.upgradeLevels[elementUpgradeId] || 0;
-    // 每级元素伤害增加60%的基础伤害
-    return this.player.baseDamage * (elementLevel * 0.6);
+    const upgradeDamage = (this.player.baseDamage || 0) * (elementLevel * 0.6);
+    const equipDamage = this.elementDamageByType[element] || 0;
+    return upgradeDamage + equipDamage;
+  }
+
+  // 击退敌人
+  private knockbackEnemy(enemy: EnemySprite, distance: number): void {
+    if (!enemy.active || !enemy.body) return;
+    const targetY = Math.max(0, enemy.y - distance);
+    this.tweens.add({
+      targets: enemy,
+      y: targetY,
+      duration: 200,
+      ease: 'Power2',
+    });
+  }
+
+  // 雷系连锁
+  private createChainThunder(source: EnemySprite, damage: number, count: number): void {
+    const enemies = this.enemies.getChildren().filter(e => {
+      const enemy = e as EnemySprite;
+      return enemy.active && enemy !== source;
+    }) as EnemySprite[];
+
+    const sorted = enemies.sort((a, b) => {
+      const distA = Phaser.Math.Distance.Between(source.x, source.y, a.x, a.y);
+      const distB = Phaser.Math.Distance.Between(source.x, source.y, b.x, b.y);
+      return distA - distB;
+    });
+
+    const targets = sorted.slice(0, count);
+    targets.forEach((target, i) => {
+      this.time.delayedCall(i * 200, () => {
+        if (!target.active) return;
+        const iconSize = 72;
+        const cx = Math.max(iconSize / 2, Math.min(GAME_WIDTH - iconSize / 2, target.x));
+        const cy = Math.max(iconSize / 2, Math.min(GAME_HEIGHT - iconSize / 2, target.y - 40));
+        const thunder = this.add.text(cx, cy, '⚡', { fontSize: `${iconSize}px`, padding: { x: 8, y: 8 } });
+        thunder.setOrigin(0.5).setDepth(20);
+
+        this.tweens.add({
+          targets: thunder,
+          y: target.y,
+          duration: 300,
+          onComplete: () => {
+            const enemyId = target.getData('uniqueId') as string;
+            if (enemyId) {
+              target.hp -= damage;
+              this.showDamageNumber(target.x, target.y - 20, damage, false);
+              this.damageStats.thunder += damage;
+              buffManager.addBuff(enemyId, 'paralyze');
+              if (target.hp <= 0) this.killEnemy(target);
+            }
+            thunder.destroy();
+          },
+        });
+      });
+    });
+  }
+
+  // 冰冻爆炸（水进阶1）
+  private createFreezeExplosion(x: number, y: number, damage: number): void {
+    const explosion = this.add.text(x, y, '💥', { fontSize: '64px' });
+    explosion.setOrigin(0.5).setDepth(20);
+
+    this.tweens.add({
+      targets: explosion,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      duration: 400,
+      onComplete: () => explosion.destroy(),
+    });
+
+    const range = 80;
+    this.enemies.getChildren().forEach((child) => {
+      const enemy = child as EnemySprite;
+      if (!enemy.active) return;
+      const dist = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
+      if (dist <= range) {
+        enemy.hp -= damage;
+        this.showDamageNumber(enemy.x, enemy.y - 20, damage, false);
+        this.damageStats.water += damage;
+        if (enemy.hp <= 0) this.killEnemy(enemy);
+      }
+    });
+  }
+
+  // 枪械爆炸伤害
+  private createExplosion(x: number, y: number, damage: number): void {
+    const explosion = this.add.text(x, y, '💥', { fontSize: '48px' });
+    explosion.setOrigin(0.5).setDepth(20);
+
+    this.tweens.add({
+      targets: explosion,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => explosion.destroy(),
+    });
+
+    const range = 50;
+    let explosionDamage = 0;
+    this.enemies.getChildren().forEach((child) => {
+      const enemy = child as EnemySprite;
+      if (!enemy.active) return;
+      const dist = Phaser.Math.Distance.Between(x, y, enemy.x, enemy.y);
+      if (dist <= range && dist > 0) {
+        const dmg = Math.round(damage * 0.5);
+        enemy.hp -= dmg;
+        explosionDamage += dmg;
+        this.showDamageNumber(enemy.x, enemy.y - 20, dmg, false, '#f97316');
+        if (enemy.hp <= 0) this.killEnemy(enemy);
+      }
+    });
+    this.damageStats.explosion += explosionDamage;
   }
 
   private createWindSkill(skillEffect: Phaser.GameObjects.Text, target: EnemySprite, baseDamage: number): void {
-    // 风系技能：持续5秒，碰到敌人就造成伤害
+    const skillLevel = this.skillLevels['wind'] || 1;
     const duration = 5000;
-    const damageInterval = 500; // 每0.5秒检测一次碰撞
+    const damageInterval = 500;
     const startTime = this.time.now;
     let lastDamageTime = 0;
+    let hitCount = 0;
+    let splitTornadoCount = 0;
+    const maxSplitTornados = 3;
 
-    // 技能飞到目标位置
     this.tweens.add({
       targets: skillEffect,
       y: target.y,
       duration: 500,
       onComplete: () => {
-        // 创建定时器检测碰撞
         const windTimer = this.time.addEvent({
           delay: damageInterval,
           callback: () => {
             const currentTime = this.time.now;
 
-            // 检查持续时间
             if (currentTime - startTime >= duration) {
               skillEffect.destroy();
               windTimer.destroy();
               return;
             }
 
-            // 让技能在目标位置附近飘动
             skillEffect.x += Phaser.Math.Between(-20, 20);
             skillEffect.y += Phaser.Math.Between(-10, 10);
 
-            // 检测与敌人的碰撞
             this.enemies.getChildren().forEach((child) => {
               const enemy = child as EnemySprite;
               if (!enemy.active) return;
@@ -1148,26 +1677,28 @@ export class GameScene extends Phaser.Scene {
                 enemy.x, enemy.y
               );
 
-              // 碰撞范围
-              if (distance < 40 && currentTime - lastDamageTime >= damageInterval) {
+              if (distance < 60 && currentTime - lastDamageTime >= damageInterval) {
                 lastDamageTime = currentTime;
+                hitCount++;
 
                 const enemyId = `enemy_${enemy.x}_${enemy.y}`;
-
-                // 获取buff效果（包括流血增伤）
                 const buffResult = buffManager.update(enemyId, 0, currentTime);
-                const damageMultiplier = buffResult.damageMultiplier;
-
-                // 计算实际伤害（考虑流血增伤）
-                const actualDamage = Math.round(baseDamage * damageMultiplier);
+                const actualDamage = Math.round(baseDamage * buffResult.damageMultiplier);
                 enemy.hp -= actualDamage;
                 this.showDamageNumber(enemy.x, enemy.y - 20, actualDamage, false);
-
-                // 记录风系伤害
                 this.damageStats.wind += actualDamage;
-
-                // 应用减速效果
                 buffManager.addBuff(enemyId, 'slow');
+
+                // 风进阶1: 命中分裂2个风刃
+                if (skillLevel >= 2) {
+                  this.createWindBlades(enemy.x, enemy.y, baseDamage * 0.5, 2);
+                }
+
+                // 风进阶2: 每5次命中分裂新旋风
+                if (skillLevel >= 3 && hitCount % 5 === 0 && splitTornadoCount < maxSplitTornados) {
+                  splitTornadoCount++;
+                  this.createMiniTornado(enemy.x, enemy.y, baseDamage * 0.5, damageInterval);
+                }
 
                 if (enemy.hp <= 0) {
                   this.killEnemy(enemy);
@@ -1176,6 +1707,77 @@ export class GameScene extends Phaser.Scene {
             });
           },
           loop: true,
+        });
+      },
+    });
+  }
+
+  // 风刃（分裂弹）
+  private createWindBlades(x: number, y: number, damage: number, count: number): void {
+    const angles = [-30, 30];
+    for (let i = 0; i < count; i++) {
+      const angle = angles[i] || 0;
+      const rad = Phaser.Math.DegToRad(angle - 90);
+      const blade = this.add.text(x, y, '💨', { fontSize: '48px' });
+      blade.setOrigin(0.5).setDepth(20);
+      const speed = 200;
+      const vx = Math.cos(rad) * speed;
+      const vy = Math.sin(rad) * speed;
+
+      this.tweens.add({
+        targets: blade,
+        x: x + vx * 0.8,
+        y: y + vy * 0.8,
+        duration: 800,
+        onUpdate: () => {
+          this.enemies.getChildren().forEach((child) => {
+            const enemy = child as EnemySprite;
+            if (!enemy.active) return;
+            const dist = Phaser.Math.Distance.Between(blade.x, blade.y, enemy.x, enemy.y);
+            if (dist < 50) {
+              const enemyId = `enemy_${enemy.x}_${enemy.y}`;
+              enemy.hp -= damage;
+              this.showDamageNumber(enemy.x, enemy.y - 20, damage, false);
+              this.damageStats.wind += damage;
+              if (enemy.hp <= 0) this.killEnemy(enemy);
+            }
+          });
+        },
+        onComplete: () => blade.destroy(),
+      });
+    }
+  }
+
+  // 迷你旋风（进阶2分裂）
+  private createMiniTornado(x: number, y: number, damage: number, interval: number): void {
+    const tornado = this.add.text(x, y, '🌪️', { fontSize: '80px' });
+    tornado.setOrigin(0.5).setDepth(20);
+    const startTime = this.time.now;
+    const duration = 3000;
+
+    const timer = this.time.addEvent({
+      delay: interval,
+      loop: true,
+      callback: () => {
+        if (this.time.now - startTime >= duration) {
+          tornado.destroy();
+          timer.destroy();
+          return;
+        }
+        // 迷你旋风不移动，只在原地检测碰撞
+
+        this.enemies.getChildren().forEach((child) => {
+          const enemy = child as EnemySprite;
+          if (!enemy.active) return;
+          const dist = Phaser.Math.Distance.Between(tornado.x, tornado.y, enemy.x, enemy.y);
+          if (dist < 55) {
+            const enemyId = `enemy_${enemy.x}_${enemy.y}`;
+            enemy.hp -= damage;
+            this.showDamageNumber(enemy.x, enemy.y - 20, damage, false);
+            this.damageStats.wind += damage;
+            buffManager.addBuff(enemyId, 'slow');
+            if (enemy.hp <= 0) this.killEnemy(enemy);
+          }
         });
       },
     });
@@ -1258,34 +1860,35 @@ export class GameScene extends Phaser.Scene {
     // 设置敌人纹理和缩放（素材是600x1080，需要大幅缩小）
     if (enemyTypeKey === 'walker' && this.textures.exists('zombie-walk-1')) {
       enemy.setTexture('zombie-walk-1');
-      enemy.setScale(0.08); // 600*0.08=48px宽
+      enemy.setScale(0.08);
     } else if (enemyTypeKey === 'runner' && this.textures.exists('runner-walk-1')) {
       enemy.setTexture('runner-walk-1');
-      enemy.setScale(0.06); // 600*0.06=36px宽
+      enemy.setScale(0.06);
     } else if (enemyTypeKey === 'tank' && this.textures.exists('zombie-walk-1')) {
-      // 精英暂时使用普通僵尸素材
       enemy.setTexture('zombie-walk-1');
-      enemy.setScale(0.1); // 稍大
+      enemy.setScale(0.1);
     } else if (enemyTypeKey === 'splitter' && this.textures.exists('zombie-walk-1')) {
-      // 分裂尸暂时使用普通僵尸素材
       enemy.setTexture('zombie-walk-1');
       enemy.setScale(0.08);
     } else if (enemyTypeKey === 'boss' && this.textures.exists('boss')) {
       enemy.setTexture('boss');
-      enemy.setScale(0.12); // Boss稍大
+      enemy.setScale(0.12);
     } else {
       enemy.setTexture(enemyType.texture);
       enemy.setScale(enemyType.scale);
     }
 
+    // 纵向压缩为0.8
+    enemy.scaleY = enemy.scaleY * 0.8;
+
     enemy.setCollideWorldBounds(true);
     enemy.setDepth(3); // 敌人在城墙层级下面
     enemy.body!.reset(spawnX, spawnY);
 
-    // 设置碰撞体大小（基于缩放后的纹理）
+    // 设置碰撞体大小（基于缩放后的纹理，横向加宽）
     const textureWidth = enemy.width * enemy.scaleX;
     const textureHeight = enemy.height * enemy.scaleY;
-    enemy.body!.setSize(textureWidth * 0.8, textureHeight * 0.8);
+    enemy.body!.setSize(textureWidth * 1.0, textureHeight * 0.8);
 
     // 为walker类型添加行走动画
     if (enemyTypeKey === 'walker' && this.anims.exists('zombie-walk')) {
@@ -1321,6 +1924,17 @@ export class GameScene extends Phaser.Scene {
     enemy.defense = enemyType.defense;
     enemy.dodgeRate = enemyType.dodgeRate;
 
+    // 30关以后，部分敌人随机获得元素属性
+    enemy.setData('element', null);
+    if (this.currentStage >= 30 && enemyTypeKey !== 'boss') {
+      const elementChance = Math.min(0.5, (this.currentStage - 30) * 0.02); // 每关+2%，最高50%
+      if (Math.random() < elementChance) {
+        const elements = ['fire', 'thunder', 'water', 'wind', 'earth'];
+        const randomElement = elements[Math.floor(Math.random() * elements.length)];
+        enemy.setData('element', randomElement);
+      }
+    }
+
     // 添加血条
     const hpBar = this.add.graphics();
     hpBar.setDepth(15);
@@ -1330,8 +1944,9 @@ export class GameScene extends Phaser.Scene {
     // 精英和首领添加名称显示
     if (enemyType.type === 'elite' || enemyType.type === 'boss') {
       const nameText = this.add.text(enemy.x, enemy.y - enemy.height * enemy.scaleY / 2 - 16, enemyType.name, {
-        fontSize: enemyType.type === 'boss' ? '14px' : '12px',
+        fontSize: enemyType.type === 'boss' ? '16px' : '14px',
         fontFamily: 'Arial',
+        fontStyle: 'bold',
         color: enemyType.type === 'boss' ? '#fbbf24' : '#a855f7',
         stroke: '#000000',
         strokeThickness: 2,
@@ -1343,8 +1958,9 @@ export class GameScene extends Phaser.Scene {
       // 首领显示总血量
       if (enemyType.type === 'boss') {
         const hpText = this.add.text(enemy.x, enemy.y - enemy.height * enemy.scaleY / 2 - 32, `HP: ${Math.round(enemy.hp)}`, {
-          fontSize: '12px',
+          fontSize: '14px',
           fontFamily: 'Arial',
+          fontStyle: 'bold',
           color: '#ef4444',
           stroke: '#000000',
           strokeThickness: 2,
@@ -1353,6 +1969,18 @@ export class GameScene extends Phaser.Scene {
         hpText.setDepth(16);
         enemy.setData('hpText', hpText);
       }
+    }
+
+    // 有元素属性的敌人显示元素图标
+    const enemyElement = enemy.getData('element') as string | null;
+    if (enemyElement) {
+      const elementIcons: Record<string, string> = { fire: '🔥', thunder: '⚡', water: '💧', wind: '🌪️', earth: '🪨' };
+      const elementIcon = this.add.text(enemy.x, enemy.y - enemy.height * enemy.scaleY / 2 - 8, elementIcons[enemyElement] || '✨', {
+        fontSize: '12px',
+      });
+      elementIcon.setOrigin(0.5);
+      elementIcon.setDepth(17);
+      enemy.setData('elementIcon', elementIcon);
     }
 
     enemy.setVelocityY(enemy.speed); // 向下移动
@@ -1414,8 +2042,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private generateUpgradeOptions(): void {
-    const playerHpPercent = (this.player.hp / this.player.maxHp) * 100;
-    const options = getRandomUpgradeOptions(this.upgradeLevels, playerHpPercent, this.activeSkillElements, 3);
+    // 用城墙血量百分比来决定是否显示回血卡牌
+    const wallHpPercent = (this.wall.hp / this.wall.maxHp) * 100;
+    const options = getRandomUpgradeOptions(this.upgradeLevels, wallHpPercent, this.activeSkillElements, 3);
 
     const upgradeOptions = options.map(u => ({
       id: u.id,
@@ -1450,9 +2079,9 @@ export class GameScene extends Phaser.Scene {
         console.log(`gun_rapid upgraded to level ${level}`);
         break;
       case 'heal_30':
-        const healAmount = this.player.maxHp * 0.3;
-        this.player.hp = Math.min(this.player.hp + healAmount, this.player.maxHp);
-        gameBridge.emit('player:hp-changed', { hp: this.player.hp, maxHp: this.player.maxHp });
+        const healAmount = this.wall.maxHp * 0.3;
+        this.wall.hp = Math.min(this.wall.hp + healAmount, this.wall.maxHp);
+        gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
         break;
     }
 
@@ -1501,13 +2130,101 @@ export class GameScene extends Phaser.Scene {
     const buffResult = buffManager.update(enemyId, 0, this.time.now);
     const damageMultiplier = buffResult.damageMultiplier;
 
+    // === 疾尸闪避（20关以后，随关卡递增）===
+    const enemyType = enemy.getData('enemyType') as string;
+    if (enemyType === 'runner' && this.currentStage > 20) {
+      const dodgeRate = Math.min(0.3, (this.currentStage - 20) * 0.01); // 每关+1%，最高30%
+      if (Math.random() < dodgeRate) {
+        this.showDamageNumber(enemy.x, enemy.y - 20, 0, false, '#9ca3af', 'MISS');
+        return;
+      }
+    }
+
+    // === 敌人元素免疫（30关以后，部分敌人有属性）===
+    const enemyElement = enemy.getData('element') as string | null;
+    if (enemyElement) {
+      // 子弹无法造成伤害，只有克制系技能可以
+      this.showDamageNumber(enemy.x, enemy.y - 20, 0, false, '#9ca3af', '免疫');
+      return;
+    }
+
     // 计算实际伤害（考虑流血增伤）
-    const actualDamage = Math.round(bullet.damage * damageMultiplier);
+    let actualDamage = Math.round(bullet.damage * damageMultiplier);
+
+    // === 攻击随机增幅词条 ===
+    // common: -20%~+30%, excellent: -20%~+40%, elite: -20%~+50%, perfect: -20%~+60%, legendary/mythic: -20%~+70%
+    const randomBonus = this.getAttackRandomBonus();
+    if (randomBonus !== 0) {
+      actualDamage = Math.round(actualDamage * (1 + randomBonus / 100));
+    }
+
+    // === 对燃烧/冰冻/麻痹敌人额外伤害词条 ===
+    if (this.affixEffects['burn_extra_damage'] && buffManager.hasBuff(enemyId, 'burn')) {
+      const extraDmg = Math.round(enemy.maxHp * (this.affixEffects['burn_extra_damage'] / 100));
+      actualDamage += extraDmg;
+    }
+    if (this.affixEffects['freeze_extra_damage'] && buffManager.hasBuff(enemyId, 'freeze')) {
+      const extraDmg = Math.round(enemy.maxHp * (this.affixEffects['freeze_extra_damage'] / 100));
+      actualDamage += extraDmg;
+    }
+    if (this.affixEffects['paralyze_extra_damage'] && buffManager.hasBuff(enemyId, 'paralyze')) {
+      const extraDmg = Math.round(enemy.maxHp * (this.affixEffects['paralyze_extra_damage'] / 100));
+      actualDamage += extraDmg;
+    }
+
+    // === 秒杀词条 ===
+    const instantKillChance = (this.affixEffects['instant_kill_1'] || 0) + (this.affixEffects['instant_kill_2'] || 0);
+    if (instantKillChance > 0 && Math.random() * 100 < instantKillChance) {
+      actualDamage = enemy.hp; // 直接秒杀
+      this.showDamageNumber(enemy.x, enemy.y - 20, actualDamage, false, '#ff0000');
+    }
+
     enemy.hp -= actualDamage;
     this.showDamageNumber(enemy.x, enemy.y - 20, actualDamage, bullet.isCrit);
 
     // 记录枪械伤害
     this.damageStats.gun += actualDamage;
+
+    // === 流血词条 ===
+    const bleedChance = this.getAffixTotal('bleed');
+    if (bleedChance > 0 && Math.random() * 100 < bleedChance) {
+      buffManager.addBuff(enemyId, 'bleed');
+    }
+
+    // === 眩晕词条（暴击时触发）===
+    const stunChance = this.getAffixTotal('stun');
+    if (bullet.isCrit && stunChance > 0 && Math.random() * 100 < stunChance) {
+      buffManager.addBuff(enemyId, 'stun');
+    }
+
+    // === 减速词条 ===
+    const slowChance = this.getAffixTotal('slow');
+    if (slowChance > 0 && Math.random() * 100 < slowChance) {
+      buffManager.addBuff(enemyId, 'slow');
+    }
+
+    // === 传送词条 ===
+    const teleportChance = this.getAffixTotal('teleport');
+    if (teleportChance > 0 && Math.random() * 100 < teleportChance) {
+      // 传送敌人回起点
+      enemy.y = -30;
+      enemy.body!.reset(enemy.x, enemy.y);
+      enemy.setVelocityY(enemy.speed);
+    }
+
+    // === 吸血恢复城墙词条 ===
+    if (this.affixEffects['lifesteal_wall'] && Math.random() * 100 < 2) {
+      const healAmount = Math.round(actualDamage * (this.affixEffects['lifesteal_wall'] / 100));
+      this.wall.hp = Math.min(this.wall.hp + healAmount, this.wall.maxHp);
+      gameBridge.emit('wall:hp-changed', { hp: this.wall.hp, maxHp: this.wall.maxHp });
+      this.showDamageNumber(this.wall.x, this.wall.y - 30, healAmount, false, '#22c55e');
+    }
+
+    // === 爆炸子弹（升级卡牌） ===
+    const explosiveLevel = this.upgradeLevels['gun_explosive'] || 0;
+    if (explosiveLevel > 0) {
+      this.createExplosion(enemy.x, enemy.y, actualDamage);
+    }
 
     // 分裂子弹效果 - 只有标记了 canSplit 的子弹才能分裂
     const canSplit = bullet.getData('canSplit') !== false;
@@ -1539,6 +2256,27 @@ export class GameScene extends Phaser.Scene {
     if (enemy.hp <= 0) {
       this.killEnemy(enemy);
     }
+  }
+
+  // 获取攻击随机增幅
+  private getAttackRandomBonus(): number {
+    if (this.affixEffects['attack_random']) return Phaser.Math.Between(-20, 30);
+    if (this.affixEffects['attack_random_40']) return Phaser.Math.Between(-20, 40);
+    if (this.affixEffects['attack_random_50']) return Phaser.Math.Between(-20, 50);
+    if (this.affixEffects['attack_random_60']) return Phaser.Math.Between(-20, 60);
+    if (this.affixEffects['attack_random_70']) return Phaser.Math.Between(-20, 70);
+    return 0;
+  }
+
+  // 获取同类词条的总值（如 bleed_1 + bleed_2 = 3%）
+  private getAffixTotal(prefix: string): number {
+    let total = 0;
+    for (const [key, value] of Object.entries(this.affixEffects)) {
+      if (key.startsWith(prefix + '_')) {
+        total += value;
+      }
+    }
+    return total;
   }
 
   private createSplitBullets(x: number, y: number, count: number, damage: number): void {
@@ -1601,6 +2339,11 @@ export class GameScene extends Phaser.Scene {
 
     this.killCount++;
     this.score += enemy.xpValue * 10;
+
+    // 击杀精英立即奖励升级选择
+    if (enemy.enemyType === 'tank' || enemy.enemyType === 'armored') {
+      this.generateUpgradeOptions();
+    }
 
     // 首领不计算经验值
     if (!enemy.isBoss) {
@@ -1679,23 +2422,38 @@ export class GameScene extends Phaser.Scene {
     return (num / 1000000000).toFixed(1) + 'B';
   }
 
-  private showDamageNumber(x: number, y: number, damage: number, isCrit: boolean): void {
-    const text = this.add.text(x, y, this.formatNumber(damage), {
+  private showDamageNumber(x: number, y: number, damage: number, isCrit: boolean, color?: string, text?: string): void {
+    // 伤害颜色逻辑：1000以下白色，1000-10000黄色，10000以上红色
+    let damageColor = color;
+    if (!damageColor) {
+      if (isCrit) {
+        damageColor = '#ff6b6b'; // 暴击用亮红色
+      } else if (damage >= 10000) {
+        damageColor = '#ef4444'; // 高伤害红色
+      } else if (damage >= 1000) {
+        damageColor = '#fbbf24'; // 中等伤害黄色
+      } else {
+        damageColor = '#ffffff'; // 低伤害白色
+      }
+    }
+
+    const displayText = text || this.formatNumber(damage);
+    const txt = this.add.text(x, y, displayText, {
       fontSize: isCrit ? '18px' : '14px',
-      fontFamily: 'Arial',
-      color: isCrit ? '#fbbf24' : '#ffffff',
+      fontFamily: 'PixelFont, Arial',
+      color: damageColor,
       stroke: '#000000',
       strokeThickness: 2,
     });
-    text.setOrigin(0.5);
-    text.setDepth(100);
+    txt.setOrigin(0.5);
+    txt.setDepth(100);
 
     this.tweens.add({
-      targets: text,
+      targets: txt,
       y: y - 40,
       alpha: 0,
       duration: 800,
-      onComplete: () => text.destroy(),
+      onComplete: () => txt.destroy(),
     });
   }
 
@@ -1703,6 +2461,10 @@ export class GameScene extends Phaser.Scene {
     gameBridge.emit('player:died', {
       waveNumber: this.waveNumber,
       killCount: this.killCount,
+      totalEnemies: this.totalEnemies,
+      cleared: false,
+      wallHp: this.wall.hp,
+      wallMaxHp: this.wall.maxHp,
     });
 
     this.scene.pause();

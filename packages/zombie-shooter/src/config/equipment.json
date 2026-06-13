@@ -1,0 +1,40 @@
+{
+  "elementInfo": {
+    "fire": { "name": "火", "icon": "🔥", "color": "#ef4444" },
+    "thunder": { "name": "雷", "icon": "⚡", "color": "#f59e0b" },
+    "water": { "name": "水", "icon": "💧", "color": "#3b82f6" },
+    "wind": { "name": "风", "icon": "🌪️", "color": "#22c55e" },
+    "earth": { "name": "土", "icon": "🪨", "color": "#a855f7" }
+  },
+  "baseStats": {
+    "common": { "attack": 5, "hp": 50 },
+    "excellent": { "attack": 10, "hp": 100 },
+    "elite": { "attack": 20, "hp": 200 },
+    "perfect": { "attack": 35, "hp": 350 },
+    "legendary": { "attack": 50, "hp": 500 },
+    "mythic": { "attack": 80, "hp": 800 }
+  },
+  "names": {
+    "helmet": ["头盔", "战盔", "护目镜", "王冠"],
+    "armor": ["盔甲", "战甲", "护胸", "铠甲"],
+    "shoulder": ["肩甲", "护肩", "肩铠", "披肩"],
+    "legs": ["腿甲", "护腿", "胫甲", "战裙"],
+    "boots": ["战靴", "长靴", "护胫", "飞靴"]
+  },
+  "elementDamageRange": {
+    "common": { "min": 10, "max": 100 },
+    "excellent": { "min": 50, "max": 300 },
+    "elite": { "min": 100, "max": 600 },
+    "perfect": { "min": 200, "max": 1000 },
+    "legendary": { "min": 400, "max": 1500 },
+    "mythic": { "min": 600, "max": 2000 }
+  },
+  "refineCost": {
+    "common": 100,
+    "excellent": 200,
+    "elite": 400,
+    "perfect": 600,
+    "legendary": 1000,
+    "mythic": 2000
+  }
+}

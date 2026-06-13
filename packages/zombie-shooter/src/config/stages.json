@@ -1,0 +1,2204 @@
+{
+  "stages": {
+    "1": {
+      "name": "血色沼泽",
+      "baseHp": 100,
+      "dropRates": {
+        "normal": {
+          "common": 92,
+          "excellent": 6,
+          "elite": 1.5,
+          "perfect": 0.5,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 85,
+          "excellent": 10,
+          "elite": 3,
+          "perfect": 2,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "2": {
+      "name": "废弃森林",
+      "baseHp": 200,
+      "dropRates": {
+        "normal": {
+          "common": 91.8,
+          "excellent": 6.1,
+          "elite": 1.6,
+          "perfect": 0.5,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 84.7,
+          "excellent": 10.2,
+          "elite": 3.1,
+          "perfect": 2.1,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "3": {
+      "name": "腐朽战场",
+      "baseHp": 300,
+      "dropRates": {
+        "normal": {
+          "common": 91.6,
+          "excellent": 6.2,
+          "elite": 1.6,
+          "perfect": 0.6,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 84.4,
+          "excellent": 10.3,
+          "elite": 3.2,
+          "perfect": 2.1,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "4": {
+      "name": "血色神殿",
+      "baseHp": 400,
+      "dropRates": {
+        "normal": {
+          "common": 91.4,
+          "excellent": 6.3,
+          "elite": 1.7,
+          "perfect": 0.6,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 84.2,
+          "excellent": 10.5,
+          "elite": 3.2,
+          "perfect": 2.2,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "5": {
+      "name": "深渊神殿",
+      "baseHp": 500,
+      "dropRates": {
+        "normal": {
+          "common": 91.2,
+          "excellent": 6.4,
+          "elite": 1.7,
+          "perfect": 0.7,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 83.9,
+          "excellent": 10.6,
+          "elite": 3.3,
+          "perfect": 2.2,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "6": {
+      "name": "风暴小镇",
+      "baseHp": 600,
+      "dropRates": {
+        "normal": {
+          "common": 91,
+          "excellent": 6.5,
+          "elite": 1.8,
+          "perfect": 0.7,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 83.6,
+          "excellent": 10.8,
+          "elite": 3.4,
+          "perfect": 2.3,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "7": {
+      "name": "冰封码头",
+      "baseHp": 700,
+      "dropRates": {
+        "normal": {
+          "common": 90.8,
+          "excellent": 6.6,
+          "elite": 1.9,
+          "perfect": 0.7,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 83.3,
+          "excellent": 10.9,
+          "elite": 3.5,
+          "perfect": 2.3,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "8": {
+      "name": "深渊沼泽",
+      "baseHp": 800,
+      "dropRates": {
+        "normal": {
+          "common": 90.6,
+          "excellent": 6.7,
+          "elite": 1.9,
+          "perfect": 0.8,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 83,
+          "excellent": 11.1,
+          "elite": 3.6,
+          "perfect": 2.4,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "9": {
+      "name": "毒雾森林",
+      "baseHp": 900,
+      "dropRates": {
+        "normal": {
+          "common": 90.4,
+          "excellent": 6.8,
+          "elite": 2,
+          "perfect": 0.8,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 82.7,
+          "excellent": 11.2,
+          "elite": 3.6,
+          "perfect": 2.4,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "10": {
+      "name": "烈焰墓地",
+      "baseHp": 1000,
+      "dropRates": {
+        "normal": {
+          "common": 90.2,
+          "excellent": 6.9,
+          "elite": 2,
+          "perfect": 0.9,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 82.4,
+          "excellent": 11.4,
+          "elite": 3.7,
+          "perfect": 2.5,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "11": {
+      "name": "黑暗废墟",
+      "baseHp": 1100,
+      "dropRates": {
+        "normal": {
+          "common": 90,
+          "excellent": 7,
+          "elite": 2.1,
+          "perfect": 0.9,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 82.1,
+          "excellent": 11.5,
+          "elite": 3.8,
+          "perfect": 2.5,
+          "legendary": 0,
+          "mythic": 0
+        }
+      }
+    },
+    "12": {
+      "name": "风暴战场",
+      "baseHp": 1200,
+      "dropRates": {
+        "normal": {
+          "common": 89.8,
+          "excellent": 7.1,
+          "elite": 2.2,
+          "perfect": 0.9,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 81.8,
+          "excellent": 11.7,
+          "elite": 3.9,
+          "perfect": 2.6,
+          "legendary": 0.1,
+          "mythic": 0
+        }
+      }
+    },
+    "13": {
+      "name": "末日雪原",
+      "baseHp": 1300,
+      "dropRates": {
+        "normal": {
+          "common": 89.6,
+          "excellent": 7.2,
+          "elite": 2.2,
+          "perfect": 1,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 81.5,
+          "excellent": 11.8,
+          "elite": 4,
+          "perfect": 2.6,
+          "legendary": 0.1,
+          "mythic": 0
+        }
+      }
+    },
+    "14": {
+      "name": "熔岩工厂",
+      "baseHp": 1400,
+      "dropRates": {
+        "normal": {
+          "common": 89.4,
+          "excellent": 7.3,
+          "elite": 2.3,
+          "perfect": 1,
+          "legendary": 0,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 81.2,
+          "excellent": 12,
+          "elite": 4,
+          "perfect": 2.7,
+          "legendary": 0.1,
+          "mythic": 0
+        }
+      }
+    },
+    "15": {
+      "name": "深渊古堡",
+      "baseHp": 1500,
+      "dropRates": {
+        "normal": {
+          "common": 89.1,
+          "excellent": 7.4,
+          "elite": 2.3,
+          "perfect": 1.1,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 80.9,
+          "excellent": 12.1,
+          "elite": 4.1,
+          "perfect": 2.7,
+          "legendary": 0.1,
+          "mythic": 0
+        }
+      }
+    },
+    "16": {
+      "name": "废弃废墟",
+      "baseHp": 1600,
+      "dropRates": {
+        "normal": {
+          "common": 88.9,
+          "excellent": 7.5,
+          "elite": 2.4,
+          "perfect": 1.1,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 80.6,
+          "excellent": 12.3,
+          "elite": 4.2,
+          "perfect": 2.8,
+          "legendary": 0.1,
+          "mythic": 0
+        }
+      }
+    },
+    "17": {
+      "name": "荒芜峡谷",
+      "baseHp": 1700,
+      "dropRates": {
+        "normal": {
+          "common": 88.7,
+          "excellent": 7.6,
+          "elite": 2.5,
+          "perfect": 1.1,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 80.3,
+          "excellent": 12.4,
+          "elite": 4.3,
+          "perfect": 2.8,
+          "legendary": 0.2,
+          "mythic": 0
+        }
+      }
+    },
+    "18": {
+      "name": "荒芜废墟",
+      "baseHp": 1800,
+      "dropRates": {
+        "normal": {
+          "common": 88.5,
+          "excellent": 7.7,
+          "elite": 2.5,
+          "perfect": 1.2,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 80,
+          "excellent": 12.6,
+          "elite": 4.4,
+          "perfect": 2.9,
+          "legendary": 0.2,
+          "mythic": 0
+        }
+      }
+    },
+    "19": {
+      "name": "血色矿坑",
+      "baseHp": 1900,
+      "dropRates": {
+        "normal": {
+          "common": 88.3,
+          "excellent": 7.8,
+          "elite": 2.6,
+          "perfect": 1.2,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 79.7,
+          "excellent": 12.7,
+          "elite": 4.4,
+          "perfect": 2.9,
+          "legendary": 0.2,
+          "mythic": 0
+        }
+      }
+    },
+    "20": {
+      "name": "暗夜沼泽",
+      "baseHp": 2000,
+      "dropRates": {
+        "normal": {
+          "common": 88.1,
+          "excellent": 7.9,
+          "elite": 2.6,
+          "perfect": 1.3,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 79.4,
+          "excellent": 12.9,
+          "elite": 4.5,
+          "perfect": 3,
+          "legendary": 0.2,
+          "mythic": 0
+        }
+      }
+    },
+    "21": {
+      "name": "末日神殿",
+      "baseHp": 2100,
+      "dropRates": {
+        "normal": {
+          "common": 87.9,
+          "excellent": 8,
+          "elite": 2.7,
+          "perfect": 1.3,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 79.1,
+          "excellent": 13,
+          "elite": 4.6,
+          "perfect": 3,
+          "legendary": 0.2,
+          "mythic": 0
+        }
+      }
+    },
+    "22": {
+      "name": "沙漠码头",
+      "baseHp": 2200,
+      "dropRates": {
+        "normal": {
+          "common": 87.7,
+          "excellent": 8.1,
+          "elite": 2.8,
+          "perfect": 1.3,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 78.8,
+          "excellent": 13.2,
+          "elite": 4.7,
+          "perfect": 3.1,
+          "legendary": 0.3,
+          "mythic": 0
+        }
+      }
+    },
+    "23": {
+      "name": "熔岩沼泽",
+      "baseHp": 2300,
+      "dropRates": {
+        "normal": {
+          "common": 87.5,
+          "excellent": 8.2,
+          "elite": 2.8,
+          "perfect": 1.4,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 78.5,
+          "excellent": 13.3,
+          "elite": 4.8,
+          "perfect": 3.1,
+          "legendary": 0.3,
+          "mythic": 0
+        }
+      }
+    },
+    "24": {
+      "name": "荒芜沼泽",
+      "baseHp": 2400,
+      "dropRates": {
+        "normal": {
+          "common": 87.2,
+          "excellent": 8.3,
+          "elite": 2.9,
+          "perfect": 1.4,
+          "legendary": 0.1,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 78.2,
+          "excellent": 13.5,
+          "elite": 4.8,
+          "perfect": 3.2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        }
+      }
+    },
+    "25": {
+      "name": "幽灵塔楼",
+      "baseHp": 2500,
+      "dropRates": {
+        "normal": {
+          "common": 87,
+          "excellent": 8.4,
+          "elite": 2.9,
+          "perfect": 1.5,
+          "legendary": 0.2,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 77.9,
+          "excellent": 13.6,
+          "elite": 4.9,
+          "perfect": 3.2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        }
+      }
+    },
+    "26": {
+      "name": "虚空码头",
+      "baseHp": 2600,
+      "dropRates": {
+        "normal": {
+          "common": 86.8,
+          "excellent": 8.5,
+          "elite": 3,
+          "perfect": 1.5,
+          "legendary": 0.2,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 77.6,
+          "excellent": 13.8,
+          "elite": 5,
+          "perfect": 3.3,
+          "legendary": 0.3,
+          "mythic": 0.1
+        }
+      }
+    },
+    "27": {
+      "name": "暗夜雪原",
+      "baseHp": 2700,
+      "dropRates": {
+        "normal": {
+          "common": 86.6,
+          "excellent": 8.6,
+          "elite": 3.1,
+          "perfect": 1.5,
+          "legendary": 0.2,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 77.3,
+          "excellent": 13.9,
+          "elite": 5.1,
+          "perfect": 3.3,
+          "legendary": 0.4,
+          "mythic": 0.1
+        }
+      }
+    },
+    "28": {
+      "name": "黑暗矿坑",
+      "baseHp": 2800,
+      "dropRates": {
+        "normal": {
+          "common": 86.4,
+          "excellent": 8.7,
+          "elite": 3.1,
+          "perfect": 1.6,
+          "legendary": 0.2,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 77,
+          "excellent": 14.1,
+          "elite": 5.2,
+          "perfect": 3.4,
+          "legendary": 0.4,
+          "mythic": 0.1
+        }
+      }
+    },
+    "29": {
+      "name": "死亡小镇",
+      "baseHp": 2900,
+      "dropRates": {
+        "normal": {
+          "common": 86.2,
+          "excellent": 8.8,
+          "elite": 3.2,
+          "perfect": 1.6,
+          "legendary": 0.2,
+          "mythic": 0
+        },
+        "elite": {
+          "common": 76.6,
+          "excellent": 14.2,
+          "elite": 5.2,
+          "perfect": 3.4,
+          "legendary": 0.4,
+          "mythic": 0.1
+        }
+      }
+    },
+    "30": {
+      "name": "风暴地牢",
+      "baseHp": 3000,
+      "dropRates": {
+        "normal": {
+          "common": 86,
+          "excellent": 8.9,
+          "elite": 3.2,
+          "perfect": 1.7,
+          "legendary": 0.2,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 76.3,
+          "excellent": 14.4,
+          "elite": 5.3,
+          "perfect": 3.5,
+          "legendary": 0.4,
+          "mythic": 0.1
+        }
+      }
+    },
+    "31": {
+      "name": "冰封营地",
+      "baseHp": 3100,
+      "dropRates": {
+        "normal": {
+          "common": 85.8,
+          "excellent": 9,
+          "elite": 3.3,
+          "perfect": 1.7,
+          "legendary": 0.2,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 76,
+          "excellent": 14.5,
+          "elite": 5.4,
+          "perfect": 3.5,
+          "legendary": 0.4,
+          "mythic": 0.1
+        }
+      }
+    },
+    "32": {
+      "name": "血色地狱",
+      "baseHp": 3200,
+      "dropRates": {
+        "normal": {
+          "common": 85.5,
+          "excellent": 9.1,
+          "elite": 3.4,
+          "perfect": 1.7,
+          "legendary": 0.2,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 75.7,
+          "excellent": 14.7,
+          "elite": 5.5,
+          "perfect": 3.6,
+          "legendary": 0.5,
+          "mythic": 0.1
+        }
+      }
+    },
+    "33": {
+      "name": "远古峡谷",
+      "baseHp": 3300,
+      "dropRates": {
+        "normal": {
+          "common": 85.3,
+          "excellent": 9.2,
+          "elite": 3.4,
+          "perfect": 1.8,
+          "legendary": 0.2,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 75.4,
+          "excellent": 14.8,
+          "elite": 5.6,
+          "perfect": 3.6,
+          "legendary": 0.5,
+          "mythic": 0.1
+        }
+      }
+    },
+    "34": {
+      "name": "荒芜洞穴",
+      "baseHp": 3400,
+      "dropRates": {
+        "normal": {
+          "common": 85.1,
+          "excellent": 9.3,
+          "elite": 3.5,
+          "perfect": 1.8,
+          "legendary": 0.2,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 75.1,
+          "excellent": 15,
+          "elite": 5.6,
+          "perfect": 3.7,
+          "legendary": 0.5,
+          "mythic": 0.2
+        }
+      }
+    },
+    "35": {
+      "name": "幽灵营地",
+      "baseHp": 3500,
+      "dropRates": {
+        "normal": {
+          "common": 84.9,
+          "excellent": 9.4,
+          "elite": 3.5,
+          "perfect": 1.9,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 74.8,
+          "excellent": 15.1,
+          "elite": 5.7,
+          "perfect": 3.7,
+          "legendary": 0.5,
+          "mythic": 0.2
+        }
+      }
+    },
+    "36": {
+      "name": "烈焰工厂",
+      "baseHp": 3600,
+      "dropRates": {
+        "normal": {
+          "common": 84.7,
+          "excellent": 9.5,
+          "elite": 3.6,
+          "perfect": 1.9,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 74.5,
+          "excellent": 15.2,
+          "elite": 5.8,
+          "perfect": 3.7,
+          "legendary": 0.5,
+          "mythic": 0.2
+        }
+      }
+    },
+    "37": {
+      "name": "熔岩废墟",
+      "baseHp": 3700,
+      "dropRates": {
+        "normal": {
+          "common": 84.5,
+          "excellent": 9.6,
+          "elite": 3.6,
+          "perfect": 1.9,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 74.2,
+          "excellent": 15.4,
+          "elite": 5.9,
+          "perfect": 3.8,
+          "legendary": 0.6,
+          "mythic": 0.2
+        }
+      }
+    },
+    "38": {
+      "name": "深渊码头",
+      "baseHp": 3800,
+      "dropRates": {
+        "normal": {
+          "common": 84.3,
+          "excellent": 9.7,
+          "elite": 3.7,
+          "perfect": 2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 73.9,
+          "excellent": 15.5,
+          "elite": 6,
+          "perfect": 3.8,
+          "legendary": 0.6,
+          "mythic": 0.2
+        }
+      }
+    },
+    "39": {
+      "name": "熔岩神殿",
+      "baseHp": 3900,
+      "dropRates": {
+        "normal": {
+          "common": 84.1,
+          "excellent": 9.8,
+          "elite": 3.8,
+          "perfect": 2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 73.6,
+          "excellent": 15.7,
+          "elite": 6,
+          "perfect": 3.9,
+          "legendary": 0.6,
+          "mythic": 0.2
+        }
+      }
+    },
+    "40": {
+      "name": "腐朽地牢",
+      "baseHp": 4000,
+      "dropRates": {
+        "normal": {
+          "common": 83.9,
+          "excellent": 9.9,
+          "elite": 3.8,
+          "perfect": 2.1,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 73.3,
+          "excellent": 15.8,
+          "elite": 6.1,
+          "perfect": 3.9,
+          "legendary": 0.6,
+          "mythic": 0.2
+        }
+      }
+    },
+    "41": {
+      "name": "黑暗森林",
+      "baseHp": 4100,
+      "dropRates": {
+        "normal": {
+          "common": 83.6,
+          "excellent": 10,
+          "elite": 3.9,
+          "perfect": 2.1,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 73,
+          "excellent": 16,
+          "elite": 6.2,
+          "perfect": 4,
+          "legendary": 0.6,
+          "mythic": 0.2
+        }
+      }
+    },
+    "42": {
+      "name": "深渊地狱",
+      "baseHp": 4200,
+      "dropRates": {
+        "normal": {
+          "common": 83.4,
+          "excellent": 10.1,
+          "elite": 3.9,
+          "perfect": 2.1,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 72.6,
+          "excellent": 16.1,
+          "elite": 6.3,
+          "perfect": 4,
+          "legendary": 0.7,
+          "mythic": 0.2
+        }
+      }
+    },
+    "43": {
+      "name": "毒雾沼泽",
+      "baseHp": 4300,
+      "dropRates": {
+        "normal": {
+          "common": 83.2,
+          "excellent": 10.2,
+          "elite": 4,
+          "perfect": 2.2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 72.3,
+          "excellent": 16.3,
+          "elite": 6.4,
+          "perfect": 4.1,
+          "legendary": 0.7,
+          "mythic": 0.2
+        }
+      }
+    },
+    "44": {
+      "name": "暗夜塔楼",
+      "baseHp": 4400,
+      "dropRates": {
+        "normal": {
+          "common": 83,
+          "excellent": 10.3,
+          "elite": 4.1,
+          "perfect": 2.2,
+          "legendary": 0.3,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 72,
+          "excellent": 16.4,
+          "elite": 6.4,
+          "perfect": 4.1,
+          "legendary": 0.7,
+          "mythic": 0.2
+        }
+      }
+    },
+    "45": {
+      "name": "远古工厂",
+      "baseHp": 4500,
+      "dropRates": {
+        "normal": {
+          "common": 82.8,
+          "excellent": 10.3,
+          "elite": 4.1,
+          "perfect": 2.2,
+          "legendary": 0.4,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 71.7,
+          "excellent": 16.6,
+          "elite": 6.5,
+          "perfect": 4.2,
+          "legendary": 0.7,
+          "mythic": 0.3
+        }
+      }
+    },
+    "46": {
+      "name": "幽灵废墟",
+      "baseHp": 4600,
+      "dropRates": {
+        "normal": {
+          "common": 82.6,
+          "excellent": 10.4,
+          "elite": 4.2,
+          "perfect": 2.3,
+          "legendary": 0.4,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 71.4,
+          "excellent": 16.7,
+          "elite": 6.6,
+          "perfect": 4.2,
+          "legendary": 0.7,
+          "mythic": 0.3
+        }
+      }
+    },
+    "47": {
+      "name": "虚空工厂",
+      "baseHp": 4700,
+      "dropRates": {
+        "normal": {
+          "common": 82.4,
+          "excellent": 10.5,
+          "elite": 4.2,
+          "perfect": 2.3,
+          "legendary": 0.4,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 71.1,
+          "excellent": 16.9,
+          "elite": 6.7,
+          "perfect": 4.3,
+          "legendary": 0.8,
+          "mythic": 0.3
+        }
+      }
+    },
+    "48": {
+      "name": "黑暗要塞",
+      "baseHp": 4800,
+      "dropRates": {
+        "normal": {
+          "common": 82.2,
+          "excellent": 10.6,
+          "elite": 4.3,
+          "perfect": 2.4,
+          "legendary": 0.4,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 70.8,
+          "excellent": 17,
+          "elite": 6.8,
+          "perfect": 4.3,
+          "legendary": 0.8,
+          "mythic": 0.3
+        }
+      }
+    },
+    "49": {
+      "name": "毒雾洞穴",
+      "baseHp": 4900,
+      "dropRates": {
+        "normal": {
+          "common": 81.9,
+          "excellent": 10.7,
+          "elite": 4.4,
+          "perfect": 2.4,
+          "legendary": 0.4,
+          "mythic": 0.1
+        },
+        "elite": {
+          "common": 70.5,
+          "excellent": 17.2,
+          "elite": 6.8,
+          "perfect": 4.4,
+          "legendary": 0.8,
+          "mythic": 0.3
+        }
+      }
+    },
+    "50": {
+      "name": "荒芜地牢",
+      "baseHp": 5000,
+      "dropRates": {
+        "normal": {
+          "common": 81.7,
+          "excellent": 10.8,
+          "elite": 4.4,
+          "perfect": 2.4,
+          "legendary": 0.4,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 70.2,
+          "excellent": 17.3,
+          "elite": 6.9,
+          "perfect": 4.4,
+          "legendary": 0.8,
+          "mythic": 0.3
+        }
+      }
+    },
+    "51": {
+      "name": "雷霆塔楼",
+      "baseHp": 5100,
+      "dropRates": {
+        "normal": {
+          "common": 81.5,
+          "excellent": 10.9,
+          "elite": 4.5,
+          "perfect": 2.5,
+          "legendary": 0.4,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 69.9,
+          "excellent": 17.5,
+          "elite": 7,
+          "perfect": 4.5,
+          "legendary": 0.8,
+          "mythic": 0.3
+        }
+      }
+    },
+    "52": {
+      "name": "烈焰古堡",
+      "baseHp": 5200,
+      "dropRates": {
+        "normal": {
+          "common": 81.3,
+          "excellent": 11,
+          "elite": 4.5,
+          "perfect": 2.5,
+          "legendary": 0.4,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 69.6,
+          "excellent": 17.6,
+          "elite": 7.1,
+          "perfect": 4.5,
+          "legendary": 0.9,
+          "mythic": 0.3
+        }
+      }
+    },
+    "53": {
+      "name": "虚空沼泽",
+      "baseHp": 5300,
+      "dropRates": {
+        "normal": {
+          "common": 81.1,
+          "excellent": 11.1,
+          "elite": 4.6,
+          "perfect": 2.6,
+          "legendary": 0.4,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 69.3,
+          "excellent": 17.8,
+          "elite": 7.1,
+          "perfect": 4.6,
+          "legendary": 0.9,
+          "mythic": 0.3
+        }
+      }
+    },
+    "54": {
+      "name": "熔岩塔楼",
+      "baseHp": 5400,
+      "dropRates": {
+        "normal": {
+          "common": 80.9,
+          "excellent": 11.2,
+          "elite": 4.7,
+          "perfect": 2.6,
+          "legendary": 0.4,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 69,
+          "excellent": 17.9,
+          "elite": 7.2,
+          "perfect": 4.6,
+          "legendary": 0.9,
+          "mythic": 0.3
+        }
+      }
+    },
+    "55": {
+      "name": "沙漠遗迹",
+      "baseHp": 5500,
+      "dropRates": {
+        "normal": {
+          "common": 80.7,
+          "excellent": 11.3,
+          "elite": 4.7,
+          "perfect": 2.6,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 68.7,
+          "excellent": 18.1,
+          "elite": 7.3,
+          "perfect": 4.7,
+          "legendary": 0.9,
+          "mythic": 0.4
+        }
+      }
+    },
+    "56": {
+      "name": "死亡废墟",
+      "baseHp": 5600,
+      "dropRates": {
+        "normal": {
+          "common": 80.5,
+          "excellent": 11.4,
+          "elite": 4.8,
+          "perfect": 2.7,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 68.4,
+          "excellent": 18.2,
+          "elite": 7.4,
+          "perfect": 4.7,
+          "legendary": 0.9,
+          "mythic": 0.4
+        }
+      }
+    },
+    "57": {
+      "name": "虚空矿坑",
+      "baseHp": 5700,
+      "dropRates": {
+        "normal": {
+          "common": 80.3,
+          "excellent": 11.5,
+          "elite": 4.8,
+          "perfect": 2.7,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 68.1,
+          "excellent": 18.4,
+          "elite": 7.5,
+          "perfect": 4.8,
+          "legendary": 1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "58": {
+      "name": "幽灵峡谷",
+      "baseHp": 5800,
+      "dropRates": {
+        "normal": {
+          "common": 80.1,
+          "excellent": 11.6,
+          "elite": 4.9,
+          "perfect": 2.8,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 67.7,
+          "excellent": 18.5,
+          "elite": 7.5,
+          "perfect": 4.8,
+          "legendary": 1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "59": {
+      "name": "黑暗洞穴",
+      "baseHp": 5900,
+      "dropRates": {
+        "normal": {
+          "common": 79.8,
+          "excellent": 11.7,
+          "elite": 4.9,
+          "perfect": 2.8,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 67.4,
+          "excellent": 18.7,
+          "elite": 7.6,
+          "perfect": 4.9,
+          "legendary": 1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "60": {
+      "name": "死亡地狱",
+      "baseHp": 6000,
+      "dropRates": {
+        "normal": {
+          "common": 79.6,
+          "excellent": 11.8,
+          "elite": 5,
+          "perfect": 2.8,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 67.1,
+          "excellent": 18.8,
+          "elite": 7.7,
+          "perfect": 4.9,
+          "legendary": 1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "61": {
+      "name": "毒雾雪原",
+      "baseHp": 6100,
+      "dropRates": {
+        "normal": {
+          "common": 79.4,
+          "excellent": 11.9,
+          "elite": 5.1,
+          "perfect": 2.9,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 66.8,
+          "excellent": 19,
+          "elite": 7.8,
+          "perfect": 5,
+          "legendary": 1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "62": {
+      "name": "血色废墟",
+      "baseHp": 6200,
+      "dropRates": {
+        "normal": {
+          "common": 79.2,
+          "excellent": 12,
+          "elite": 5.1,
+          "perfect": 2.9,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 66.5,
+          "excellent": 19.1,
+          "elite": 7.9,
+          "perfect": 5,
+          "legendary": 1.1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "63": {
+      "name": "深渊墓地",
+      "baseHp": 6300,
+      "dropRates": {
+        "normal": {
+          "common": 79,
+          "excellent": 12.1,
+          "elite": 5.2,
+          "perfect": 3,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 66.2,
+          "excellent": 19.2,
+          "elite": 7.9,
+          "perfect": 5.1,
+          "legendary": 1.1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "64": {
+      "name": "废弃战场",
+      "baseHp": 6400,
+      "dropRates": {
+        "normal": {
+          "common": 78.8,
+          "excellent": 12.2,
+          "elite": 5.2,
+          "perfect": 3,
+          "legendary": 0.5,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 65.9,
+          "excellent": 19.4,
+          "elite": 8,
+          "perfect": 5.1,
+          "legendary": 1.1,
+          "mythic": 0.4
+        }
+      }
+    },
+    "65": {
+      "name": "冰封工厂",
+      "baseHp": 6500,
+      "dropRates": {
+        "normal": {
+          "common": 78.6,
+          "excellent": 12.3,
+          "elite": 5.3,
+          "perfect": 3,
+          "legendary": 0.6,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 65.6,
+          "excellent": 19.5,
+          "elite": 8.1,
+          "perfect": 5.2,
+          "legendary": 1.1,
+          "mythic": 0.5
+        }
+      }
+    },
+    "66": {
+      "name": "虚空地狱",
+      "baseHp": 6600,
+      "dropRates": {
+        "normal": {
+          "common": 78.4,
+          "excellent": 12.4,
+          "elite": 5.4,
+          "perfect": 3.1,
+          "legendary": 0.6,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 65.3,
+          "excellent": 19.7,
+          "elite": 8.2,
+          "perfect": 5.2,
+          "legendary": 1.1,
+          "mythic": 0.5
+        }
+      }
+    },
+    "67": {
+      "name": "废弃要塞",
+      "baseHp": 6700,
+      "dropRates": {
+        "normal": {
+          "common": 78.2,
+          "excellent": 12.5,
+          "elite": 5.4,
+          "perfect": 3.1,
+          "legendary": 0.6,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 65,
+          "excellent": 19.8,
+          "elite": 8.3,
+          "perfect": 5.3,
+          "legendary": 1.2,
+          "mythic": 0.5
+        }
+      }
+    },
+    "68": {
+      "name": "毒雾要塞",
+      "baseHp": 6800,
+      "dropRates": {
+        "normal": {
+          "common": 77.9,
+          "excellent": 12.6,
+          "elite": 5.5,
+          "perfect": 3.2,
+          "legendary": 0.6,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 64.7,
+          "excellent": 20,
+          "elite": 8.3,
+          "perfect": 5.3,
+          "legendary": 1.2,
+          "mythic": 0.5
+        }
+      }
+    },
+    "69": {
+      "name": "冰封古堡",
+      "baseHp": 6900,
+      "dropRates": {
+        "normal": {
+          "common": 77.7,
+          "excellent": 12.7,
+          "elite": 5.5,
+          "perfect": 3.2,
+          "legendary": 0.6,
+          "mythic": 0.2
+        },
+        "elite": {
+          "common": 64.4,
+          "excellent": 20.1,
+          "elite": 8.4,
+          "perfect": 5.4,
+          "legendary": 1.2,
+          "mythic": 0.5
+        }
+      }
+    },
+    "70": {
+      "name": "废弃洞穴",
+      "baseHp": 7000,
+      "dropRates": {
+        "normal": {
+          "common": 77.5,
+          "excellent": 12.8,
+          "elite": 5.6,
+          "perfect": 3.2,
+          "legendary": 0.6,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 64.1,
+          "excellent": 20.3,
+          "elite": 8.5,
+          "perfect": 5.4,
+          "legendary": 1.2,
+          "mythic": 0.5
+        }
+      }
+    },
+    "71": {
+      "name": "幽灵墓地",
+      "baseHp": 7100,
+      "dropRates": {
+        "normal": {
+          "common": 77.3,
+          "excellent": 12.9,
+          "elite": 5.7,
+          "perfect": 3.3,
+          "legendary": 0.6,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 63.8,
+          "excellent": 20.4,
+          "elite": 8.6,
+          "perfect": 5.5,
+          "legendary": 1.2,
+          "mythic": 0.5
+        }
+      }
+    },
+    "72": {
+      "name": "毒雾地狱",
+      "baseHp": 7200,
+      "dropRates": {
+        "normal": {
+          "common": 77.1,
+          "excellent": 13,
+          "elite": 5.7,
+          "perfect": 3.3,
+          "legendary": 0.6,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 63.5,
+          "excellent": 20.6,
+          "elite": 8.6,
+          "perfect": 5.5,
+          "legendary": 1.3,
+          "mythic": 0.5
+        }
+      }
+    },
+    "73": {
+      "name": "风暴洞穴",
+      "baseHp": 7300,
+      "dropRates": {
+        "normal": {
+          "common": 76.9,
+          "excellent": 13.1,
+          "elite": 5.8,
+          "perfect": 3.3,
+          "legendary": 0.6,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 63.2,
+          "excellent": 20.7,
+          "elite": 8.7,
+          "perfect": 5.6,
+          "legendary": 1.3,
+          "mythic": 0.5
+        }
+      }
+    },
+    "74": {
+      "name": "腐朽遗迹",
+      "baseHp": 7400,
+      "dropRates": {
+        "normal": {
+          "common": 76.7,
+          "excellent": 13.2,
+          "elite": 5.8,
+          "perfect": 3.4,
+          "legendary": 0.6,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 62.9,
+          "excellent": 20.9,
+          "elite": 8.8,
+          "perfect": 5.6,
+          "legendary": 1.3,
+          "mythic": 0.5
+        }
+      }
+    },
+    "75": {
+      "name": "寒霜沼泽",
+      "baseHp": 7500,
+      "dropRates": {
+        "normal": {
+          "common": 76.5,
+          "excellent": 13.3,
+          "elite": 5.9,
+          "perfect": 3.4,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 62.5,
+          "excellent": 21,
+          "elite": 8.9,
+          "perfect": 5.7,
+          "legendary": 1.3,
+          "mythic": 0.6
+        }
+      }
+    },
+    "76": {
+      "name": "末日矿坑",
+      "baseHp": 7600,
+      "dropRates": {
+        "normal": {
+          "common": 76.3,
+          "excellent": 13.4,
+          "elite": 5.9,
+          "perfect": 3.5,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 62.2,
+          "excellent": 21.2,
+          "elite": 9,
+          "perfect": 5.7,
+          "legendary": 1.3,
+          "mythic": 0.6
+        }
+      }
+    },
+    "77": {
+      "name": "冰封塔楼",
+      "baseHp": 7700,
+      "dropRates": {
+        "normal": {
+          "common": 76.1,
+          "excellent": 13.5,
+          "elite": 6,
+          "perfect": 3.5,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 61.9,
+          "excellent": 21.3,
+          "elite": 9,
+          "perfect": 5.8,
+          "legendary": 1.4,
+          "mythic": 0.6
+        }
+      }
+    },
+    "78": {
+      "name": "冰封小镇",
+      "baseHp": 7800,
+      "dropRates": {
+        "normal": {
+          "common": 75.9,
+          "excellent": 13.6,
+          "elite": 6.1,
+          "perfect": 3.5,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 61.6,
+          "excellent": 21.5,
+          "elite": 9.1,
+          "perfect": 5.8,
+          "legendary": 1.4,
+          "mythic": 0.6
+        }
+      }
+    },
+    "79": {
+      "name": "熔岩要塞",
+      "baseHp": 7900,
+      "dropRates": {
+        "normal": {
+          "common": 75.6,
+          "excellent": 13.7,
+          "elite": 6.1,
+          "perfect": 3.6,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 61.3,
+          "excellent": 21.6,
+          "elite": 9.2,
+          "perfect": 5.9,
+          "legendary": 1.4,
+          "mythic": 0.6
+        }
+      }
+    },
+    "80": {
+      "name": "暗夜小镇",
+      "baseHp": 8000,
+      "dropRates": {
+        "normal": {
+          "common": 75.4,
+          "excellent": 13.8,
+          "elite": 6.2,
+          "perfect": 3.6,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 61,
+          "excellent": 21.8,
+          "elite": 9.3,
+          "perfect": 5.9,
+          "legendary": 1.4,
+          "mythic": 0.6
+        }
+      }
+    },
+    "81": {
+      "name": "冰封森林",
+      "baseHp": 8100,
+      "dropRates": {
+        "normal": {
+          "common": 75.2,
+          "excellent": 13.9,
+          "elite": 6.2,
+          "perfect": 3.7,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 60.7,
+          "excellent": 21.9,
+          "elite": 9.4,
+          "perfect": 6,
+          "legendary": 1.4,
+          "mythic": 0.6
+        }
+      }
+    },
+    "82": {
+      "name": "血色战场",
+      "baseHp": 8200,
+      "dropRates": {
+        "normal": {
+          "common": 75,
+          "excellent": 14,
+          "elite": 6.3,
+          "perfect": 3.7,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 60.4,
+          "excellent": 22,
+          "elite": 9.4,
+          "perfect": 6,
+          "legendary": 1.5,
+          "mythic": 0.6
+        }
+      }
+    },
+    "83": {
+      "name": "寒霜森林",
+      "baseHp": 8300,
+      "dropRates": {
+        "normal": {
+          "common": 74.8,
+          "excellent": 14.1,
+          "elite": 6.4,
+          "perfect": 3.7,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 60.1,
+          "excellent": 22.2,
+          "elite": 9.5,
+          "perfect": 6.1,
+          "legendary": 1.5,
+          "mythic": 0.6
+        }
+      }
+    },
+    "84": {
+      "name": "熔岩地牢",
+      "baseHp": 8400,
+      "dropRates": {
+        "normal": {
+          "common": 74.6,
+          "excellent": 14.1,
+          "elite": 6.4,
+          "perfect": 3.8,
+          "legendary": 0.7,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 59.8,
+          "excellent": 22.3,
+          "elite": 9.6,
+          "perfect": 6.1,
+          "legendary": 1.5,
+          "mythic": 0.6
+        }
+      }
+    },
+    "85": {
+      "name": "远古地牢",
+      "baseHp": 8500,
+      "dropRates": {
+        "normal": {
+          "common": 74.4,
+          "excellent": 14.2,
+          "elite": 6.5,
+          "perfect": 3.8,
+          "legendary": 0.8,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 59.5,
+          "excellent": 22.5,
+          "elite": 9.7,
+          "perfect": 6.2,
+          "legendary": 1.5,
+          "mythic": 0.7
+        }
+      }
+    },
+    "86": {
+      "name": "幽灵小镇",
+      "baseHp": 8600,
+      "dropRates": {
+        "normal": {
+          "common": 74.2,
+          "excellent": 14.3,
+          "elite": 6.5,
+          "perfect": 3.9,
+          "legendary": 0.8,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 59.2,
+          "excellent": 22.6,
+          "elite": 9.8,
+          "perfect": 6.2,
+          "legendary": 1.5,
+          "mythic": 0.7
+        }
+      }
+    },
+    "87": {
+      "name": "寒霜码头",
+      "baseHp": 8700,
+      "dropRates": {
+        "normal": {
+          "common": 74,
+          "excellent": 14.4,
+          "elite": 6.6,
+          "perfect": 3.9,
+          "legendary": 0.8,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 58.9,
+          "excellent": 22.8,
+          "elite": 9.8,
+          "perfect": 6.3,
+          "legendary": 1.6,
+          "mythic": 0.7
+        }
+      }
+    },
+    "88": {
+      "name": "腐朽墓地",
+      "baseHp": 8800,
+      "dropRates": {
+        "normal": {
+          "common": 73.8,
+          "excellent": 14.5,
+          "elite": 6.6,
+          "perfect": 3.9,
+          "legendary": 0.8,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 58.6,
+          "excellent": 22.9,
+          "elite": 9.9,
+          "perfect": 6.3,
+          "legendary": 1.6,
+          "mythic": 0.7
+        }
+      }
+    },
+    "89": {
+      "name": "风暴要塞",
+      "baseHp": 8900,
+      "dropRates": {
+        "normal": {
+          "common": 73.6,
+          "excellent": 14.6,
+          "elite": 6.7,
+          "perfect": 4,
+          "legendary": 0.8,
+          "mythic": 0.3
+        },
+        "elite": {
+          "common": 58.3,
+          "excellent": 23.1,
+          "elite": 10,
+          "perfect": 6.4,
+          "legendary": 1.6,
+          "mythic": 0.7
+        }
+      }
+    },
+    "90": {
+      "name": "沙漠古堡",
+      "baseHp": 9000,
+      "dropRates": {
+        "normal": {
+          "common": 73.3,
+          "excellent": 14.7,
+          "elite": 6.8,
+          "perfect": 4,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 58,
+          "excellent": 23.2,
+          "elite": 10.1,
+          "perfect": 6.4,
+          "legendary": 1.6,
+          "mythic": 0.7
+        }
+      }
+    },
+    "91": {
+      "name": "雷霆工厂",
+      "baseHp": 9100,
+      "dropRates": {
+        "normal": {
+          "common": 73.1,
+          "excellent": 14.8,
+          "elite": 6.8,
+          "perfect": 4.1,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 57.7,
+          "excellent": 23.4,
+          "elite": 10.1,
+          "perfect": 6.5,
+          "legendary": 1.6,
+          "mythic": 0.7
+        }
+      }
+    },
+    "92": {
+      "name": "风暴峡谷",
+      "baseHp": 9200,
+      "dropRates": {
+        "normal": {
+          "common": 72.9,
+          "excellent": 14.9,
+          "elite": 6.9,
+          "perfect": 4.1,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 57.4,
+          "excellent": 23.5,
+          "elite": 10.2,
+          "perfect": 6.5,
+          "legendary": 1.7,
+          "mythic": 0.7
+        }
+      }
+    },
+    "93": {
+      "name": "荒芜雪原",
+      "baseHp": 9300,
+      "dropRates": {
+        "normal": {
+          "common": 72.7,
+          "excellent": 15,
+          "elite": 6.9,
+          "perfect": 4.1,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 57.1,
+          "excellent": 23.7,
+          "elite": 10.3,
+          "perfect": 6.6,
+          "legendary": 1.7,
+          "mythic": 0.7
+        }
+      }
+    },
+    "94": {
+      "name": "毒雾码头",
+      "baseHp": 9400,
+      "dropRates": {
+        "normal": {
+          "common": 72.5,
+          "excellent": 15.1,
+          "elite": 7,
+          "perfect": 4.2,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 56.8,
+          "excellent": 23.8,
+          "elite": 10.4,
+          "perfect": 6.6,
+          "legendary": 1.7,
+          "mythic": 0.7
+        }
+      }
+    },
+    "95": {
+      "name": "远古营地",
+      "baseHp": 9500,
+      "dropRates": {
+        "normal": {
+          "common": 72.3,
+          "excellent": 15.2,
+          "elite": 7.1,
+          "perfect": 4.2,
+          "legendary": 0.8,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 56.5,
+          "excellent": 24,
+          "elite": 10.5,
+          "perfect": 6.7,
+          "legendary": 1.7,
+          "mythic": 0.8
+        }
+      }
+    },
+    "96": {
+      "name": "暗夜码头",
+      "baseHp": 9600,
+      "dropRates": {
+        "normal": {
+          "common": 72.1,
+          "excellent": 15.3,
+          "elite": 7.1,
+          "perfect": 4.2,
+          "legendary": 0.9,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 56.2,
+          "excellent": 24.1,
+          "elite": 10.5,
+          "perfect": 6.7,
+          "legendary": 1.7,
+          "mythic": 0.8
+        }
+      }
+    },
+    "97": {
+      "name": "废弃雪原",
+      "baseHp": 9700,
+      "dropRates": {
+        "normal": {
+          "common": 71.9,
+          "excellent": 15.4,
+          "elite": 7.2,
+          "perfect": 4.3,
+          "legendary": 0.9,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 55.9,
+          "excellent": 24.2,
+          "elite": 10.6,
+          "perfect": 6.8,
+          "legendary": 1.7,
+          "mythic": 0.8
+        }
+      }
+    },
+    "98": {
+      "name": "远古洞穴",
+      "baseHp": 9800,
+      "dropRates": {
+        "normal": {
+          "common": 71.7,
+          "excellent": 15.5,
+          "elite": 7.2,
+          "perfect": 4.3,
+          "legendary": 0.9,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 55.6,
+          "excellent": 24.4,
+          "elite": 10.7,
+          "perfect": 6.8,
+          "legendary": 1.8,
+          "mythic": 0.8
+        }
+      }
+    },
+    "99": {
+      "name": "暗夜战场",
+      "baseHp": 9900,
+      "dropRates": {
+        "normal": {
+          "common": 71.5,
+          "excellent": 15.6,
+          "elite": 7.3,
+          "perfect": 4.4,
+          "legendary": 0.9,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 55.2,
+          "excellent": 24.5,
+          "elite": 10.8,
+          "perfect": 6.9,
+          "legendary": 1.8,
+          "mythic": 0.8
+        }
+      }
+    },
+    "100": {
+      "name": "血色墓地",
+      "baseHp": 10000,
+      "dropRates": {
+        "normal": {
+          "common": 71.3,
+          "excellent": 15.7,
+          "elite": 7.3,
+          "perfect": 4.4,
+          "legendary": 0.9,
+          "mythic": 0.4
+        },
+        "elite": {
+          "common": 54.9,
+          "excellent": 24.7,
+          "elite": 10.8,
+          "perfect": 6.9,
+          "legendary": 1.8,
+          "mythic": 0.8
+        }
+      }
+    }
+  }
+}

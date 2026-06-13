@@ -1,0 +1,327 @@
+{
+  "elementSkills": {
+    "wind": {
+      "initial": "skill_wind_1",
+      "advanced1": "skill_wind_2",
+      "advanced2": "skill_wind_3",
+      "element": "element_wind"
+    },
+    "thunder": {
+      "initial": "skill_thunder_1",
+      "advanced1": "skill_thunder_2",
+      "advanced2": "skill_thunder_3",
+      "element": "element_thunder"
+    },
+    "water": {
+      "initial": "skill_water_1",
+      "advanced1": "skill_water_2",
+      "advanced2": "skill_water_3",
+      "element": "element_water"
+    },
+    "fire": {
+      "initial": "skill_fire_1",
+      "advanced1": "skill_fire_2",
+      "advanced2": "skill_fire_3",
+      "element": "element_fire"
+    },
+    "earth": {
+      "initial": "skill_earth_1",
+      "advanced1": "skill_earth_2",
+      "advanced2": "skill_earth_3",
+      "element": "element_earth"
+    }
+  },
+  "upgrades": {
+    "gun_damage": {
+      "id": "gun_damage",
+      "name": "子弹增伤",
+      "description": "主子弹伤害 +60%",
+      "category": "gun",
+      "icon": "🔫",
+      "maxLevel": 10,
+      "levelEffectTemplate": "主子弹伤害 +{level * 60}%"
+    },
+    "gun_burst": {
+      "id": "gun_burst",
+      "name": "齐射",
+      "description": "扇形射出子弹，角度15°",
+      "category": "gun",
+      "icon": "🎯",
+      "maxLevel": 2,
+      "levelEffectTemplate": "扇形 {level === 1 ? '15°' : '30°'}，射出 {level + 1} 发子弹"
+    },
+    "gun_rapid": {
+      "id": "gun_rapid",
+      "name": "连射",
+      "description": "连续射出多排子弹",
+      "category": "gun",
+      "icon": "⚡",
+      "maxLevel": 2,
+      "levelEffectTemplate": "连续射出 {level + 1} 排子弹"
+    },
+    "gun_split_2": {
+      "id": "gun_split_2",
+      "name": "分裂弹",
+      "description": "命中后分裂2个子弹，继承50%伤害",
+      "category": "gun",
+      "icon": "💥",
+      "maxLevel": 1,
+      "levelEffectTemplate": "命中后分裂2个子弹"
+    },
+    "gun_split_4": {
+      "id": "gun_split_4",
+      "name": "高级分裂弹",
+      "description": "命中后分裂4个子弹，继承50%伤害",
+      "category": "gun",
+      "icon": "💫",
+      "maxLevel": 1,
+      "requires": ["gun_split_2"],
+      "levelEffectTemplate": "命中后分裂4个子弹"
+    },
+    "gun_all_damage": {
+      "id": "gun_all_damage",
+      "name": "全子弹增幅",
+      "description": "主子弹和分裂子弹伤害 +100%",
+      "category": "gun",
+      "icon": "🔥",
+      "maxLevel": 3,
+      "requires": ["gun_split_2"],
+      "levelEffectTemplate": "所有子弹伤害 +{level * 100}%"
+    },
+    "gun_fire": {
+      "id": "gun_fire",
+      "name": "火焰弹",
+      "description": "子弹附带燃烧效果，3s内每秒造成攻击30%伤害",
+      "category": "gun",
+      "icon": "🔥",
+      "maxLevel": 1,
+      "levelEffectTemplate": "命中后燃烧3秒"
+    },
+    "gun_ice": {
+      "id": "gun_ice",
+      "name": "冰冻弹",
+      "description": "子弹附带冰冻效果，完全不能行动1s",
+      "category": "gun",
+      "icon": "❄️",
+      "maxLevel": 1,
+      "levelEffectTemplate": "命中后冰冻1秒"
+    },
+    "gun_thunder": {
+      "id": "gun_thunder",
+      "name": "电击弹",
+      "description": "子弹附带麻痹效果，减速50%且无法攻击1s",
+      "category": "gun",
+      "icon": "⚡",
+      "maxLevel": 1,
+      "levelEffectTemplate": "命中后麻痹1秒"
+    },
+    "gun_explosive": {
+      "id": "gun_explosive",
+      "name": "爆炸弹",
+      "description": "子弹命中后必定爆炸，造成范围伤害",
+      "category": "gun",
+      "icon": "💥",
+      "maxLevel": 1,
+      "levelEffectTemplate": "命中后爆炸造成范围伤害"
+    },
+    "skill_wind_1": {
+      "id": "skill_wind_1",
+      "name": "风咒",
+      "description": "持续5秒的旋风，碰到敌人造成伤害",
+      "category": "skill",
+      "icon": "🌪️",
+      "maxLevel": 1,
+      "levelEffectTemplate": "旋风持续5秒，每0.5秒检测碰撞"
+    },
+    "skill_wind_2": {
+      "id": "skill_wind_2",
+      "name": "旋风斩",
+      "description": "旋风碰到敌人分裂2个风刃，继承50%伤害",
+      "category": "skill",
+      "icon": "🌀",
+      "maxLevel": 1,
+      "requires": ["skill_wind_1"],
+      "levelEffectTemplate": "碰撞时分裂2个风刃"
+    },
+    "skill_wind_3": {
+      "id": "skill_wind_3",
+      "name": "风卷残云",
+      "description": "旋风每碰到5个敌人分裂1个旋风，最多3个",
+      "category": "skill",
+      "icon": "🌬️",
+      "maxLevel": 1,
+      "requires": ["skill_wind_2"],
+      "levelEffectTemplate": "每5次碰撞分裂新旋风"
+    },
+    "skill_thunder_1": {
+      "id": "skill_thunder_1",
+      "name": "雷咒",
+      "description": "随机雷罚1名敌人",
+      "category": "skill",
+      "icon": "⚡",
+      "maxLevel": 1,
+      "levelEffectTemplate": "雷罚单体敌人"
+    },
+    "skill_thunder_2": {
+      "id": "skill_thunder_2",
+      "name": "惊雷术",
+      "description": "雷罚命中后分裂2道雷罚",
+      "category": "skill",
+      "icon": "🌩️",
+      "maxLevel": 1,
+      "requires": ["skill_thunder_1"],
+      "levelEffectTemplate": "命中后分裂2道雷罚"
+    },
+    "skill_thunder_3": {
+      "id": "skill_thunder_3",
+      "name": "天雷空破",
+      "description": "雷罚命中后连续3记雷罚",
+      "category": "skill",
+      "icon": "⛈️",
+      "maxLevel": 1,
+      "requires": ["skill_thunder_2"],
+      "levelEffectTemplate": "命中后连续3记雷罚"
+    },
+    "skill_water_1": {
+      "id": "skill_water_1",
+      "name": "冰咒",
+      "description": "随机冰冻1名敌人",
+      "category": "skill",
+      "icon": "💧",
+      "maxLevel": 1,
+      "levelEffectTemplate": "冰冻单体敌人"
+    },
+    "skill_water_2": {
+      "id": "skill_water_2",
+      "name": "寒冰破",
+      "description": "冰冻解除后造成冰暴伤害，波及临近敌人",
+      "category": "skill",
+      "icon": "🧊",
+      "maxLevel": 1,
+      "requires": ["skill_water_1"],
+      "levelEffectTemplate": "冰冻结束时冰暴伤害"
+    },
+    "skill_water_3": {
+      "id": "skill_water_3",
+      "name": "水漫金山",
+      "description": "敌人受伤同时后退3个单位",
+      "category": "skill",
+      "icon": "🌊",
+      "maxLevel": 1,
+      "requires": ["skill_water_2"],
+      "levelEffectTemplate": "敌人受伤同时后退3个单位"
+    },
+    "skill_fire_1": {
+      "id": "skill_fire_1",
+      "name": "炎咒",
+      "description": "随机点燃1名敌人",
+      "category": "skill",
+      "icon": "🔥",
+      "maxLevel": 1,
+      "levelEffectTemplate": "点燃单体敌人"
+    },
+    "skill_fire_2": {
+      "id": "skill_fire_2",
+      "name": "爆炎弹",
+      "description": "点燃同时击退1个单位",
+      "category": "skill",
+      "icon": "💥",
+      "maxLevel": 1,
+      "requires": ["skill_fire_1"],
+      "levelEffectTemplate": "点燃同时击退"
+    },
+    "skill_fire_3": {
+      "id": "skill_fire_3",
+      "name": "三味真火",
+      "description": "附加3秒燃烧",
+      "category": "skill",
+      "icon": "🌋",
+      "maxLevel": 1,
+      "requires": ["skill_fire_2"],
+      "levelEffectTemplate": "附加3秒燃烧"
+    },
+    "skill_earth_1": {
+      "id": "skill_earth_1",
+      "name": "土咒",
+      "description": "随机击退1名敌人1个单位",
+      "category": "skill",
+      "icon": "🪨",
+      "maxLevel": 1,
+      "levelEffectTemplate": "击退单体敌人"
+    },
+    "skill_earth_2": {
+      "id": "skill_earth_2",
+      "name": "飞岩术",
+      "description": "击退同时造成1秒眩晕",
+      "category": "skill",
+      "icon": "⛰️",
+      "maxLevel": 1,
+      "requires": ["skill_earth_1"],
+      "levelEffectTemplate": "击退同时眩晕1秒"
+    },
+    "skill_earth_3": {
+      "id": "skill_earth_3",
+      "name": "泰山压顶",
+      "description": "眩晕增加到3秒",
+      "category": "skill",
+      "icon": "🏔️",
+      "maxLevel": 1,
+      "requires": ["skill_earth_2"],
+      "levelEffectTemplate": "眩晕时间增加到3秒"
+    },
+    "element_wind": {
+      "id": "element_wind",
+      "name": "风系伤害",
+      "description": "风系技能伤害 +60%",
+      "category": "element",
+      "icon": "🌪️",
+      "maxLevel": 10,
+      "levelEffectTemplate": "风系伤害 +{level * 60}%"
+    },
+    "element_thunder": {
+      "id": "element_thunder",
+      "name": "雷系伤害",
+      "description": "雷系技能伤害 +60%",
+      "category": "element",
+      "icon": "⚡",
+      "maxLevel": 10,
+      "levelEffectTemplate": "雷系伤害 +{level * 60}%"
+    },
+    "element_water": {
+      "id": "element_water",
+      "name": "水系伤害",
+      "description": "水系技能伤害 +60%",
+      "category": "element",
+      "icon": "💧",
+      "maxLevel": 10,
+      "levelEffectTemplate": "水系伤害 +{level * 60}%"
+    },
+    "element_fire": {
+      "id": "element_fire",
+      "name": "火系伤害",
+      "description": "火系技能伤害 +60%",
+      "category": "element",
+      "icon": "🔥",
+      "maxLevel": 10,
+      "levelEffectTemplate": "火系伤害 +{level * 60}%"
+    },
+    "element_earth": {
+      "id": "element_earth",
+      "name": "土系伤害",
+      "description": "土系技能伤害 +60%",
+      "category": "element",
+      "icon": "🪨",
+      "maxLevel": 10,
+      "levelEffectTemplate": "土系伤害 +{level * 60}%"
+    },
+    "heal_30": {
+      "id": "heal_30",
+      "name": "生命恢复",
+      "description": "恢复30%最大血量",
+      "category": "heal",
+      "icon": "❤️",
+      "maxLevel": 99,
+      "levelEffectTemplate": "恢复30%生命值"
+    }
+  }
+}

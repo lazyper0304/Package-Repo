@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Card, Text, Badge, ContextMenu } from '@radix-ui/themes';
-import type { RewardItem } from '../../../game/data/rewards';
-import { QUALITY_CONFIG } from '../../../game/data/gems';
+import type { RewardItem } from '@/game/data/rewards';
+import { QUALITY_CONFIG } from '@/game/data/gems';
 import styles from './index.module.less';
 
 interface InventoryGridProps {
@@ -9,11 +9,10 @@ interface InventoryGridProps {
   onItemClick?: (item: RewardItem) => void;
   onEquip?: (item: RewardItem) => void;
   onUnequip?: (item: RewardItem) => void;
-  onIdentify?: (item: RewardItem) => void;
   onDecompose?: (item: RewardItem) => void;
 }
 
-export function InventoryGrid({ items, onItemClick, onEquip, onUnequip, onIdentify, onDecompose }: InventoryGridProps) {
+export function InventoryGrid({ items, onItemClick, onEquip, onUnequip, onDecompose }: InventoryGridProps) {
   const [selectedItem, setSelectedItem] = useState<RewardItem | null>(null);
 
   const handleClick = useCallback((item: RewardItem) => {
@@ -52,24 +51,16 @@ export function InventoryGrid({ items, onItemClick, onEquip, onUnequip, onIdenti
               >
                 {QUALITY_CONFIG[item.quality].name}
               </Badge>
-              {!item.identified && (
-                <div className={styles.unidentified}>?</div>
-              )}
             </Card>
           </ContextMenu.Trigger>
 
           <ContextMenu.Content>
-            {!item.identified && onIdentify && (
-              <ContextMenu.Item onClick={() => onIdentify(item)}>
-                鉴定
-              </ContextMenu.Item>
-            )}
-            {item.identified && onEquip && (
+            {onEquip && (
               <ContextMenu.Item onClick={() => onEquip(item)}>
                 装备
               </ContextMenu.Item>
             )}
-            {item.identified && onUnequip && (
+            {onUnequip && (
               <ContextMenu.Item onClick={() => onUnequip(item)}>
                 卸下
               </ContextMenu.Item>

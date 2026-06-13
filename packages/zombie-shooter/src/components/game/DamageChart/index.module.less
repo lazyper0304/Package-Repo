@@ -1,0 +1,33 @@
+.damageChart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.damageChartItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.damageBarHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.damageBarContainer {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.damageBar {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  border-radius: 4px;
+  min-width: 2px;
+  transition: width 0.3s ease;
+}

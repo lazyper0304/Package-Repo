@@ -1,0 +1,67 @@
+{
+  "currencyConfig": {
+    "copper": {
+      "name": "铜钱",
+      "icon": "🪙",
+      "description": "打关卡产出，用于装备和核心升级"
+    },
+    "silver": {
+      "name": "银锭",
+      "icon": "🥈",
+      "description": "打副本产出（暂未开放）"
+    },
+    "gold": {
+      "name": "金条",
+      "icon": "🥇",
+      "description": "通关宝箱产出，每关只能领一次"
+    }
+  },
+  "stageRewards": {
+    "clear": {
+      "description": "通关奖励",
+      "rewards": ["gem", "equipment"]
+    },
+    "halfHp": {
+      "description": "50%血量通关",
+      "rewards": ["gem", "equipment"],
+      "bonusGold": 50
+    },
+    "fullHp": {
+      "description": "100%血量通关",
+      "rewards": ["gem", "equipment"],
+      "bonusGold": 200
+    }
+  },
+  "gacha": {
+    "single": {
+      "cost": 200,
+      "currency": "gold",
+      "description": "单抽"
+    },
+    "multi": {
+      "cost": 1800,
+      "currency": "gold",
+      "count": 10,
+      "description": "10连抽（9折）"
+    },
+    "rates": {
+      "gem": 0.85,
+      "core": 0.10,
+      "armor": 0.05
+    },
+    "gemQualityRates": {
+      "common": 0.50,
+      "excellent": 0.30,
+      "elite": 0.15,
+      "perfect": 0.04,
+      "legendary": 0.009,
+      "mythic": 0.001
+    }
+  },
+  "skillUpgrade": {
+    "elementDamageBonus": 0.10,
+    "upgradeCurrency": "copper",
+    "upgradeCostBase": 100,
+    "upgradeCostScale": 1.5
+  }
+}

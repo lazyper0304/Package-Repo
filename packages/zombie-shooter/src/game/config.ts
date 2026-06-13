@@ -3,7 +3,7 @@ import { BootScene } from './scenes/BootScene';
 import { GameScene } from './scenes/GameScene';
 
 export const GAME_WIDTH = 480;
-export const GAME_HEIGHT = 920;
+export const GAME_HEIGHT = 853; // 9:16 比例
 
 export function createGameConfig(parent: string | HTMLElement): Phaser.Types.Core.GameConfig {
   return {

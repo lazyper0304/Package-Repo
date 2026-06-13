@@ -1,4 +1,5 @@
 import { BALANCE } from './balance';
+import enemiesConfig from '@/config/enemies.json';
 
 export interface WaveConfig {
   totalEnemies: number;
@@ -6,74 +7,56 @@ export interface WaveConfig {
   enemyTypes: { type: string; weight: number }[];
 }
 
+// 从 JSON 配置读取波次层级
+const waveTiers = enemiesConfig.waveTiers as Array<{
+  condition: { type: string; wave?: number; waves?: number[]; min?: number; max?: number };
+  totalEnemiesFormula: string;
+  enemyTypes: { type: string; weight: number }[];
+}>;
+
+// 简单公式解析器
+function evalFormula(formula: string, wave: number): number {
+  const expr = formula.replace(/wave/g, String(wave));
+  try {
+    return new Function(`return ${expr}`)();
+  } catch {
+    return 0;
+  }
+}
+
 export function getWaveConfig(waveNumber: number): WaveConfig {
   const baseSpawnInterval = Math.max(BALANCE.wave.minSpawnInterval, BALANCE.wave.baseSpawnInterval - waveNumber * BALANCE.wave.spawnIntervalDecrease);
 
-  // Boss wave: 第14波
-  if (waveNumber === 14) {
-    return {
-      totalEnemies: 15 + waveNumber * 2,
-      spawnInterval: baseSpawnInterval,
-      enemyTypes: [
-        { type: 'walker', weight: 30 },
-        { type: 'runner', weight: 25 },
-        { type: 'tank', weight: 20 },
-        { type: 'splitter', weight: 15 },
-        { type: 'boss', weight: 10 },
-      ],
-    };
+  for (const tier of waveTiers) {
+    const { condition } = tier;
+    let matched = false;
+
+    if (condition.type === 'exact') {
+      if (condition.wave !== undefined) {
+        matched = waveNumber === condition.wave;
+      } else if (condition.waves !== undefined) {
+        matched = condition.waves.includes(waveNumber);
+      }
+    } else if (condition.type === 'range') {
+      const min = condition.min ?? 0;
+      const max = condition.max ?? Infinity;
+      matched = waveNumber >= min && waveNumber <= max;
+    }
+
+    if (matched) {
+      return {
+        totalEnemies: evalFormula(tier.totalEnemiesFormula, waveNumber),
+        spawnInterval: baseSpawnInterval,
+        enemyTypes: tier.enemyTypes,
+      };
+    }
   }
 
-  // Elite wave: 第5波和第10波
-  if (waveNumber === 5 || waveNumber === 10) {
-    return {
-      totalEnemies: 10 + waveNumber * 2,
-      spawnInterval: baseSpawnInterval,
-      enemyTypes: [
-        { type: 'walker', weight: 40 },
-        { type: 'runner', weight: 30 },
-        { type: 'tank', weight: 20 },
-        { type: 'splitter', weight: 10 },
-      ],
-    };
-  }
-
-  // Early waves (1-4)
-  if (waveNumber <= 4) {
-    return {
-      totalEnemies: 8 + waveNumber * 2,
-      spawnInterval: baseSpawnInterval,
-      enemyTypes: [
-        { type: 'walker', weight: 70 },
-        { type: 'runner', weight: 30 },
-      ],
-    };
-  }
-
-  // Mid waves (6-9, 11-13, 15-20)
-  if (waveNumber <= 13) {
-    return {
-      totalEnemies: 12 + waveNumber * 2,
-      spawnInterval: baseSpawnInterval,
-      enemyTypes: [
-        { type: 'walker', weight: 40 },
-        { type: 'runner', weight: 30 },
-        { type: 'splitter', weight: 20 },
-        { type: 'tank', weight: 10 },
-      ],
-    };
-  }
-
-  // Late waves (15-20)
+  // fallback
   return {
-    totalEnemies: 15 + waveNumber * 2,
+    totalEnemies: 8 + waveNumber * 2,
     spawnInterval: baseSpawnInterval,
-    enemyTypes: [
-      { type: 'walker', weight: 35 },
-      { type: 'runner', weight: 25 },
-      { type: 'splitter', weight: 25 },
-      { type: 'tank', weight: 15 },
-    ],
+    enemyTypes: [{ type: 'walker', weight: 70 }, { type: 'runner', weight: 30 }],
   };
 }
 

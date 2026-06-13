@@ -11,8 +11,12 @@ export class BootScene extends Phaser.Scene {
     this.load.image('bullet-fire', 'bullet-fire.png');
     this.load.image('bullet-ice', 'bullet-ice.png');
     this.load.image('bullet-thunder', 'bullet-thunder.png');
-    // 加载背景图片
-    this.load.image('background', 'background.webp');
+
+    // 加载关卡背景图片
+    for (let i = 1; i <= 10; i++) {
+      this.load.image(`stage-${i}`, `stage-${i}.webp`);
+    }
+
     // 加载城墙图片
     this.load.image('wall', 'wall.png');
     // 加载玩家图片

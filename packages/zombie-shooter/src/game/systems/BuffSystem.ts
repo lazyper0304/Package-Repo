@@ -1,14 +1,16 @@
 // Buff 系统
 
+import balanceConfig from '@/config/balance.json';
+
 export type BuffType = 'burn' | 'freeze' | 'paralyze' | 'slow' | 'stun' | 'bleed';
 
 export interface Buff {
   type: BuffType;
-  duration: number; // 持续时间（毫秒）
-  remaining: number; // 剩余时间
-  value: number; // 效果值（如伤害百分比、减速比例）
-  interval?: number; // 触发间隔（用于DOT）
-  lastTick?: number; // 上次触发时间
+  duration: number;
+  remaining: number;
+  value: number;
+  interval?: number;
+  lastTick?: number;
 }
 
 export interface BuffConfig {
@@ -17,54 +19,11 @@ export interface BuffConfig {
   color: string;
   defaultDuration: number;
   defaultValue: number;
-  interval?: number; // DOT间隔
+  interval?: number;
 }
 
-export const BUFF_CONFIGS: Record<BuffType, BuffConfig> = {
-  burn: {
-    name: '燃烧',
-    icon: '🔥',
-    color: '#ef4444',
-    defaultDuration: 3000,
-    defaultValue: 0.3, // 攻击的30%
-    interval: 1000, // 每秒触发
-  },
-  freeze: {
-    name: '冰冻',
-    icon: '❄️',
-    color: '#3b82f6',
-    defaultDuration: 1000,
-    defaultValue: 1, // 完全停止
-  },
-  paralyze: {
-    name: '麻痹',
-    icon: '⚡',
-    color: '#f59e0b',
-    defaultDuration: 1000,
-    defaultValue: 0.5, // 减速50%
-  },
-  slow: {
-    name: '减速',
-    icon: '🐌',
-    color: '#8b5cf6',
-    defaultDuration: 2000,
-    defaultValue: 0.5, // 减速50%
-  },
-  stun: {
-    name: '眩晕',
-    icon: '💫',
-    color: '#f97316',
-    defaultDuration: 1000,
-    defaultValue: 1, // 完全停止
-  },
-  bleed: {
-    name: '流血',
-    icon: '🩸',
-    color: '#dc2626',
-    defaultDuration: 5000,
-    defaultValue: 0.3, // 受到的所有伤害增加30%
-  },
-};
+// 从 JSON 配置导出
+export const BUFF_CONFIGS = balanceConfig.buffs as Record<BuffType, BuffConfig>;
 
 export class BuffManager {
   private buffs: Map<string, Buff[]> = new Map();

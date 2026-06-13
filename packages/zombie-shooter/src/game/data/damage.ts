@@ -1,7 +1,11 @@
 // 伤害系统
 
+import balanceConfig from '@/config/balance.json';
+
 export type DamageType = 'physical' | 'elemental';
 export type DamageModifier = 'normal' | 'critical' | 'explosive' | 'critical_explosive';
+
+const damageConfig = balanceConfig.damage;
 
 export interface DamageResult {
   baseDamage: number;
@@ -47,8 +51,8 @@ export function calculateDamage(
   const critMultiplierValue = isCritical ? critMultiplier : 1;
 
   // 计算爆炸
-  const isExplosive = hasExplosive && Math.random() < 0.3; // 爆炸触发概率
-  const explosiveMultiplier = isExplosive ? 1.5 : 1;
+  const isExplosive = hasExplosive && Math.random() < damageConfig.explosiveChance;
+  const explosiveMultiplier = isExplosive ? damageConfig.explosiveMultiplier : 1;
 
   // 基础伤害 = 攻击力 - 防御力
   const baseDamage = Math.max(0, attack - enemyDefense);
@@ -75,7 +79,7 @@ export function calculateDamage(
 export function getExplosiveTargets(
   primaryTarget: { x: number; y: number },
   allEnemies: { x: number; y: number; id: string }[],
-  range: number = 50
+  range: number = damageConfig.explosiveRange
 ): string[] {
   const targets: string[] = [];
 
@@ -90,7 +94,7 @@ export function getExplosiveTargets(
     }
   });
 
-  return targets.slice(0, 3); // 最多波及3个
+  return targets.slice(0, damageConfig.explosiveMaxTargets);
 }
 
 // 元素伤害来源

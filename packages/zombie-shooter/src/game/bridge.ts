@@ -29,6 +29,7 @@ export const gameBridge = new GameBridge();
 
 // Events from Phaser -> React
 export interface GameEvents {
+  'scene:ready': void;
   'game:started': void;
   'wave:complete': { waveNumber: number };
   'wave:started': { waveNumber: number };
@@ -46,6 +47,7 @@ export interface GameEvents {
   'skills:updated': { skills: SkillInfo[] };
   'damage:stats': { stats: DamageStat[] };
   'gun:stats': GunStats;
+  'affixes:updated': { affixes: { name: string; description: string; source: string }[] };
 }
 
 // Events from React -> Phaser
@@ -87,7 +89,11 @@ export interface DamageStat {
 
 export interface GunStats {
   damage: number;
+  baseDamage: number;
+  equipDamage: number;
   damageBonus: number;
+  randomBoostMin: number;
+  randomBoostMax: number;
   burstCount: number;
   rapidCount: number;
   splitCount: number;
